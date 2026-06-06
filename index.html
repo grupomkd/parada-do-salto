@@ -973,6 +973,27 @@
   </div>
 </main>
 
+<!-- MODAL ADICIONAR ITENS -->
+<div class="modal-overlay" id="modal-itens">
+  <div class="modal-box" style="max-width:560px;width:95%;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 id="modal-itens-title" style="font-family:'Playfair Display',serif;font-size:18px;color:var(--wood-dark)">Adicionar Itens</h3>
+      <button onclick="fecharModalItens()" style="background:transparent;border:none;font-size:22px;cursor:pointer;color:#888;line-height:1">×</button>
+    </div>
+    <div class="cat-tabs" id="modal-cat-tabs" style="margin-bottom:10px"></div>
+    <div class="cardapio-list" id="modal-cardapio-list" style="max-height:220px"></div>
+    <div style="margin:12px 0 6px;font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px">Itens a adicionar</div>
+    <div class="carrinho" id="modal-carrinho" style="min-height:60px;margin-bottom:10px"><div class="carrinho-empty">Nenhum item selecionado</div></div>
+    <div class="total-box" style="padding:10px 14px;margin-bottom:12px">
+      <span class="label" style="font-size:12px">ADICIONAL</span>
+      <span class="valor" id="modal-total-display" style="font-size:18px">R$ 0,00</span>
+    </div>
+    <label>Observação adicional</label>
+    <textarea class="obs-area" id="modal-obs" placeholder="Ex: sem cebola..." style="height:50px;margin-bottom:12px"></textarea>
+    <button onclick="confirmarAdicionarItens()" style="width:100%;padding:12px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:16px;cursor:pointer;letter-spacing:0.5px">✓ Adicionar ao Pedido</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1492,8 +1513,9 @@ function renderCozinha() {
           ${p.obs ? `<div class="pc-obs">📝 ${p.obs}</div>` : ''}
         </div>
         <div class="pedido-card-footer">
-          <div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
             ${botoes}
+            <button class="btn-status" style="background:var(--gold);color:var(--wood-dark)" onclick="abrirAdicionarItens('${key}')">+ Itens</button>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="pc-total">R$ ${p.total.toFixed(2).replace('.',',')}</span>
@@ -1778,6 +1800,148 @@ function gerarRelatorioPDF() {
     win.onload = () => setTimeout(() => win.print(), 500);
   }
   showToast('✓ Relatório gerado! Use Ctrl+P ou o botão para imprimir/salvar PDF.');
+}
+
+// ====== ADICIONAR ITENS A PEDIDO EXISTENTE ======
+let modalCarrinho = [];
+let modalCatAtual = CATEGORIAS[0];
+let modalTamanhoAtual = {};
+let modalPedidoKey = null;
+
+function abrirAdicionarItens(key) {
+  modalPedidoKey = key;
+  modalCarrinho = [];
+  modalCatAtual = CATEGORIAS[0];
+  document.getElementById('modal-itens-title').textContent = 'Adicionar Itens — Mesa ' + pedidos[key].mesa;
+  document.getElementById('modal-obs').value = '';
+  renderModalCatTabs();
+  renderModalCardapio();
+  renderModalCarrinho();
+  document.getElementById('modal-itens').classList.add('open');
+}
+
+function fecharModalItens() {
+  document.getElementById('modal-itens').classList.remove('open');
+  modalCarrinho = [];
+  modalPedidoKey = null;
+}
+
+function renderModalCatTabs() {
+  const tabs = document.getElementById('modal-cat-tabs');
+  tabs.innerHTML = CATEGORIAS.map(cat => `
+    <button class="cat-tab ${cat === modalCatAtual ? 'active' : ''}" onclick="setModalCat('${cat}')">${cat}</button>
+  `).join('');
+}
+
+function setModalCat(cat) {
+  modalCatAtual = cat;
+  renderModalCatTabs();
+  renderModalCardapio();
+}
+
+function renderModalCardapio() {
+  const list = document.getElementById('modal-cardapio-list');
+  const itens = CARDAPIO[modalCatAtual] || [];
+  if (itens.length === 0) { list.innerHTML = '<div class="carrinho-empty">Nenhum item</div>'; return; }
+  list.innerHTML = itens.map(item => {
+    if (item.tam) {
+      if (!modalTamanhoAtual[item.id]) modalTamanhoAtual[item.id] = 'M';
+      const preco = modalTamanhoAtual[item.id] === 'G' ? item.precoG : item.preco;
+      return `<div class="cardapio-item">
+        <div class="item-info">
+          <div class="item-name">${item.nome}</div>
+          <div class="size-btns" style="margin-top:4px">
+            <button class="size-btn ${modalTamanhoAtual[item.id]==='M'?'active':''}" onclick="setModalTam('${item.id}','M',event)">M</button>
+            <button class="size-btn ${modalTamanhoAtual[item.id]==='G'?'active':''}" onclick="setModalTam('${item.id}','G',event)">G</button>
+          </div>
+        </div>
+        <span class="item-price" id="mpr-${item.id}">R$ ${preco.toFixed(2).replace('.',',')}</span>
+        <button class="add-btn" onclick="addModalItem('${item.id}','${item.nome}',${preco},'${modalTamanhoAtual[item.id]}')">+</button>
+      </div>`;
+    }
+    return `<div class="cardapio-item">
+      <div class="item-info"><div class="item-name">${item.nome}</div></div>
+      <span class="item-price">R$ ${item.preco.toFixed(2).replace('.',',')}</span>
+      <button class="add-btn" onclick="addModalItem('${item.id}','${item.nome}',${item.preco},'')">+</button>
+    </div>`;
+  }).join('');
+}
+
+function setModalTam(id, tam, e) {
+  e.stopPropagation();
+  modalTamanhoAtual[id] = tam;
+  let item = null;
+  for (const cat of Object.values(CARDAPIO)) { item = cat.find(x => x.id === id); if (item) break; }
+  if (item) {
+    const p = tam === 'G' ? item.precoG : item.preco;
+    const el = document.getElementById('mpr-' + id);
+    if (el) el.textContent = 'R$ ' + p.toFixed(2).replace('.',',');
+  }
+  e.target.parentElement.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+}
+
+function addModalItem(id, nome, preco, tam) {
+  const label = tam ? `${nome} (${tam})` : nome;
+  const existing = modalCarrinho.find(c => c.label === label);
+  if (existing) existing.qtd++;
+  else modalCarrinho.push({ id, label, preco, qtd: 1 });
+  renderModalCarrinho();
+}
+
+function renderModalCarrinho() {
+  const el = document.getElementById('modal-carrinho');
+  if (modalCarrinho.length === 0) {
+    el.innerHTML = '<div class="carrinho-empty">Nenhum item selecionado</div>';
+    document.getElementById('modal-total-display').textContent = 'R$ 0,00';
+    return;
+  }
+  el.innerHTML = modalCarrinho.map((item, i) => `
+    <div class="carrinho-item">
+      <span class="ci-name">${item.label}</span>
+      <div class="ci-qtd">
+        <button class="qtd-btn" onclick="changeModalQtd(${i},-1)">−</button>
+        <span style="font-weight:700;min-width:20px;text-align:center">${item.qtd}</span>
+        <button class="qtd-btn" onclick="changeModalQtd(${i},1)">+</button>
+      </div>
+      <span class="ci-total">R$ ${(item.preco * item.qtd).toFixed(2).replace('.',',')}</span>
+      <span class="ci-del" onclick="removeModalItem(${i})">×</span>
+    </div>
+  `).join('');
+  const total = modalCarrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
+  document.getElementById('modal-total-display').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+}
+
+function changeModalQtd(i, delta) {
+  modalCarrinho[i].qtd += delta;
+  if (modalCarrinho[i].qtd <= 0) modalCarrinho.splice(i, 1);
+  renderModalCarrinho();
+}
+function removeModalItem(i) {
+  modalCarrinho.splice(i, 1);
+  renderModalCarrinho();
+}
+
+function confirmarAdicionarItens() {
+  if (!modalPedidoKey || modalCarrinho.length === 0) { showToast('⚠️ Adicione pelo menos um item!'); return; }
+  const p = pedidos[modalPedidoKey];
+  const adicional = modalCarrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
+  const obs = document.getElementById('modal-obs').value.trim();
+  // Mesclar itens novos com existentes
+  modalCarrinho.forEach(novoItem => {
+    const existing = p.itens.find(it => it.nome === novoItem.label);
+    if (existing) existing.qtd += novoItem.qtd;
+    else p.itens.push({ nome: novoItem.label, qtd: novoItem.qtd, preco: novoItem.preco });
+  });
+  p.total += adicional;
+  if (obs) p.obs = p.obs ? p.obs + ' | ' + obs : obs;
+  // Volta para aguardando ao adicionar itens
+  p.status = 'aguardando';
+  salvarPedidos();
+  renderCozinha();
+  renderMesas();
+  fecharModalItens();
+  showToast('✓ Itens adicionados à Mesa ' + p.mesa + '! + R$ ' + adicional.toFixed(2).replace('.',','));
 }
 
 // ====== CARDÁPIO EDIT ======
