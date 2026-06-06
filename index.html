@@ -961,6 +961,7 @@
 <div class="status-bar">
   <span class="status-dot"></span>
   <span>Sistema online · <strong id="live-count">0</strong> pedidos ativos · Total do dia: <strong id="live-total">R$ 0,00</strong></span>
+  <span id="live-esgotados" style="margin-left:auto;display:none;background:#e74c3c;color:white;font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;cursor:pointer" onclick="showPanel('cardapio-edit')"></span>
 </div>
 
 <main>
@@ -1657,6 +1658,20 @@ function renderCardapio() {
     const div = document.createElement('div');
     div.className = 'cardapio-item';
 
+    if (item.pausado) {
+      // Item esgotado — mostrar cinza, sem botão de adicionar
+      div.style.cssText = 'opacity:0.45;background:#f5f5f5;cursor:not-allowed';
+      div.innerHTML = `
+        <div class="item-info">
+          <div class="item-name" style="text-decoration:line-through;color:#999">${item.nome}</div>
+          ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
+        </div>
+        <span style="font-size:11px;font-weight:700;color:#e74c3c;padding:2px 8px;border-radius:10px;background:#fdecea;white-space:nowrap">ESGOTADO</span>
+      `;
+      list.appendChild(div);
+      return;
+    }
+
     if (item.tam) {
       // item com tamanho
       if (!tamanhoAtual[item.id]) tamanhoAtual[item.id] = 'M';
@@ -2181,6 +2196,17 @@ function updateStatusBar() {
   const totalDia = historico.reduce((s, h) => s + h.total, 0);
   document.getElementById('live-count').textContent = ativos;
   document.getElementById('live-total').textContent = 'R$ ' + totalDia.toFixed(2).replace('.',',');
+  // Esgotados
+  const esgotados = Object.values(CARDAPIO).flat().filter(i => i && i.pausado);
+  const el = document.getElementById('live-esgotados');
+  if (el) {
+    if (esgotados.length > 0) {
+      el.style.display = 'inline-block';
+      el.textContent = '⏸ ' + esgotados.length + ' item(s) esgotado(s)';
+    } else {
+      el.style.display = 'none';
+    }
+  }
 }
 
 // ====== TOAST ======
@@ -2606,6 +2632,12 @@ function renderModalCardapio() {
   const itens = CARDAPIO[modalCatAtual] || [];
   if (itens.length === 0) { list.innerHTML = '<div class="carrinho-empty">Nenhum item</div>'; return; }
   list.innerHTML = itens.map(item => {
+    if (item.pausado) {
+      return `<div class="cardapio-item" style="opacity:0.4;background:#f5f5f5;cursor:not-allowed">
+        <div class="item-info"><div class="item-name" style="text-decoration:line-through;color:#999">${item.nome}</div></div>
+        <span style="font-size:11px;font-weight:700;color:#e74c3c;padding:2px 8px;border-radius:10px;background:#fdecea">ESGOTADO</span>
+      </div>`;
+    }
     if (item.tam) {
       if (!modalTamanhoAtual[item.id]) modalTamanhoAtual[item.id] = 'M';
       const preco = modalTamanhoAtual[item.id] === 'G' ? item.precoG : item.preco;
@@ -2769,13 +2801,21 @@ function renderEditItems() {
     return;
   }
   tbody.innerHTML = itens.map((item, idx) => `
-    <tr id="edit-row-${idx}">
-      <td style="font-weight:600;font-size:13px">${item.nome}</td>
+    <tr id="edit-row-${idx}" style="${item.pausado ? 'opacity:0.5;background:#fafafa' : ''}">
+      <td style="font-weight:600;font-size:13px">
+        ${item.pausado ? '<span style="background:#e74c3c;color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;margin-right:5px">ESGOTADO</span>' : ''}
+        ${item.nome}
+      </td>
       <td style="font-size:12px;color:#777">${item.desc || '—'}</td>
       <td style="font-weight:700;color:var(--wood-mid)">R$ ${item.preco.toFixed(2).replace('.',',')}</td>
       <td style="font-size:13px;color:#555">${item.precoG ? 'R$ ' + item.precoG.toFixed(2).replace('.',',') : '—'}</td>
-      <td>
-        <button class="btn-edit-item btn-edit-edit" onclick="modoEditar(${idx})">✏️ Editar</button>
+      <td style="white-space:nowrap">
+        <button class="btn-edit-item ${item.pausado ? 'btn-edit-save' : ''}" 
+          style="${item.pausado ? 'background:#2d8a3e' : 'background:#e67e22;color:white'}"
+          onclick="togglePausar('${editCatAtual}', ${idx})">
+          ${item.pausado ? '✓ Disponível' : '⏸ Esgotado'}
+        </button>
+        <button class="btn-edit-item btn-edit-edit" onclick="modoEditar(${idx})">✏️</button>
         <button class="btn-edit-item btn-edit-del" onclick="confirmarRemoverItem(${idx})">🗑</button>
       </td>
     </tr>
@@ -2798,6 +2838,19 @@ function renderEditItems() {
       </td>
     </tr>
   `).join('');
+}
+
+function togglePausar(cat, idx) {
+  const item = CARDAPIO[cat][idx];
+  item.pausado = !item.pausado;
+  salvarConfig();
+  renderEditItems();
+  renderCardapio();
+  updateStatusBar();
+  showToast(item.pausado
+    ? '⏸ "' + item.nome + '" marcado como esgotado!'
+    : '✓ "' + item.nome + '" disponível novamente!'
+  );
 }
 
 function modoEditar(idx) {
