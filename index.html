@@ -690,7 +690,52 @@
   .filter-btn:hover { border-color: var(--gold); background: rgba(200,146,42,0.1); }
   .filter-btn.active { background: var(--gold); color: var(--wood-dark); border-color: var(--gold); }
 
-  .borda-info {
+  .pc-item-clicavel {
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 0 -8px;
+    user-select: none;
+  }
+  .pc-item-clicavel:hover { background: #f0f4f0; }
+  .item-entregue { background: #f0f7f0 !important; }
+  .item-entregue:hover { background: #e5f0e5 !important; }
+  .pc-item-check { font-size: 14px; margin-right: 4px; flex-shrink: 0; }
+
+  /* COBRANÇA */
+  .pag-btn {
+    padding: 12px 8px;
+    border-radius: 10px;
+    border: 2px solid var(--cream-dark);
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-mid);
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .pag-btn:hover { border-color: var(--gold); background: #fffbf0; }
+  .pag-btn.selected { background: var(--green-dark); color: white; border-color: var(--green-dark); }
+
+  .caixa-mesa-card {
+    background: var(--cream);
+    border-radius: var(--radius);
+    padding: 14px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+  }
+  .caixa-mesa-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .caixa-mesa-card .cm-num { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--wood-dark); font-weight: 700; }
+  .caixa-mesa-card .cm-cliente { font-size: 12px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .caixa-mesa-card .cm-total { font-size: 16px; font-weight: 700; color: var(--green-dark); margin-top: 6px; }
+  .caixa-mesa-card .cm-status { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px; }
+  .caixa-mesa-card.status-entregue .cm-status { color: var(--status-done); }
+  .caixa-mesa-card.status-producao .cm-status { color: var(--status-prod); }
+  .caixa-mesa-card.status-aguardando .cm-status { color: var(--status-wait); }
     font-size: 11px;
     color: #888;
     font-style: italic;
@@ -794,6 +839,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       <span>Cardápio</span>
     </button>
+    <button class="nav-btn" onclick="showPanel('garcons')" id="nav-garcons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Garçons</span>
+    </button>
   </nav>
 </header>
 
@@ -831,6 +880,10 @@
       <div class="form-section">
         <h3>1. Selecionar Mesa</h3>
         <div class="mesa-selector" id="mesa-selector"></div>
+        <label>Garçom</label>
+        <select id="garcom-pedido" style="margin-bottom:14px">
+          <option value="">— Selecione o garçom —</option>
+        </select>
         <label>Cliente (opcional)</label>
         <input type="text" id="cliente-nome" placeholder="Nome do cliente...">
         <h3 style="margin-top:4px">2. Resumo do Pedido</h3>
@@ -874,6 +927,15 @@
   <div class="panel" id="panel-caixa">
     <p class="section-title">Caixa do Dia</p>
     <div class="resumo-grid" id="resumo-grid"></div>
+
+    <!-- MESAS ABERTAS PARA FECHAR CONTA -->
+    <div style="margin-bottom:20px">
+      <div style="color:var(--cream);font-size:14px;font-weight:700;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span>⚡ Mesas com conta para fechar</span>
+      </div>
+      <div id="caixa-mesas-abertas" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px"></div>
+    </div>
+
     <div class="card">
       <div class="card-header" style="gap:10px;flex-wrap:wrap">
         <h2>Histórico de Pedidos Fechados</h2>
@@ -891,16 +953,55 @@
             <tr>
               <th>Mesa</th>
               <th>Cliente</th>
-              <th>Itens</th>
+              <th>Garçom</th>
+              <th>Pagamento</th>
               <th>Hora</th>
               <th>Total</th>
-              <th></th>
             </tr>
           </thead>
           <tbody id="historico-body">
             <tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;font-style:italic;">Nenhum pedido fechado ainda</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GARÇONS -->
+  <div class="panel" id="panel-garcons">
+    <p class="section-title">Gerenciar Garçons</p>
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:20px">
+      <div>
+        <div class="card">
+          <div class="card-header"><h2>Adicionar Garçom</h2></div>
+          <div class="card-body">
+            <label>Nome</label>
+            <input type="text" id="novo-garcom-nome" placeholder="Nome do garçom...">
+            <button onclick="adicionarGarcom()" style="width:100%;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;letter-spacing:0.5px;margin-top:4px">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h2>Garçons Cadastrados</h2>
+            <span id="garcons-count" style="font-size:12px;color:var(--cream-dark);font-style:italic"></span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div id="garcons-lista"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-header"><h2>Resumo do Dia por Garçom</h2></div>
+          <div class="card-body" style="padding:0">
+            <table class="historico-table">
+              <thead><tr><th>Garçom</th><th>Pedidos Fechados</th><th>Total Gerado</th></tr></thead>
+              <tbody id="garcons-resumo-body">
+                <tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum dado ainda</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -973,6 +1074,106 @@
   </div>
 </main>
 
+<!-- MODAL COBRANÇA -->
+<div class="modal-overlay" id="modal-cobranca">
+  <div class="modal-box" style="max-width:480px;width:95%;max-height:92vh;overflow-y:auto;padding:0;border-radius:14px;overflow:hidden">
+    <!-- Header da conta -->
+    <div style="background:var(--wood-dark);padding:18px 20px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--cream)" id="cob-titulo">Mesa 1</div>
+        <div style="font-size:12px;color:var(--gold-light);margin-top:2px" id="cob-subtitulo"></div>
+      </div>
+      <button onclick="fecharCobranca()" style="background:rgba(255,255,255,0.1);border:none;color:var(--cream);font-size:20px;cursor:pointer;border-radius:8px;padding:4px 10px;line-height:1">×</button>
+    </div>
+    <!-- Itens consumidos -->
+    <div style="padding:16px 20px;background:var(--cream)">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Consumo</div>
+      <div id="cob-itens"></div>
+      <!-- Divisor -->
+      <div style="border-top:2px dashed var(--cream-dark);margin:12px 0"></div>
+      <!-- Desconto -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Desconto (R$)</span>
+        <input type="number" id="cob-desconto" value="0" min="0" step="0.50" oninput="calcularConta()"
+          style="width:90px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Subtotal</span>
+        <span style="font-size:15px;font-weight:700;color:var(--text-dark)" id="cob-subtotal">R$ 0,00</span>
+      </div>
+      <!-- Total grande -->
+      <div style="background:var(--wood-dark);border-radius:10px;padding:14px 16px;margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:700;color:var(--cream-dark);letter-spacing:1px;text-transform:uppercase">Total a pagar</span>
+        <span style="font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-light)" id="cob-total">R$ 0,00</span>
+      </div>
+    </div>
+    <!-- Forma de pagamento -->
+    <div style="padding:16px 20px;background:#faf6ec;border-top:1px solid var(--cream-dark)">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:10px">Forma de Pagamento</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="cob-pagamentos">
+        <button class="pag-btn" onclick="selecionarPagamento('Dinheiro', this)">💵 Dinheiro</button>
+        <button class="pag-btn" onclick="selecionarPagamento('Pix', this)">📱 Pix</button>
+        <button class="pag-btn" onclick="selecionarPagamento('Débito', this)">💳 Débito</button>
+        <button class="pag-btn" onclick="selecionarPagamento('Crédito', this)">💳 Crédito</button>
+        <button class="pag-btn" onclick="selecionarPagamento('Voucher', this)">🎫 Voucher</button>
+        <button class="pag-btn" onclick="selecionarPagamento('Misto', this)">🔀 Misto</button>
+      </div>
+      <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Recebido (R$)</span>
+          <input type="number" id="cob-recebido" min="0" step="0.50" oninput="calcularTroco()"
+            style="width:100px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--cream-dark)">
+          <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Troco</span>
+          <span style="font-size:16px;font-weight:700;color:var(--green-dark)" id="cob-troco">R$ 0,00</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:8px;text-align:center" id="cob-pag-selecionado">Selecione a forma de pagamento</div>
+      <button onclick="confirmarFecharConta()" id="btn-fechar-conta" disabled
+        style="width:100%;padding:14px;background:#ccc;color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:17px;cursor:not-allowed;letter-spacing:1px;transition:all 0.2s">
+        Fechar Conta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PEDIDO -->
+<div class="modal-overlay" id="modal-editar">
+  <div class="modal-box" style="max-width:500px;width:95%;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 id="modal-editar-title" style="font-family:'Playfair Display',serif;font-size:18px;color:var(--wood-dark)">Editar Pedido</h3>
+      <button onclick="fecharEditarPedido()" style="background:transparent;border:none;font-size:22px;cursor:pointer;color:#888;line-height:1">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:100px 1fr;gap:12px;margin-bottom:4px">
+      <div>
+        <label>Nº da Mesa</label>
+        <input type="number" id="editar-mesa" min="1" max="50" style="width:100%;padding:10px 12px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:16px;font-weight:700;text-align:center;margin-bottom:0">
+      </div>
+      <div>
+        <label>Nome do Cliente</label>
+        <input type="text" id="editar-cliente" placeholder="Nome do cliente...">
+      </div>
+    </div>
+    <label>Garçom</label>
+    <select id="editar-garcom" style="margin-bottom:14px">
+      <option value="">— Sem garçom —</option>
+    </select>
+    <div style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Itens do Pedido</div>
+    <div id="editar-itens-lista" style="border:1.5px solid var(--cream-dark);border-radius:8px;background:white;margin-bottom:14px"></div>
+    <div class="total-box" style="padding:10px 14px;margin-bottom:12px">
+      <span class="label" style="font-size:12px">TOTAL ATUALIZADO</span>
+      <span class="valor" id="editar-total-display" style="font-size:18px">R$ 0,00</span>
+    </div>
+    <label>Observação</label>
+    <textarea class="obs-area" id="editar-obs" placeholder="Observações..." style="height:50px;margin-bottom:14px"></textarea>
+    <div style="display:flex;gap:8px">
+      <button onclick="fecharEditarPedido()" style="flex:1;padding:11px;background:transparent;border:1.5px solid var(--cream-dark);border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:600;color:var(--text-mid)">Cancelar</button>
+      <button onclick="salvarEdicaoPedido()" style="flex:2;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:16px;cursor:pointer;letter-spacing:0.5px">✓ Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ADICIONAR ITENS -->
 <div class="modal-overlay" id="modal-itens">
   <div class="modal-box" style="max-width:560px;width:95%;max-height:90vh;overflow-y:auto">
@@ -1039,6 +1240,7 @@ try {
   db = firebase.database();
   useFirebase = true;
   setupFirebaseListeners();
+  setupGarconsListener();
 } catch(e) {
   console.log('Modo local (sem Firebase):', e.message);
   useFirebase = false;
@@ -1204,7 +1406,8 @@ function showPanel(name) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'caixa') renderCaixa();
+  if (name === 'caixa') { renderCaixa(); renderGarconsResumo(); }
+  if (name === 'garcons') { renderGarconsList(); renderGarconsResumo(); }
   if (name === 'cardapio-edit') initEditCardapio();
 }
 
@@ -1442,6 +1645,7 @@ function enviarPedido() {
   const pedido = {
     mesa: mesaSelecionada,
     cliente: document.getElementById('cliente-nome').value || '',
+    garcom: document.getElementById('garcom-pedido').value || '',
     itens: carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco })),
     obs: document.getElementById('obs-pedido').value || '',
     total: total,
@@ -1455,6 +1659,7 @@ function enviarPedido() {
   carrinho = [];
   mesaSelecionada = null;
   document.getElementById('cliente-nome').value = '';
+  document.getElementById('garcom-pedido').value = '';
   document.getElementById('obs-pedido').value = '';
   renderCarrinho();
   renderMesas();
@@ -1482,17 +1687,46 @@ function renderCozinha() {
   }
   grid.innerHTML = lista.map(p => {
     const key = 'mesa' + p.mesa;
-    const itensHtml = p.itens.map(it => `
-      <div class="pc-item">
-        <span class="pc-item-name"><strong>${it.qtd}x</strong> ${it.nome}</span>
-        <span class="pc-item-qtd">R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
+    // Garantir que cada item tem entregue flag
+    if (!p.itens) p.itens = [];
+    const totalItens = p.itens.length;
+    const itensEntregues = p.itens.filter(it => it.entregue).length;
+    const todosEntregues = totalItens > 0 && itensEntregues === totalItens;
+
+    const itensHtml = p.itens.map((it, idx) => `
+      <div class="pc-item pc-item-clicavel ${it.entregue ? 'item-entregue' : ''}"
+           onclick="toggleItemEntregue('${key}', ${idx})"
+           title="${it.entregue ? 'Clique para desmarcar' : 'Clique para marcar como entregue'}">
+        <span class="pc-item-check">${it.entregue ? '✅' : '⬜'}</span>
+        <span class="pc-item-name" style="${it.entregue ? 'text-decoration:line-through;opacity:0.5' : ''}">
+          <strong>${it.qtd}x</strong> ${it.nome}
+        </span>
+        <span class="pc-item-qtd" style="${it.entregue ? 'opacity:0.4' : ''}">R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
       </div>
     `).join('');
+
+    // Barra de progresso
+    const pct = totalItens > 0 ? Math.round((itensEntregues / totalItens) * 100) : 0;
+    const progressBar = p.status === 'producao' || p.status === 'entregue' ? `
+      <div style="padding:6px 14px 4px;border-top:1px solid var(--cream-dark)">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px">
+          <span>Entregues</span>
+          <span style="font-weight:700;color:${todosEntregues ? 'var(--status-done)' : 'var(--text-mid)'}">${itensEntregues}/${totalItens}</span>
+        </div>
+        <div style="height:5px;background:#e0e0e0;border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${todosEntregues ? 'var(--status-done)' : 'var(--status-prod)'};border-radius:3px;transition:width 0.3s"></div>
+        </div>
+      </div>` : '';
+
     let botoes = '';
     if (p.status === 'aguardando') {
       botoes = `<button class="btn-status btn-prod" onclick="mudarStatus('${key}', 'producao')">🔵 Em Produção</button>`;
     } else if (p.status === 'producao') {
-      botoes = `<button class="btn-status btn-entregar" onclick="mudarStatus('${key}', 'entregue')">✅ Entregue</button>`;
+      if (todosEntregues) {
+        botoes = `<button class="btn-status btn-entregar" onclick="mudarStatus('${key}', 'entregue')">✅ Tudo Entregue!</button>`;
+      } else {
+        botoes = `<button class="btn-status btn-entregar" onclick="mudarStatus('${key}', 'entregue')" style="opacity:0.5" title="Marque todos os itens primeiro">✅ Entregue</button>`;
+      }
     } else if (p.status === 'entregue') {
       botoes = `<button class="btn-status btn-fechar" onclick="confirmarFechar('${key}')">💰 Fechar Mesa</button>`;
     }
@@ -1502,16 +1736,22 @@ function renderCozinha() {
           <div>
             <div class="pc-mesa ${p.status}">Mesa ${p.mesa}</div>
             ${p.cliente ? `<div style="font-size:12px;color:var(--text-mid);font-weight:600">${p.cliente}</div>` : ''}
+            ${p.garcom ? `<div style="font-size:11px;color:#888;margin-top:1px">🧑‍🍳 ${p.garcom}</div>` : ''}
           </div>
-          <div class="pc-info">
-            <div class="pc-hora">${p.hora}</div>
+          <div class="pc-info" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="pc-hora">${p.hora}</div>
+              <button onclick="abrirEditarPedido('${key}')" title="Editar pedido" style="background:rgba(0,0,0,0.12);border:none;border-radius:6px;cursor:pointer;padding:3px 7px;font-size:13px;line-height:1">✏️</button>
+            </div>
             <span class="status-badge badge-${p.status}">${statusLabel(p.status)}</span>
           </div>
         </div>
         <div class="pedido-card-body">
+          ${p.status === 'producao' || p.status === 'entregue' ? '<div style="font-size:10px;color:#aaa;font-style:italic;margin-bottom:4px">Toque em um item para marcar como entregue</div>' : ''}
           ${itensHtml}
           ${p.obs ? `<div class="pc-obs">📝 ${p.obs}</div>` : ''}
         </div>
+        ${progressBar}
         <div class="pedido-card-footer">
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             ${botoes}
@@ -1535,6 +1775,21 @@ function mudarStatus(key, novoStatus) {
     renderMesas();
     showToast('Status da Mesa ' + pedidos[key].mesa + ' → ' + statusLabel(novoStatus));
   }
+}
+
+function toggleItemEntregue(key, idx) {
+  const p = pedidos[key];
+  if (!p || p.status === 'aguardando') return; // só funciona em produção ou entregue
+  p.itens[idx].entregue = !p.itens[idx].entregue;
+  // Se todos marcados, muda status automaticamente para entregue
+  const todosEntregues = p.itens.every(it => it.entregue);
+  if (todosEntregues && p.status === 'producao') {
+    p.status = 'entregue';
+    showToast('✅ Todos os itens da Mesa ' + p.mesa + ' entregues!');
+  }
+  salvarPedidos();
+  renderCozinha();
+  renderMesas();
 }
 
 function confirmarFechar(key) {
@@ -1571,11 +1826,15 @@ function confirmarCancelar(key) {
 }
 
 // ====== CAIXA ======
+let cobKey = null;
+let cobPagamento = '';
+
 function renderCaixa() {
   const totalDia = historico.reduce((s, h) => s + h.total, 0);
   const ticketMedio = historico.length > 0 ? totalDia / historico.length : 0;
   const ativos = Object.keys(pedidos).length;
   const resumoGrid = document.getElementById('resumo-grid');
+
   resumoGrid.innerHTML = `
     <div class="resumo-card">
       <div class="rc-label">Total do Dia</div>
@@ -1586,32 +1845,138 @@ function renderCaixa() {
       <div class="rc-val">${historico.length}</div>
     </div>
     <div class="resumo-card">
-      <div class="rc-label">Pedidos Ativos</div>
-      <div class="rc-val">${ativos}</div>
+      <div class="rc-label">Mesas em Aberto</div>
+      <div class="rc-val" style="color:var(--gold)">${ativos}</div>
     </div>
     <div class="resumo-card">
       <div class="rc-label">Ticket Médio</div>
       <div class="rc-val">R$ ${ticketMedio.toFixed(2).replace('.',',')}</div>
     </div>
   `;
+
+  // Mesas abertas
+  const mesasAbertas = document.getElementById('caixa-mesas-abertas');
+  if (mesasAbertas) {
+    const listaPedidos = Object.entries(pedidos);
+    if (listaPedidos.length === 0) {
+      mesasAbertas.innerHTML = '<div style="color:#aaa;font-size:13px;font-style:italic;padding:10px 0">Nenhuma mesa em aberto no momento</div>';
+    } else {
+      mesasAbertas.innerHTML = listaPedidos.sort((a,b) => a[1].mesa - b[1].mesa).map(([key, p]) => `
+        <div class="caixa-mesa-card status-${p.status}" onclick="abrirCobranca('${key}')">
+          <div class="cm-num">Mesa ${p.mesa}</div>
+          <div class="cm-cliente">${p.cliente || p.garcom || '—'}</div>
+          <div class="cm-total">R$ ${p.total.toFixed(2).replace('.',',')}</div>
+          <div class="cm-status">${statusLabel(p.status)}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Histórico
   const tbody = document.getElementById('historico-body');
   if (historico.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;font-style:italic;">Nenhum pedido fechado ainda</td></tr>';
     return;
   }
-  tbody.innerHTML = [...historico].reverse().map((h, i) => {
-    const itensStr = h.itens.map(it => `${it.qtd}x ${it.nome}`).join(', ');
-    return `
-      <tr>
-        <td class="td-mesa">Mesa ${h.mesa}</td>
-        <td>${h.cliente || '—'}</td>
-        <td style="font-size:12px;color:#666;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itensStr}</td>
-        <td>${h.fechadoEm}</td>
-        <td class="td-valor">R$ ${h.total.toFixed(2).replace('.',',')}</td>
-        <td></td>
-      </tr>
-    `;
-  }).join('');
+  tbody.innerHTML = [...historico].reverse().map(h => `
+    <tr>
+      <td class="td-mesa">Mesa ${h.mesa}</td>
+      <td>${h.cliente || '—'}</td>
+      <td>${h.garcom || '—'}</td>
+      <td><span style="background:#e8f5e9;color:#2d8a3e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${h.pagamento || '—'}</span></td>
+      <td>${h.fechadoEm}</td>
+      <td class="td-valor">R$ ${h.total.toFixed(2).replace('.',',')}</td>
+    </tr>
+  `).join('');
+}
+
+// ====== COBRANÇA ======
+function abrirCobranca(key) {
+  cobKey = key;
+  cobPagamento = '';
+  const p = pedidos[key];
+  document.getElementById('cob-titulo').textContent = 'Mesa ' + p.mesa;
+  document.getElementById('cob-subtitulo').textContent =
+    [p.cliente, p.garcom].filter(Boolean).join(' · ') || 'Sem identificação';
+  document.getElementById('cob-desconto').value = '0';
+  document.getElementById('cob-recebido').value = '';
+  document.getElementById('cob-troco').textContent = 'R$ 0,00';
+  document.getElementById('cob-troco-box').style.display = 'none';
+  document.getElementById('cob-pag-selecionado').textContent = 'Selecione a forma de pagamento';
+  document.querySelectorAll('.pag-btn').forEach(b => b.classList.remove('selected'));
+  const btn = document.getElementById('btn-fechar-conta');
+  btn.disabled = true; btn.style.background = '#ccc'; btn.style.cursor = 'not-allowed';
+
+  const itensEl = document.getElementById('cob-itens');
+  itensEl.innerHTML = p.itens.map(it => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--cream-dark)">
+      <span style="font-size:13px;color:var(--text-dark)"><strong style="color:var(--wood-mid)">${it.qtd}×</strong> ${it.nome}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--text-dark);white-space:nowrap;margin-left:10px">R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
+    </div>
+  `).join('');
+
+  calcularConta();
+  document.getElementById('modal-cobranca').classList.add('open');
+}
+
+function fecharCobranca() {
+  document.getElementById('modal-cobranca').classList.remove('open');
+  cobKey = null; cobPagamento = '';
+}
+
+function calcularConta() {
+  if (!cobKey || !pedidos[cobKey]) return;
+  const p = pedidos[cobKey];
+  const desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
+  const total = Math.max(0, p.total - desconto);
+  document.getElementById('cob-subtotal').textContent = 'R$ ' + p.total.toFixed(2).replace('.',',');
+  document.getElementById('cob-total').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  calcularTroco();
+}
+
+function calcularTroco() {
+  const totalTxt = document.getElementById('cob-total').textContent;
+  const total = parseFloat(totalTxt.replace('R$ ','').replace(',','.')) || 0;
+  const recebido = parseFloat(document.getElementById('cob-recebido').value) || 0;
+  document.getElementById('cob-troco').textContent = 'R$ ' + Math.max(0, recebido - total).toFixed(2).replace('.',',');
+}
+
+function selecionarPagamento(tipo, btn) {
+  cobPagamento = tipo;
+  document.querySelectorAll('.pag-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('cob-pag-selecionado').textContent = '✓ ' + tipo + ' selecionado';
+  document.getElementById('cob-troco-box').style.display = tipo === 'Dinheiro' ? 'block' : 'none';
+  const btnFechar = document.getElementById('btn-fechar-conta');
+  btnFechar.disabled = false;
+  btnFechar.style.background = 'var(--green-dark)';
+  btnFechar.style.cursor = 'pointer';
+}
+
+function confirmarFecharConta() {
+  if (!cobKey || !cobPagamento) return;
+  const p = pedidos[cobKey];
+  const desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
+  const totalFinal = Math.max(0, p.total - desconto);
+  abrirModal(
+    'Fechar Conta — Mesa ' + p.mesa,
+    `Total: R$ ${totalFinal.toFixed(2).replace('.',',')} · ${cobPagamento}. Confirmar?`,
+    () => {
+      p.total = totalFinal;
+      p.pagamento = cobPagamento;
+      p.desconto = desconto;
+      historico.push({ ...p, fechadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) });
+      delete pedidos[cobKey];
+      salvarPedidos();
+      salvarHistorico();
+      fecharCobranca();
+      renderCaixa();
+      renderMesas();
+      renderCozinha();
+      renderGarconsResumo();
+      showToast('✓ Mesa ' + p.mesa + ' fechada! R$ ' + totalFinal.toFixed(2).replace('.',',') + ' · ' + cobPagamento);
+    }
+  );
 }
 
 function confirmarZerarDia() {
@@ -1683,7 +2048,8 @@ function gerarRelatorioPDF() {
       <tr>
         <td style="font-weight:700;color:#6b4226">Mesa ${h.mesa}</td>
         <td>${h.cliente || '—'}</td>
-        <td style="font-size:11px;color:#555;max-width:200px">${itensStr}</td>
+        <td>${h.garcom || '—'}</td>
+        <td style="font-size:11px;color:#555;max-width:180px">${itensStr}</td>
         <td>${h.hora}</td>
         <td style="font-weight:700;color:#2d4a1e">R$ ${h.total.toFixed(2).replace('.',',')}</td>
       </tr>
@@ -1778,7 +2144,7 @@ function gerarRelatorioPDF() {
 
 <h2>Histórico de Pedidos</h2>
 <table>
-  <thead><tr><th>Mesa</th><th>Cliente</th><th>Itens</th><th>Fechado</th><th>Total</th></tr></thead>
+  <thead><tr><th>Mesa</th><th>Cliente</th><th>Garçom</th><th>Itens</th><th>Fechado</th><th>Total</th></tr></thead>
   <tbody>${linhasHistorico}</tbody>
 </table>
 
@@ -1800,6 +2166,207 @@ function gerarRelatorioPDF() {
     win.onload = () => setTimeout(() => win.print(), 500);
   }
   showToast('✓ Relatório gerado! Use Ctrl+P ou o botão para imprimir/salvar PDF.');
+}
+
+// ====== GARÇONS ======
+let garcons = [];
+
+function setupGarconsListener() {
+  if (!useFirebase) return;
+  db.ref('garcons').on('value', snap => {
+    garcons = snap.val() ? Object.values(snap.val()) : [];
+    renderGarconsList();
+    renderGarconsSelects();
+    renderGarconsResumo();
+  });
+}
+
+function salvarGarcons() {
+  if (!useFirebase) return;
+  const obj = {};
+  garcons.forEach((g, i) => obj[i] = g);
+  db.ref('garcons').set(obj);
+}
+
+function adicionarGarcom() {
+  const nome = document.getElementById('novo-garcom-nome').value.trim();
+  if (!nome) { showToast('⚠️ Digite o nome do garçom!'); return; }
+  if (garcons.find(g => g.nome.toLowerCase() === nome.toLowerCase())) {
+    showToast('⚠️ Garçom já cadastrado!'); return;
+  }
+  garcons.push({ id: 'g_' + Date.now(), nome });
+  salvarGarcons();
+  document.getElementById('novo-garcom-nome').value = '';
+  renderGarconsList();
+  renderGarconsSelects();
+  showToast('✓ ' + nome + ' adicionado!');
+}
+
+function removerGarcom(idx) {
+  const nome = garcons[idx].nome;
+  abrirModal('Remover Garçom', `Remover "${nome}" da lista?`, () => {
+    garcons.splice(idx, 1);
+    salvarGarcons();
+    renderGarconsList();
+    renderGarconsSelects();
+    showToast(nome + ' removido.');
+  });
+}
+
+function renderGarconsList() {
+  const lista = document.getElementById('garcons-lista');
+  if (!lista) return;
+  document.getElementById('garcons-count').textContent = garcons.length + ' cadastrados';
+  if (garcons.length === 0) {
+    lista.innerHTML = '<div style="padding:30px;text-align:center;color:#aaa;font-style:italic">Nenhum garçom cadastrado ainda</div>';
+    return;
+  }
+  lista.innerHTML = garcons.map((g, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--cream-dark)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--wood-mid);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">
+          ${g.nome.charAt(0).toUpperCase()}
+        </div>
+        <span style="font-weight:600;font-size:14px;color:var(--text-dark)">${g.nome}</span>
+      </div>
+      <button class="btn-edit-item btn-edit-del" onclick="removerGarcom(${i})">🗑 Remover</button>
+    </div>
+  `).join('');
+}
+
+function renderGarconsSelects() {
+  const opts = '<option value="">— Selecione o garçom —</option>' +
+    garcons.map(g => `<option value="${g.nome}">${g.nome}</option>`).join('');
+  const optsEditar = '<option value="">— Sem garçom —</option>' +
+    garcons.map(g => `<option value="${g.nome}">${g.nome}</option>`).join('');
+  const sel = document.getElementById('garcom-pedido');
+  const selEditar = document.getElementById('editar-garcom');
+  if (sel) sel.innerHTML = opts;
+  if (selEditar) selEditar.innerHTML = optsEditar;
+}
+
+function renderGarconsResumo() {
+  const tbody = document.getElementById('garcons-resumo-body');
+  if (!tbody) return;
+  if (garcons.length === 0 || historico.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum dado ainda</td></tr>';
+    return;
+  }
+  const resumo = {};
+  historico.forEach(h => {
+    const g = h.garcom || '(sem garçom)';
+    if (!resumo[g]) resumo[g] = { pedidos: 0, total: 0 };
+    resumo[g].pedidos++;
+    resumo[g].total += h.total;
+  });
+  tbody.innerHTML = Object.entries(resumo)
+    .sort((a, b) => b[1].total - a[1].total)
+    .map(([nome, r]) => `
+      <tr>
+        <td style="font-weight:600">${nome}</td>
+        <td style="text-align:center;font-weight:700;color:var(--wood-mid)">${r.pedidos}</td>
+        <td style="font-weight:700;color:var(--green-dark)">R$ ${r.total.toFixed(2).replace('.',',')}</td>
+      </tr>
+    `).join('');
+}
+
+// ====== EDITAR PEDIDO EXISTENTE ======
+let editarPedidoKey = null;
+let editarItens = [];
+
+function abrirEditarPedido(key) {
+  editarPedidoKey = key;
+  const p = pedidos[key];
+  editarItens = p.itens.map(it => ({ ...it }));
+  document.getElementById('modal-editar-title').textContent = 'Editar Pedido — Mesa ' + p.mesa;
+  document.getElementById('editar-mesa').value = p.mesa;
+  document.getElementById('editar-cliente').value = p.cliente || '';
+  document.getElementById('editar-obs').value = p.obs || '';
+  // Popular e selecionar garçom
+  renderGarconsSelects();
+  const selEditar = document.getElementById('editar-garcom');
+  if (selEditar) selEditar.value = p.garcom || '';
+  renderEditarItens();
+  document.getElementById('modal-editar').classList.add('open');
+}
+
+function fecharEditarPedido() {
+  document.getElementById('modal-editar').classList.remove('open');
+  editarPedidoKey = null;
+  editarItens = [];
+}
+
+function renderEditarItens() {
+  const lista = document.getElementById('editar-itens-lista');
+  if (editarItens.length === 0) {
+    lista.innerHTML = '<div class="carrinho-empty" style="padding:20px;text-align:center;color:#bbb;font-style:italic">Nenhum item</div>';
+    document.getElementById('editar-total-display').textContent = 'R$ 0,00';
+    return;
+  }
+  lista.innerHTML = editarItens.map((it, i) => `
+    <div class="carrinho-item">
+      <span class="ci-name" style="font-size:13px">${it.nome}</span>
+      <div class="ci-qtd">
+        <button class="qtd-btn" onclick="changeEditarQtd(${i},-1)">−</button>
+        <span style="font-weight:700;min-width:20px;text-align:center">${it.qtd}</span>
+        <button class="qtd-btn" onclick="changeEditarQtd(${i},1)">+</button>
+      </div>
+      <span class="ci-total" style="font-size:13px">R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
+      <span class="ci-del" onclick="removeEditarItem(${i})">×</span>
+    </div>
+  `).join('');
+  const total = editarItens.reduce((s, it) => s + it.preco * it.qtd, 0);
+  document.getElementById('editar-total-display').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+}
+
+function changeEditarQtd(i, delta) {
+  editarItens[i].qtd += delta;
+  if (editarItens[i].qtd <= 0) editarItens.splice(i, 1);
+  renderEditarItens();
+}
+
+function removeEditarItem(i) {
+  editarItens.splice(i, 1);
+  renderEditarItens();
+}
+
+function salvarEdicaoPedido() {
+  if (!editarPedidoKey) return;
+  if (editarItens.length === 0) { showToast('⚠️ O pedido precisa ter pelo menos 1 item!'); return; }
+  const novaMesa = parseInt(document.getElementById('editar-mesa').value);
+  if (!novaMesa || novaMesa < 1) { showToast('⚠️ Número de mesa inválido!'); return; }
+
+  const p = pedidos[editarPedidoKey];
+  const mesaAntiga = p.mesa;
+  p.cliente = document.getElementById('editar-cliente').value.trim();
+  p.garcom = document.getElementById('editar-garcom').value || '';
+  p.obs = document.getElementById('editar-obs').value.trim();
+  p.itens = editarItens;
+  p.total = editarItens.reduce((s, it) => s + it.preco * it.qtd, 0);
+
+  // Se a mesa mudou, trocar a chave no Firebase
+  if (novaMesa !== mesaAntiga) {
+    const novaKey = 'mesa' + novaMesa;
+    if (pedidos[novaKey]) {
+      showToast('⚠️ Mesa ' + novaMesa + ' já tem um pedido em aberto!');
+      return;
+    }
+    p.mesa = novaMesa;
+    pedidos[novaKey] = p;
+    delete pedidos[editarPedidoKey];
+    // Atualizar totalMesas se necessário
+    if (novaMesa > totalMesas) {
+      totalMesas = novaMesa;
+      salvarConfig();
+    }
+  }
+
+  salvarPedidos();
+  renderCozinha();
+  renderMesas();
+  renderMesaSelector();
+  fecharEditarPedido();
+  showToast('✓ Pedido atualizado!' + (novaMesa !== mesaAntiga ? ' Movido para Mesa ' + novaMesa : ''));
 }
 
 // ====== ADICIONAR ITENS A PEDIDO EXISTENTE ======
