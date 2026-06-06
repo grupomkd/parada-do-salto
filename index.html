@@ -1119,25 +1119,31 @@ function setupFirebaseListeners() {
     historico = snap.val() ? Object.values(snap.val()) : [];
     renderCaixa();
   });
-  db.ref('config').on('value', snap => {
-    const cfg = snap.val();
-    if (cfg) {
-      if (cfg.totalMesas) {
-        totalMesas = cfg.totalMesas;
-        const disp = document.getElementById('total-mesas-display');
-        if (disp) disp.textContent = totalMesas;
-        renderMesas();
-        renderMesaSelector();
-      }
-      if (cfg.cardapio) {
-        Object.keys(cfg.cardapio).forEach(cat => {
-          if (CARDAPIO[cat] !== undefined) {
-            CARDAPIO[cat] = cfg.cardapio[cat];
-          }
-        });
-        renderCatTabs();
-        renderCardapio();
-      }
+  db.ref('config/totalMesas').on('value', snap => {
+    const val = snap.val();
+    if (val && val !== totalMesas) {
+      totalMesas = val;
+      const disp = document.getElementById('total-mesas-display');
+      if (disp) disp.textContent = totalMesas;
+      renderMesas();
+      renderMesaSelector();
+    }
+  });
+  db.ref('config/cardapio').on('value', snap => {
+    const val = snap.val();
+    if (val) {
+      // Mapear chaves sanitizadas de volta para nomes de categoria
+      Object.keys(CARDAPIO).forEach(cat => {
+        const key = cat.replace(/[.#$[\]/]/g, '_');
+        const raw = val[key];
+        if (raw) {
+          // Firebase pode converter arrays em objetos {0:.., 1:..}
+          CARDAPIO[cat] = Array.isArray(raw) ? raw : Object.values(raw);
+        }
+      });
+      renderCatTabs();
+      renderCardapio();
+      if (editCatAtual) renderEditItems();
     }
   });
 }
@@ -1155,12 +1161,20 @@ function salvarHistorico() {
   }
 }
 function salvarConfig() {
-  if (useFirebase) {
-    db.ref('config').set({
-      totalMesas: totalMesas,
-      cardapio: CARDAPIO
-    });
-  }
+  if (!useFirebase) return;
+  db.ref('config/totalMesas').set(totalMesas);
+  // Salvar cada categoria individualmente para preservar arrays
+  Object.keys(CARDAPIO).forEach(cat => {
+    // Limpar itens undefined/null antes de salvar
+    const itens = CARDAPIO[cat].filter(i => i && i.nome).map(i => ({
+      id: i.id || 'item_' + Date.now(),
+      nome: i.nome,
+      preco: i.preco,
+      ...(i.precoG ? { precoG: i.precoG, tam: true } : {}),
+      ...(i.desc ? { desc: i.desc } : {})
+    }));
+    db.ref('config/cardapio/' + cat.replace(/[.#$[\]/]/g, '_')).set(itens);
+  });
 }
 
 // ====== NAVEGAÇÃO ======
