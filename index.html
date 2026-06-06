@@ -1591,8 +1591,13 @@ function abrirMesa(num, pedido) {
     showPanel('pedido');
     showToast('Mesa ' + num + ' selecionada!');
   } else {
-    showPanel('cozinha');
-    filtrarCozinha('todos', document.querySelector('.filter-btn'));
+    // Mesa ocupada — vai pro novo pedido pra acumular
+    mesaSelecionada = num;
+    document.querySelectorAll('.mesa-sel-btn').forEach(b => b.classList.remove('selected'));
+    const btn = document.querySelector(`.mesa-sel-btn[data-mesa="${num}"]`);
+    if (btn) btn.classList.add('selected');
+    showPanel('pedido');
+    showToast('➕ Mesa ' + num + ' já tem pedido — novos itens serão acumulados!');
   }
 }
 
@@ -1756,18 +1761,42 @@ function enviarPedido() {
   const agora = new Date();
   const hora = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const key = 'mesa' + mesaSelecionada;
-  const pedido = {
-    mesa: mesaSelecionada,
-    cliente: document.getElementById('cliente-nome').value || '',
-    garcom: document.getElementById('garcom-pedido').value || '',
-    itens: carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco })),
-    obs: document.getElementById('obs-pedido').value || '',
-    total: total,
-    hora: hora,
-    status: 'aguardando',
-    ts: Date.now()
-  };
-  pedidos[key] = pedido;
+  const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco }));
+
+  if (pedidos[key]) {
+    // Mesa já tem pedido — ACUMULAR itens e total
+    const p = pedidos[key];
+    novosItens.forEach(novoItem => {
+      const existing = p.itens.find(it => it.nome === novoItem.nome);
+      if (existing) existing.qtd += novoItem.qtd;
+      else p.itens.push(novoItem);
+    });
+    p.total += total;
+    p.status = 'aguardando'; // volta pra cozinha ver os novos itens
+    // Manter cliente/garcom se já tinha, senão usar o novo
+    if (!p.cliente && document.getElementById('cliente-nome').value)
+      p.cliente = document.getElementById('cliente-nome').value;
+    if (!p.garcom && document.getElementById('garcom-pedido').value)
+      p.garcom = document.getElementById('garcom-pedido').value;
+    const obsNova = document.getElementById('obs-pedido').value;
+    if (obsNova) p.obs = p.obs ? p.obs + ' | ' + obsNova : obsNova;
+    showToast('✓ Itens adicionados à Mesa ' + mesaSelecionada + '! Total agora: R$ ' + p.total.toFixed(2).replace('.',','));
+  } else {
+    // Mesa livre — criar pedido novo
+    pedidos[key] = {
+      mesa: mesaSelecionada,
+      cliente: document.getElementById('cliente-nome').value || '',
+      garcom: document.getElementById('garcom-pedido').value || '',
+      itens: novosItens,
+      obs: document.getElementById('obs-pedido').value || '',
+      total: total,
+      hora: hora,
+      status: 'aguardando',
+      ts: Date.now()
+    };
+    showToast('✓ Pedido da Mesa ' + mesaSelecionada + ' enviado para a cozinha!');
+  }
+
   salvarPedidos();
   // Reset
   carrinho = [];
@@ -1778,7 +1807,6 @@ function enviarPedido() {
   renderCarrinho();
   renderMesas();
   renderMesaSelector();
-  showToast('✓ Pedido da Mesa ' + pedido.mesa + ' enviado para a cozinha!');
   showPanel('cozinha');
 }
 
