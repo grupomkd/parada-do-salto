@@ -1119,6 +1119,27 @@ function setupFirebaseListeners() {
     historico = snap.val() ? Object.values(snap.val()) : [];
     renderCaixa();
   });
+  db.ref('config').on('value', snap => {
+    const cfg = snap.val();
+    if (cfg) {
+      if (cfg.totalMesas) {
+        totalMesas = cfg.totalMesas;
+        const disp = document.getElementById('total-mesas-display');
+        if (disp) disp.textContent = totalMesas;
+        renderMesas();
+        renderMesaSelector();
+      }
+      if (cfg.cardapio) {
+        Object.keys(cfg.cardapio).forEach(cat => {
+          if (CARDAPIO[cat] !== undefined) {
+            CARDAPIO[cat] = cfg.cardapio[cat];
+          }
+        });
+        renderCatTabs();
+        renderCardapio();
+      }
+    }
+  });
 }
 
 function salvarPedidos() {
@@ -1131,6 +1152,14 @@ function salvarHistorico() {
     const obj = {};
     historico.forEach((h, i) => obj[i] = h);
     db.ref('historico').set(obj);
+  }
+}
+function salvarConfig() {
+  if (useFirebase) {
+    db.ref('config').set({
+      totalMesas: totalMesas,
+      cardapio: CARDAPIO
+    });
   }
 }
 
@@ -1173,6 +1202,7 @@ function adicionarMesa() {
   document.getElementById('total-mesas-display').textContent = totalMesas;
   renderMesas();
   renderMesaSelector();
+  salvarConfig();
   showToast('✓ Mesa ' + totalMesas + ' adicionada!');
 }
 
@@ -1188,6 +1218,7 @@ function removerMesa() {
   document.getElementById('total-mesas-display').textContent = totalMesas;
   renderMesas();
   renderMesaSelector();
+  salvarConfig();
   showToast('Mesa ' + num + ' removida.');
 }
 
@@ -1838,6 +1869,7 @@ function salvarEdicaoItem(idx) {
   renderEditItems();
   renderEditCatList();
   renderCardapio();
+  salvarConfig();
   showToast('✓ Item "' + novoNome + '" atualizado!');
 }
 
@@ -1849,6 +1881,7 @@ function confirmarRemoverItem(idx) {
     renderEditCatList();
     renderCardapio();
     renderCatTabs();
+    salvarConfig();
     showToast('Item removido!');
   });
 }
@@ -1899,6 +1932,7 @@ function adicionarItem() {
   renderEditCatList();
   renderCardapio();
   renderCatTabs();
+  salvarConfig();
   showToast('✓ "' + nome + '" adicionado ao cardápio!');
 }
 </script>
