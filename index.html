@@ -1067,8 +1067,10 @@
               <th>Cliente</th>
               <th>Garçom</th>
               <th>Pagamento</th>
+              <th>Tempo</th>
               <th>Hora</th>
               <th>Total</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="historico-body">
@@ -1840,7 +1842,9 @@ function renderCozinha() {
         botoes = `<button class="btn-status btn-entregar" onclick="mudarStatus('${key}', 'entregue')" style="opacity:0.5" title="Marque todos os itens primeiro">✅ Entregue</button>`;
       }
     } else if (p.status === 'entregue') {
-      botoes = `<button class="btn-status btn-fechar" onclick="confirmarFechar('${key}')">💰 Fechar Mesa</button>`;
+      botoes = `
+        <button class="btn-status btn-prod" onclick="mudarStatus('${key}', 'aguardando')" style="background:#888" title="Mesa pediu mais">🔄 Pedir Mais</button>
+      `;
     }
     return `
       <div class="pedido-card">
@@ -1856,6 +1860,7 @@ function renderCozinha() {
               <button onclick="abrirEditarPedido('${key}')" title="Editar pedido" style="background:rgba(0,0,0,0.12);border:none;border-radius:6px;cursor:pointer;padding:3px 7px;font-size:13px;line-height:1">✏️</button>
             </div>
             <span class="status-badge badge-${p.status}">${statusLabel(p.status)}</span>
+            ${p.tsProducao ? `<span class="cronometro" data-inicio="${p.tsProducao}" data-fim="${p.tsEntregue || ''}" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${p.tsEntregue ? '#e8f5e9' : '#fff3e0'};color:${p.tsEntregue ? '#2d8a3e' : '#e8961a'}">⏱ ${formatarTempo(p.tsProducao, p.tsEntregue)}</span>` : ''}
           </div>
         </div>
         <div class="pedido-card-body">
@@ -1882,6 +1887,8 @@ function renderCozinha() {
 function mudarStatus(key, novoStatus) {
   if (pedidos[key]) {
     pedidos[key].status = novoStatus;
+    if (novoStatus === 'producao') pedidos[key].tsProducao = Date.now();
+    if (novoStatus === 'entregue') pedidos[key].tsEntregue = Date.now();
     salvarPedidos();
     renderCozinha();
     renderMesas();
@@ -1897,6 +1904,7 @@ function toggleItemEntregue(key, idx) {
   const todosEntregues = p.itens.every(it => it.entregue);
   if (todosEntregues && p.status === 'producao') {
     p.status = 'entregue';
+    p.tsEntregue = Date.now();
     showToast('✅ Todos os itens da Mesa ' + p.mesa + ' entregues!');
   }
   salvarPedidos();
@@ -1990,16 +1998,20 @@ function renderCaixa() {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;font-style:italic;">Nenhum pedido fechado ainda</td></tr>';
     return;
   }
-  tbody.innerHTML = [...historico].reverse().map(h => `
+  tbody.innerHTML = [...historico].reverse().map((h, i) => {
+    const realIdx = historico.length - 1 - i;
+    return `
     <tr>
       <td class="td-mesa">Mesa ${h.mesa}</td>
       <td>${h.cliente || '—'}</td>
       <td>${h.garcom || '—'}</td>
       <td><span style="background:#e8f5e9;color:#2d8a3e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${h.pagamento || '—'}</span></td>
+      <td style="font-size:12px;color:#888;font-weight:600">${h.tempoPreparo || '—'}</td>
       <td>${h.fechadoEm}</td>
       <td class="td-valor">R$ ${h.total.toFixed(2).replace('.',',')}</td>
+      <td><button onclick="reabrirMesa(${realIdx})" style="background:var(--status-wait);color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700" title="Desfazer fechamento">↩ Reabrir</button></td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 // ====== COBRANÇA ======
@@ -2077,7 +2089,10 @@ function confirmarFecharConta() {
       p.total = totalFinal;
       p.pagamento = cobPagamento;
       p.desconto = desconto;
-      historico.push({ ...p, fechadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) });
+      p.tempoPreparo = formatarTempoMin(p.tsProducao, p.tsEntregue);
+      p.tsFechar = Date.now();
+      const registro = { ...p, fechadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), idHistorico: 'h_' + Date.now() };
+      historico.push(registro);
       delete pedidos[cobKey];
       salvarPedidos();
       salvarHistorico();
@@ -2098,6 +2113,38 @@ function confirmarZerarDia() {
     renderCaixa();
     showToast('Dia zerado!');
   });
+}
+
+function reabrirMesa(idx) {
+  const h = historico[idx];
+  if (!h) return;
+  const key = 'mesa' + h.mesa;
+  if (pedidos[key]) {
+    showToast('⚠️ Mesa ' + h.mesa + ' já tem pedido em aberto!');
+    return;
+  }
+  abrirModal(
+    'Reabrir Mesa ' + h.mesa,
+    `Reabrir a conta da Mesa ${h.mesa} (R$ ${h.total.toFixed(2).replace('.',',')} · ${h.pagamento})? O registro será removido do histórico.`,
+    () => {
+      // Restaurar pedido sem campos de fechamento
+      const p = { ...h };
+      delete p.fechadoEm;
+      delete p.pagamento;
+      delete p.desconto;
+      delete p.tsFechar;
+      delete p.idHistorico;
+      p.status = 'entregue'; // volta como entregue pra mesa poder pedir mais ou fechar de novo
+      pedidos[key] = p;
+      historico.splice(idx, 1);
+      salvarPedidos();
+      salvarHistorico();
+      renderCaixa();
+      renderMesas();
+      renderCozinha();
+      showToast('↩ Mesa ' + h.mesa + ' reaberta! Verifique na aba Cozinha ou Caixa.');
+    }
+  );
 }
 
 // ====== STATUS BAR ======
@@ -2152,6 +2199,9 @@ function gerarRelatorioPDF() {
       ranking[key].total += it.preco * it.qtd;
     });
   });
+  const tempoTotal = historico.filter(h => h.tsProducao && h.tsEntregue).map(h => h.tsEntregue - h.tsProducao);
+  const tempoMedio = tempoTotal.length > 0 ? Math.floor(tempoTotal.reduce((a,b)=>a+b,0)/tempoTotal.length/1000) : 0;
+  const tempoMedioStr = tempoMedio > 0 ? `${Math.floor(tempoMedio/60)}min ${tempoMedio%60}s` : '—';
   const rankingSort = Object.values(ranking).sort((a,b) => b.qtd - a.qtd).slice(0, 5);
 
   const linhasHistorico = [...historico].reverse().map(h => {
@@ -2161,8 +2211,9 @@ function gerarRelatorioPDF() {
         <td style="font-weight:700;color:#6b4226">Mesa ${h.mesa}</td>
         <td>${h.cliente || '—'}</td>
         <td>${h.garcom || '—'}</td>
-        <td style="font-size:11px;color:#555;max-width:180px">${itensStr}</td>
-        <td>${h.hora}</td>
+        <td style="font-size:11px;color:#555;max-width:150px">${itensStr}</td>
+        <td style="text-align:center;font-weight:600;color:#e8961a">${h.tempoPreparo || '—'}</td>
+        <td>${h.fechadoEm}</td>
         <td style="font-weight:700;color:#2d4a1e">R$ ${h.total.toFixed(2).replace('.',',')}</td>
       </tr>
     `;
@@ -2194,7 +2245,7 @@ function gerarRelatorioPDF() {
   .header .data-info { margin-top: 10px; font-size: 13px; color: #666; }
   .header .data-info strong { color: #3d2b1f; }
 
-  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
   .card { background: #f5edd6; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #e8d9b5; }
   .card .lbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6b4226; margin-bottom: 4px; }
   .card .val { font-family: 'Playfair Display', serif; font-size: 22px; color: #2d4a1e; }
@@ -2246,6 +2297,10 @@ function gerarRelatorioPDF() {
     <div class="lbl">Mesas em Aberto</div>
     <div class="val gold">${pedidosAtivos}</div>
   </div>
+  <div class="card">
+    <div class="lbl">Tempo Médio Preparo</div>
+    <div class="val" style="font-size:18px">${tempoMedioStr}</div>
+  </div>
 </div>
 
 <h2>Top 5 Itens Mais Vendidos</h2>
@@ -2256,7 +2311,7 @@ function gerarRelatorioPDF() {
 
 <h2>Histórico de Pedidos</h2>
 <table>
-  <thead><tr><th>Mesa</th><th>Cliente</th><th>Garçom</th><th>Itens</th><th>Fechado</th><th>Total</th></tr></thead>
+  <thead><tr><th>Mesa</th><th>Cliente</th><th>Garçom</th><th>Itens</th><th>Tempo</th><th>Fechado</th><th>Total</th></tr></thead>
   <tbody>${linhasHistorico}</tbody>
 </table>
 
@@ -2622,6 +2677,32 @@ function confirmarAdicionarItens() {
   fecharModalItens();
   showToast('✓ Itens adicionados à Mesa ' + p.mesa + '! + R$ ' + adicional.toFixed(2).replace('.',','));
 }
+
+// ====== CRONÔMETRO ======
+function formatarTempo(tsInicio, tsFim) {
+  const fim = tsFim ? tsFim : Date.now();
+  const diff = Math.floor((fim - tsInicio) / 1000);
+  const m = Math.floor(diff / 60);
+  const s = diff % 60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function formatarTempoMin(tsInicio, tsFim) {
+  if (!tsInicio || !tsFim) return '—';
+  const diff = Math.floor((tsFim - tsInicio) / 1000);
+  const m = Math.floor(diff / 60);
+  const s = diff % 60;
+  return m > 0 ? `${m}min ${s}s` : `${s}s`;
+}
+
+// Ticker que atualiza cronômetros ao vivo a cada segundo
+setInterval(() => {
+  document.querySelectorAll('.cronometro[data-inicio]').forEach(el => {
+    const inicio = parseInt(el.getAttribute('data-inicio'));
+    const fim = el.getAttribute('data-fim') ? parseInt(el.getAttribute('data-fim')) : null;
+    if (!fim) el.textContent = '⏱ ' + formatarTempo(inicio, null);
+  });
+}, 1000);
 
 // ====== CARDÁPIO EDIT ======
 let editCatAtual = null;
