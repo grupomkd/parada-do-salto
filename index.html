@@ -955,6 +955,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       <span>Garçons</span>
     </button>
+    <button class="nav-btn" onclick="toggleImpressora(this)" id="nav-impressora" title="Ativar/desativar impressão automática">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+      <span>Imprimir</span>
+    </button>
   </nav>
 </header>
 
@@ -1813,6 +1817,9 @@ function enviarPedido() {
   }
 
   salvarPedidos();
+  // Imprimir comanda
+  const pedidoParaImprimir = pedidos['mesa' + mesaSelecionada] || pedidos['mesa' + (mesaSelecionada)];
+  imprimirComanda(pedidos['mesa' + mesaSelecionada], novosItens);
   // Reset
   carrinho = [];
   mesaSelecionada = null;
@@ -2734,8 +2741,118 @@ function confirmarAdicionarItens() {
   salvarPedidos();
   renderCozinha();
   renderMesas();
+  imprimirComanda(p, modalCarrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco })));
   fecharModalItens();
   showToast('✓ Itens adicionados à Mesa ' + p.mesa + '! + R$ ' + adicional.toFixed(2).replace('.',','));
+}
+
+// ====== IMPRESSÃO TÉRMICA ======
+let impressoraAtiva = localStorage.getItem('impressoraAtiva') === 'true';
+
+// Inicialização
+window.addEventListener('DOMContentLoaded', () => {
+  renderMesas();
+  renderMesaSelector();
+  renderCatTabs();
+  renderCardapio();
+  renderCozinha();
+  renderCaixa();
+  const btnImp = document.getElementById('nav-impressora');
+  if (btnImp && impressoraAtiva) btnImp.classList.add('active');
+  if (!useFirebase) showToast('⚠️ Modo local — para multi-dispositivo, configure o Firebase');
+});
+
+function toggleImpressora(btn) {
+  impressoraAtiva = !impressoraAtiva;
+  localStorage.setItem('impressoraAtiva', impressoraAtiva);
+  btn.classList.toggle('active', impressoraAtiva);
+  showToast(impressoraAtiva ? '🖨️ Impressão automática ATIVADA neste dispositivo!' : '🖨️ Impressão automática desativada.');
+}
+
+function imprimirComanda(pedido, itensNovos) {
+  if (!impressoraAtiva || !pedido) return;
+
+  const agora = new Date();
+  const hora = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const data = agora.toLocaleDateString('pt-BR');
+
+  // Linha separadora 80mm (42 chars para papel 80mm)
+  const linha = '─'.repeat(32);
+  const linhaDupla = '═'.repeat(32);
+
+  const itensHtml = itensNovos.map(it => `
+    <div style="display:flex;justify-content:space-between;margin:3px 0;font-size:15px">
+      <span><strong>${it.qtd}x</strong> ${it.nome}</span>
+    </div>
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    width: 72mm;
+    padding: 4mm;
+    color: #000;
+    background: #fff;
+  }
+  @media print {
+    body { width: 72mm; }
+    @page { margin: 0; size: 80mm auto; }
+  }
+  .center { text-align: center; }
+  .bold { font-weight: bold; }
+  .big { font-size: 22px; font-weight: bold; }
+  .linha { border-top: 1px dashed #000; margin: 6px 0; }
+  .row { display: flex; justify-content: space-between; }
+  .item { margin: 4px 0; font-size: 15px; }
+  .destaque { background: #000; color: #fff; text-align:center; padding: 4px; font-size: 18px; font-weight: bold; margin: 6px 0; }
+</style>
+</head>
+<body>
+  <div class="center bold" style="font-size:16px; letter-spacing:2px">PARADA DO SALTO</div>
+  <div class="center" style="font-size:11px">Sabor que acolhe, qualidade que fica!</div>
+  <div class="linha"></div>
+
+  <div class="destaque">MESA ${pedido.mesa}</div>
+
+  <div class="row" style="font-size:12px;margin-bottom:2px">
+    <span>📅 ${data}</span>
+    <span>🕐 ${hora}</span>
+  </div>
+  ${pedido.cliente ? `<div style="font-size:12px">👤 <strong>${pedido.cliente}</strong></div>` : ''}
+  ${pedido.garcom ? `<div style="font-size:12px">🧑‍🍳 ${pedido.garcom}</div>` : ''}
+
+  <div class="linha"></div>
+  <div class="bold" style="font-size:12px;margin-bottom:4px">ITENS DO PEDIDO:</div>
+  ${itensHtml}
+  <div class="linha"></div>
+
+  ${pedido.obs ? `<div style="font-size:12px;margin-top:4px">📝 OBS: <strong>${pedido.obs}</strong></div><div class="linha"></div>` : ''}
+
+  <div class="center" style="font-size:11px;margin-top:6px">⏱ Início: ${hora}</div>
+  <div class="center" style="font-size:10px;color:#555;margin-top:4px">*** COMANDA DA COZINHA ***</div>
+  <br><br>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=300,height=500');
+  if (!win) {
+    showToast('⚠️ Permita pop-ups no Chrome para imprimir!');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => {
+    setTimeout(() => {
+      win.print();
+      setTimeout(() => win.close(), 1000);
+    }, 300);
+  };
 }
 
 // ====== CRONÔMETRO ======
