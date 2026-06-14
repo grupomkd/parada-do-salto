@@ -1189,22 +1189,20 @@
 
 <!-- MODAL COBRANÇA -->
 <div class="modal-overlay" id="modal-cobranca">
-  <div class="modal-box" style="max-width:480px;width:95%;max-height:92vh;overflow-y:auto;padding:0;border-radius:14px;overflow:hidden">
+  <div class="modal-box" style="max-width:480px;width:95%;padding:0;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;max-height:95vh">
     <!-- Header da conta -->
-    <div style="background:var(--wood-dark);padding:18px 20px;display:flex;justify-content:space-between;align-items:center">
+    <div style="background:var(--wood-dark);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
       <div>
         <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--cream)" id="cob-titulo">Mesa 1</div>
         <div style="font-size:12px;color:var(--gold-light);margin-top:2px" id="cob-subtitulo"></div>
       </div>
       <button onclick="fecharCobranca()" style="background:rgba(255,255,255,0.1);border:none;color:var(--cream);font-size:20px;cursor:pointer;border-radius:8px;padding:4px 10px;line-height:1">×</button>
     </div>
-    <!-- Itens consumidos -->
-    <div style="padding:16px 20px;background:var(--cream)">
+    <!-- Itens consumidos — scrollável -->
+    <div style="padding:14px 20px;background:var(--cream);overflow-y:auto;flex:1">
       <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Consumo</div>
       <div id="cob-itens"></div>
-      <!-- Divisor -->
       <div style="border-top:2px dashed var(--cream-dark);margin:12px 0"></div>
-      <!-- Desconto -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Desconto (R$)</span>
         <input type="number" id="cob-desconto" value="0" min="0" step="0.50" oninput="calcularConta()"
@@ -1214,16 +1212,15 @@
         <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Subtotal</span>
         <span style="font-size:15px;font-weight:700;color:var(--text-dark)" id="cob-subtotal">R$ 0,00</span>
       </div>
-      <!-- Total grande -->
       <div style="background:var(--wood-dark);border-radius:10px;padding:14px 16px;margin-top:10px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:13px;font-weight:700;color:var(--cream-dark);letter-spacing:1px;text-transform:uppercase">Total a pagar</span>
         <span style="font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-light)" id="cob-total">R$ 0,00</span>
       </div>
     </div>
-    <!-- Forma de pagamento -->
-    <div style="padding:16px 20px;background:#faf6ec;border-top:1px solid var(--cream-dark)">
-      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:10px">Forma de Pagamento</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="cob-pagamentos">
+    <!-- Forma de pagamento — fixo no fundo -->
+    <div style="padding:14px 20px;background:#faf6ec;border-top:1px solid var(--cream-dark);flex-shrink:0">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Forma de Pagamento</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
         <button class="pag-btn" onclick="selecionarPagamento('Dinheiro', this)">💵 Dinheiro</button>
         <button class="pag-btn" onclick="selecionarPagamento('Pix', this)">📱 Pix</button>
         <button class="pag-btn" onclick="selecionarPagamento('Débito', this)">💳 Débito</button>
@@ -1231,7 +1228,7 @@
         <button class="pag-btn" onclick="selecionarPagamento('Voucher', this)">🎫 Voucher</button>
         <button class="pag-btn" onclick="selecionarPagamento('Misto', this)">🔀 Misto</button>
       </div>
-      <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+      <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Recebido (R$)</span>
           <input type="number" id="cob-recebido" min="0" step="0.50" oninput="calcularTroco()"
@@ -1243,10 +1240,16 @@
         </div>
       </div>
       <div style="font-size:11px;color:#aaa;margin-bottom:8px;text-align:center" id="cob-pag-selecionado">Selecione a forma de pagamento</div>
-      <button onclick="confirmarFecharConta()" id="btn-fechar-conta" disabled
-        style="width:100%;padding:14px;background:#ccc;color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:17px;cursor:not-allowed;letter-spacing:1px;transition:all 0.2s">
-        Fechar Conta
-      </button>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+        <button onclick="confirmarFecharConta()" id="btn-fechar-conta" disabled
+          style="padding:14px;background:#ccc;color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:17px;cursor:not-allowed;letter-spacing:1px;transition:all 0.2s">
+          Fechar Conta
+        </button>
+        <button onclick="imprimirNotinhaCliente()" id="btn-notinha" title="Imprimir notinha do cliente"
+          style="padding:14px 16px;background:var(--gold);color:var(--wood-dark);border:none;border-radius:var(--radius);cursor:pointer;font-size:20px;transition:all 0.2s">
+          🧾
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -2090,6 +2093,79 @@ function renderCaixa() {
   `}).join('');
 }
 
+function imprimirNotinhaCliente() {
+  if (!cobKey || !pedidos[cobKey]) { showToast('⚠️ Nenhuma mesa selecionada!'); return; }
+  const p = pedidos[cobKey];
+  const desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
+  const totalFinal = Math.max(0, p.total - desconto);
+  const agora = new Date();
+  const dataStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  const pagamento = cobPagamento || '—';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    width: 72mm;
+    padding: 4mm;
+    color: #000;
+    background: #fff;
+  }
+  @media print {
+    body { width: 72mm; }
+    @page { margin: 0; size: 80mm auto; }
+    .no-print { display: none; }
+  }
+  .center { text-align: center; }
+  .bold { font-weight: bold; }
+  .linha { border-top: 1px dashed #000; margin: 6px 0; }
+  .row { display: flex; justify-content: space-between; }
+  .btn { display:block;margin:10px auto;padding:8px 20px;background:#3d2b1f;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px; }
+</style>
+</head>
+<body>
+  <button class="btn no-print" onclick="window.print()">🖨️ Imprimir</button>
+  <div class="center bold" style="font-size:15px;letter-spacing:1px">PARADA DO SALTO</div>
+  <div class="center" style="font-size:10px">Sabor que acolhe, qualidade que fica!</div>
+  <div class="center" style="font-size:10px">@paradadosalto</div>
+  <div class="linha"></div>
+  <div class="row"><span>Mesa:</span><span><b>${p.mesa}</b></span></div>
+  ${p.cliente ? `<div class="row"><span>Cliente:</span><span>${p.cliente}</span></div>` : ''}
+  ${p.garcom ? `<div class="row"><span>Atendido por:</span><span>${p.garcom}</span></div>` : ''}
+  <div class="linha"></div>
+  ${p.itens.map(it => `
+    <div class="row">
+      <span>${it.qtd}x ${it.nome}</span>
+      <span>R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
+    </div>
+  `).join('')}
+  <div class="linha"></div>
+  ${desconto > 0 ? `<div class="row"><span>Desconto:</span><span>- R$ ${desconto.toFixed(2).replace('.',',')}</span></div>` : ''}
+  <div class="row bold" style="font-size:15px;margin-top:4px">
+    <span>TOTAL</span>
+    <span>R$ ${totalFinal.toFixed(2).replace('.',',')}</span>
+  </div>
+  <div class="row" style="margin-top:4px"><span>Pagamento:</span><span>${pagamento}</span></div>
+  <div class="linha"></div>
+  <div class="center" style="font-size:10px">${dataStr}</div>
+  <div class="center" style="font-size:11px;margin-top:6px">Obrigado pela preferência!</div>
+  <div class="center" style="font-size:10px">Volte sempre! 🤝</div>
+  <br><br>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=320,height=600');
+  if (!win) { showToast('⚠️ Permita pop-ups para imprimir!'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => setTimeout(() => win.print(), 300);
+}
+
 // ====== COBRANÇA ======
 function abrirCobranca(key) {
   cobKey = key;
@@ -2795,7 +2871,8 @@ function confirmarAdicionarItens() {
 }
 
 // ====== IMPRESSÃO TÉRMICA ======
-let impressoraAtiva = localStorage.getItem('impressoraAtiva') === 'true';
+let impressoraAtiva = true;
+localStorage.setItem('impressoraAtiva', 'true');
 
 // Inicialização
 window.addEventListener('DOMContentLoaded', () => {
@@ -2806,7 +2883,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderCozinha();
   renderCaixa();
   const btnImp = document.getElementById('nav-impressora');
-  if (btnImp && impressoraAtiva) btnImp.classList.add('active');
+  if (btnImp) btnImp.classList.add('active');
   if (!useFirebase) showToast('⚠️ Modo local — para multi-dispositivo, configure o Firebase');
 });
 
@@ -2814,7 +2891,7 @@ function toggleImpressora(btn) {
   impressoraAtiva = !impressoraAtiva;
   localStorage.setItem('impressoraAtiva', impressoraAtiva);
   btn.classList.toggle('active', impressoraAtiva);
-  showToast(impressoraAtiva ? '🖨️ Impressão automática ATIVADA neste dispositivo!' : '🖨️ Impressão automática desativada.');
+  showToast(impressoraAtiva ? '🖨️ Impressão ATIVADA!' : '🖨️ Impressão pausada — clique novamente para reativar');
 }
 
 function imprimirComanda(pedido, itensNovos) {
