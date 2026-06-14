@@ -1188,18 +1188,18 @@
 </main>
 
 <!-- MODAL COBRANÇA -->
-<div class="modal-overlay" id="modal-cobranca">
-  <div class="modal-box" style="max-width:480px;width:95%;padding:0;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;max-height:95vh">
-    <!-- Header da conta -->
-    <div style="background:var(--wood-dark);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+<div class="modal-overlay" id="modal-cobranca" style="align-items:center;padding:10px">
+  <div style="max-width:480px;width:95%;background:var(--cream);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 20px)">
+    <!-- Header fixo -->
+    <div style="background:var(--wood-dark);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
       <div>
-        <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--cream)" id="cob-titulo">Mesa 1</div>
+        <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--cream)" id="cob-titulo">Mesa 1</div>
         <div style="font-size:12px;color:var(--gold-light);margin-top:2px" id="cob-subtitulo"></div>
       </div>
       <button onclick="fecharCobranca()" style="background:rgba(255,255,255,0.1);border:none;color:var(--cream);font-size:20px;cursor:pointer;border-radius:8px;padding:4px 10px;line-height:1">×</button>
     </div>
-    <!-- Itens consumidos — scrollável -->
-    <div style="padding:14px 20px;background:var(--cream);overflow-y:auto;flex:1">
+    <!-- Meio scrollável -->
+    <div style="overflow-y:auto;flex:1;padding:14px 20px;background:var(--cream)">
       <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Consumo</div>
       <div id="cob-itens"></div>
       <div style="border-top:2px dashed var(--cream-dark);margin:12px 0"></div>
@@ -1212,44 +1212,45 @@
         <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Subtotal</span>
         <span style="font-size:15px;font-weight:700;color:var(--text-dark)" id="cob-subtotal">R$ 0,00</span>
       </div>
-      <div style="background:var(--wood-dark);border-radius:10px;padding:14px 16px;margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="background:var(--wood-dark);border-radius:10px;padding:12px 16px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:13px;font-weight:700;color:var(--cream-dark);letter-spacing:1px;text-transform:uppercase">Total a pagar</span>
-        <span style="font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-light)" id="cob-total">R$ 0,00</span>
+        <span style="font-family:'Playfair Display',serif;font-size:26px;color:var(--gold-light)" id="cob-total">R$ 0,00</span>
+      </div>
+      <!-- Pagamento dentro do scroll -->
+      <div style="margin-top:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Forma de Pagamento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          <button class="pag-btn" onclick="selecionarPagamento('Dinheiro', this)">💵 Dinheiro</button>
+          <button class="pag-btn" onclick="selecionarPagamento('Pix', this)">📱 Pix</button>
+          <button class="pag-btn" onclick="selecionarPagamento('Débito', this)">💳 Débito</button>
+          <button class="pag-btn" onclick="selecionarPagamento('Crédito', this)">💳 Crédito</button>
+          <button class="pag-btn" onclick="selecionarPagamento('Voucher', this)">🎫 Voucher</button>
+          <button class="pag-btn" onclick="selecionarPagamento('Misto', this)">🔀 Misto</button>
+        </div>
+        <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Recebido (R$)</span>
+            <input type="number" id="cob-recebido" min="0" step="0.50" oninput="calcularTroco()"
+              style="width:100px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--cream-dark)">
+            <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Troco</span>
+            <span style="font-size:16px;font-weight:700;color:var(--green-dark)" id="cob-troco">R$ 0,00</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-bottom:8px;text-align:center" id="cob-pag-selecionado">Selecione a forma de pagamento</div>
       </div>
     </div>
-    <!-- Forma de pagamento — fixo no fundo -->
-    <div style="padding:14px 20px;background:#faf6ec;border-top:1px solid var(--cream-dark);flex-shrink:0">
-      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Forma de Pagamento</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-        <button class="pag-btn" onclick="selecionarPagamento('Dinheiro', this)">💵 Dinheiro</button>
-        <button class="pag-btn" onclick="selecionarPagamento('Pix', this)">📱 Pix</button>
-        <button class="pag-btn" onclick="selecionarPagamento('Débito', this)">💳 Débito</button>
-        <button class="pag-btn" onclick="selecionarPagamento('Crédito', this)">💳 Crédito</button>
-        <button class="pag-btn" onclick="selecionarPagamento('Voucher', this)">🎫 Voucher</button>
-        <button class="pag-btn" onclick="selecionarPagamento('Misto', this)">🔀 Misto</button>
-      </div>
-      <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Recebido (R$)</span>
-          <input type="number" id="cob-recebido" min="0" step="0.50" oninput="calcularTroco()"
-            style="width:100px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--cream-dark)">
-          <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Troco</span>
-          <span style="font-size:16px;font-weight:700;color:var(--green-dark)" id="cob-troco">R$ 0,00</span>
-        </div>
-      </div>
-      <div style="font-size:11px;color:#aaa;margin-bottom:8px;text-align:center" id="cob-pag-selecionado">Selecione a forma de pagamento</div>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
-        <button onclick="confirmarFecharConta()" id="btn-fechar-conta" disabled
-          style="padding:14px;background:#ccc;color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:17px;cursor:not-allowed;letter-spacing:1px;transition:all 0.2s">
-          Fechar Conta
-        </button>
-        <button onclick="imprimirNotinhaCliente()" id="btn-notinha" title="Imprimir notinha do cliente"
-          style="padding:14px 16px;background:var(--gold);color:var(--wood-dark);border:none;border-radius:var(--radius);cursor:pointer;font-size:20px;transition:all 0.2s">
-          🧾
-        </button>
-      </div>
+    <!-- Botões sempre visíveis no fundo -->
+    <div style="padding:12px 20px;background:#faf6ec;border-top:1px solid var(--cream-dark);flex-shrink:0;display:grid;grid-template-columns:1fr auto;gap:8px">
+      <button onclick="confirmarFecharConta()" id="btn-fechar-conta" disabled
+        style="padding:14px;background:#ccc;color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:17px;cursor:not-allowed;letter-spacing:1px;transition:all 0.2s">
+        Fechar Conta
+      </button>
+      <button onclick="imprimirNotinhaCliente()" title="Imprimir notinha do cliente"
+        style="padding:14px 16px;background:var(--gold);color:var(--wood-dark);border:none;border-radius:var(--radius);cursor:pointer;font-size:20px;transition:all 0.2s">
+        🧾
+      </button>
     </div>
   </div>
 </div>
