@@ -2212,7 +2212,7 @@ function calcularConta() {
 
 function calcularTroco() {
   const totalTxt = document.getElementById('cob-total').textContent;
-  const total = parseFloat(totalTxt.replace('R$ ','').replace(',','.')) || 0;
+  const total = parseFloat(totalTxt.replace(/[R$\s]/g,'').replace(',','.')) || 0;
   const recebido = parseFloat(document.getElementById('cob-recebido').value) || 0;
   const troco = recebido - total;
   const trocoEl = document.getElementById('cob-troco');
