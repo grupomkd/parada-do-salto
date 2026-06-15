@@ -1231,7 +1231,8 @@
       <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Recebido (R$)</span>
-          <input type="number" id="cob-recebido" min="0" step="0.50" oninput="calcularTroco()"
+          <input type="number" id="cob-recebido" min="0" step="0.01"
+            oninput="calcularTroco()" onkeyup="calcularTroco()" onchange="calcularTroco()"
             style="width:100px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--cream-dark)">
@@ -1706,7 +1707,6 @@ function renderCardapio() {
     }
 
     if (item.tam) {
-      // item com tamanho
       if (!tamanhoAtual[item.id]) tamanhoAtual[item.id] = 'M';
       const precoAtual = tamanhoAtual[item.id] === 'G' ? item.precoG : item.preco;
       div.innerHTML = `
@@ -1719,7 +1719,7 @@ function renderCardapio() {
           </div>
         </div>
         <span class="item-price" id="price-${item.id}">R$ ${precoAtual.toFixed(2).replace('.',',')}</span>
-        <button class="add-btn" onclick="addItem('${item.id}', '${item.nome}', ${precoAtual}, '${tamanhoAtual[item.id]}')">+</button>
+        <button class="add-btn" onclick="addItemComTam('${item.id}', '${item.nome}', ${item.preco}, ${item.precoG})">+</button>
       `;
     } else {
       div.innerHTML = `
@@ -1756,6 +1756,13 @@ function setTam(id, tam, e) {
 }
 
 // ====== CARRINHO ======
+// Adiciona item com tamanho — lê o tamanho atual no momento do clique
+function addItemComTam(id, nome, precoM, precoG) {
+  const tam = tamanhoAtual[id] || 'M';
+  const preco = tam === 'G' ? precoG : precoM;
+  addItem(id, nome, preco, tam);
+}
+
 function addItem(id, nome, preco, tam) {
   const label = tam ? `${nome} (${tam})` : nome;
   const existing = carrinho.find(c => c.label === label);
@@ -2789,7 +2796,7 @@ function renderModalCardapio() {
           </div>
         </div>
         <span class="item-price" id="mpr-${item.id}">R$ ${preco.toFixed(2).replace('.',',')}</span>
-        <button class="add-btn" onclick="addModalItem('${item.id}','${item.nome}',${preco},'${modalTamanhoAtual[item.id]}')">+</button>
+        <button class="add-btn" onclick="addModalItemComTam('${item.id}','${item.nome}',${item.preco},${item.precoG})">+</button>
       </div>`;
     }
     return `<div class="cardapio-item">
@@ -2812,6 +2819,12 @@ function setModalTam(id, tam, e) {
   }
   e.target.parentElement.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
   e.target.classList.add('active');
+}
+
+function addModalItemComTam(id, nome, precoM, precoG) {
+  const tam = modalTamanhoAtual[id] || 'M';
+  const preco = tam === 'G' ? precoG : precoM;
+  addModalItem(id, nome, preco, tam);
 }
 
 function addModalItem(id, nome, preco, tam) {
