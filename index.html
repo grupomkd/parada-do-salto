@@ -1094,7 +1094,7 @@
           <div class="card-body">
             <label>Nome do Produto</label>
             <input type="text" id="novo-lojinha-nome" placeholder="Ex: Boné, Camiseta...">
-            <button onclick="cadastrarProdutoLojinha()" style="width:100%;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;margin-top:4px">+ Adicionar</button>
+            <button onclick="adicionarProdutoLojinha()" style="width:100%;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;margin-top:4px">+ Adicionar</button>
           </div>
         </div>
       </div>
@@ -1626,7 +1626,7 @@ function showPanel(name) {
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'caixa') { renderCaixa(); renderGarconsResumo(); }
   if (name === 'garcons') { renderGarconsList(); renderGarconsResumo(); }
-  if (name === 'lojinha') renderLojinhaPanel();
+  if (name === 'lojinha') renderLojinhaLista();
   if (name === 'cardapio-edit') initEditCardapio();
 }
 
@@ -2280,8 +2280,8 @@ function abrirCobranca(key) {
 function fecharCobranca() {
   document.getElementById('modal-cobranca').classList.remove('open');
   cobKey = null; cobPagamento = '';
-  cobLojinhaItens = [];
-  renderCobLojinhaItens();
+  lojinhaItensAdicionados = [];
+  renderLojinhaItensAdicionados();
 }
 
 let cobTotalFinal = 0;
@@ -2290,7 +2290,7 @@ function calcularConta() {
   if (!cobKey || !pedidos[cobKey]) return;
   const p = pedidos[cobKey];
   const desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
-  const totalLojinha = cobLojinhaItens.reduce((s, it) => s + it.preco * it.qtd, 0);
+  const totalLojinha = lojinhaItensAdicionados.reduce((s, it) => s + it.preco * it.qtd, 0);
   cobTotalFinal = Math.max(0, p.total + totalLojinha - desconto);
   document.getElementById('cob-subtotal').textContent = 'R$ ' + (p.total + totalLojinha).toFixed(2).replace('.',',');
   document.getElementById('cob-total').textContent = 'R$ ' + cobTotalFinal.toFixed(2).replace('.',',');
@@ -2616,68 +2616,9 @@ function gerarRelatorioPDF() {
   showToast('✓ Relatório gerado! Use Ctrl+P ou o botão para imprimir/salvar PDF.');
 }
 
-function setupLojinhaListener() {
-  if (!useFirebase) return;
-  db.ref('lojinha_produtos').on('value', snap => {
-    const val = snap.val();
-    if (val) lojinhaProdutos = Array.isArray(val) ? val : Object.values(val);
-    else lojinhaProdutos = [];
-    renderLojinhaCadastro();
-  });
-}
-
-function cadastrarProdutoLojinha() {
-  const nome = document.getElementById('novo-lojinha-nome').value.trim();
-  if (!nome) { showToast('⚠️ Digite o nome do produto!'); return; }
-  if (lojinhaProdutos.find(p => p.nome.toLowerCase() === nome.toLowerCase())) {
-    showToast('⚠️ Produto já cadastrado!'); return;
-  }
-  lojinhaProdutos.push({ id: 'lj_' + Date.now(), nome });
-  salvarLojinhaProdutos();
-  document.getElementById('novo-lojinha-nome').value = '';
-  renderLojinhaCadastro();
-  showToast('✓ "' + nome + '" adicionado à lojinha!');
-}
-
-function removerProdutoLojinha(idx) {
-  const nome = lojinhaProdutos[idx].nome;
-  abrirModal('Remover Produto', `Remover "${nome}" da lojinha?`, () => {
-    lojinhaProdutos.splice(idx, 1);
-    salvarLojinhaProdutos();
-    renderLojinhaCadastro();
-    showToast(nome + ' removido.');
-  });
-}
-
-function renderLojinhaPanel() {
-  const count = document.getElementById('lojinha-count');
-  if (count) count.textContent = lojinhaProdutos.length + ' cadastrados';
-  const lista = document.getElementById('lojinha-lista');
-  if (!lista) return;
-  if (lojinhaProdutos.length === 0) {
-    lista.innerHTML = '<div style="padding:30px;text-align:center;color:#aaa;font-style:italic">Nenhum produto cadastrado ainda</div>';
-    return;
-  }
-  lista.innerHTML = lojinhaProdutos.map((p, i) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--cream-dark);background:white">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:20px">🛍️</span>
-        <span style="font-weight:600;font-size:14px;color:var(--text-dark)">${p.nome}</span>
-      </div>
-      <button class="btn-edit-item btn-edit-del" onclick="removerProdutoLojinha(${i})">🗑 Remover</button>
-    </div>
-  `).join('');
-}
-
-function renderLojinhaCadastro() {
-  renderLojinhaPanel();
-  // Atualizar lista do modal de cobrança também
-  renderLojinhaProdutosLista();
-}
-
 // ====== LOJINHA ======
 let produtosLojinha = [];
-let cobLojinhaItens = []; // itens da lojinha adicionados na conta atual
+let lojinhaItensAdicionados = [];
 
 function setupLojinhaListener() {
   if (!useFirebase) return;
@@ -2778,20 +2719,20 @@ function confirmarItemLojinha() {
   const valor = parseFloat(document.getElementById('lojinha-sel-valor').value);
   if (!nome) { showToast('⚠️ Digite o nome do produto!'); return; }
   if (!valor || valor <= 0) { showToast('⚠️ Digite o valor!'); return; }
-  cobLojinhaItens.push({ nome, preco: valor, qtd: 1 });
-  renderCobLojinhaItens();
+  lojinhaItensAdicionados.push({ nome, preco: valor, qtd: 1 });
+  renderLojinhaItensAdicionados();
   calcularConta();
   fecharModalLojinha();
   showToast('✓ "' + nome + '" adicionado — R$ ' + valor.toFixed(2).replace('.',','));
 }
 
-function renderCobLojinhaItens() {
+function renderLojinhaItensAdicionados() {
   const el = document.getElementById('cob-lojinha-itens');
-  if (!el || cobLojinhaItens.length === 0) {
+  if (!el || lojinhaItensAdicionados.length === 0) {
     if (el) el.innerHTML = '';
     return;
   }
-  el.innerHTML = cobLojinhaItens.map((it, i) => `
+  el.innerHTML = lojinhaItensAdicionados.map((it, i) => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--cream-dark)">
       <span style="font-size:13px;color:var(--text-dark)">🛍️ <strong style="color:var(--wood-mid)">1×</strong> ${it.nome}</span>
       <div style="display:flex;align-items:center;gap:8px">
@@ -2803,8 +2744,8 @@ function renderCobLojinhaItens() {
 }
 
 function removerCobLojinha(i) {
-  cobLojinhaItens.splice(i, 1);
-  renderCobLojinhaItens();
+  lojinhaItensAdicionados.splice(i, 1);
+  renderLojinhaItensAdicionados();
   calcularConta();
 }
 
