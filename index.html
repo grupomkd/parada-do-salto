@@ -953,14 +953,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <span>Lojinha</span>
     </button>
-    <button class="nav-btn" onclick="showPanel('lojinha')" id="nav-lojinha">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-      <span>Lojinha</span>
-    </button>
-    <button class="nav-btn" onclick="showPanel('lojinha')" id="nav-lojinha">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-      <span>Lojinha</span>
-    </button>
     <button class="nav-btn" onclick="toggleImpressora(this)" id="nav-impressora" title="Ativar/desativar impressão automática">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
       <span>Imprimir</span>
@@ -1102,7 +1094,7 @@
           <div class="card-body">
             <label>Nome do Produto</label>
             <input type="text" id="novo-lojinha-nome" placeholder="Ex: Boné, Camiseta...">
-            <button onclick="adicionarProdutoLojinha()" style="width:100%;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;margin-top:4px">+ Adicionar</button>
+            <button onclick="cadastrarProdutoLojinha()" style="width:100%;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;margin-top:4px">+ Adicionar</button>
           </div>
         </div>
       </div>
@@ -1117,7 +1109,7 @@
           </div>
         </div>
         <div style="margin-top:12px;padding:12px 16px;background:rgba(200,146,42,0.1);border-radius:var(--radius);border:1px solid rgba(200,146,42,0.3)">
-          <p style="color:var(--cream-dark);font-size:13px">💡 Na hora de fechar a conta de qualquer mesa, clique em <strong style="color:var(--gold-light)">+ Lojinha</strong> para adicionar esses produtos com o valor que desejar.</p>
+          <p style="color:var(--cream-dark);font-size:13px">💡 Na hora de fechar a conta de qualquer mesa, clique em <strong style="color:var(--gold-light)">🏪 + Adicionar item da Lojinha</strong> para adicionar esses produtos com o valor que desejar.</p>
         </div>
       </div>
     </div>
@@ -1165,19 +1157,6 @@
   <!-- CARDÁPIO EDIT -->
   <div class="panel" id="panel-cardapio-edit">
     <p class="section-title">Gerenciar Cardápio</p>
-
-    <!-- LOJINHA -->
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-header"><h2>🛍️ Produtos da Lojinha</h2></div>
-      <div class="card-body">
-        <p style="font-size:12px;color:#888;margin-bottom:12px">Cadastre produtos da lojinha aqui. Na hora de fechar a conta, você seleciona o produto e digita o valor.</p>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input type="text" id="novo-lojinha-nome" placeholder="Nome do produto (ex: Camiseta, Boné...)" style="flex:1;margin-bottom:0">
-          <button onclick="cadastrarProdutoLojinha()" style="padding:10px 18px;background:var(--green-dark);color:var(--cream);border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;white-space:nowrap">+ Adicionar</button>
-        </div>
-        <div id="lojinha-cadastro-lista"></div>
-      </div>
-    </div>
     <div style="display:grid;grid-template-columns:220px 1fr;gap:20px;">
       <div>
         <div class="card">
@@ -1647,7 +1626,8 @@ function showPanel(name) {
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'caixa') { renderCaixa(); renderGarconsResumo(); }
   if (name === 'garcons') { renderGarconsList(); renderGarconsResumo(); }
-  if (name === 'cardapio-edit') { initEditCardapio(); renderLojinhaCadastro(); }
+  if (name === 'lojinha') renderLojinhaPanel();
+  if (name === 'cardapio-edit') initEditCardapio();
 }
 
 // ====== MESAS ======
@@ -2669,22 +2649,30 @@ function removerProdutoLojinha(idx) {
   });
 }
 
-function renderLojinhaCadastro() {
-  const el = document.getElementById('lojinha-cadastro-lista');
-  if (!el) return;
+function renderLojinhaPanel() {
+  const count = document.getElementById('lojinha-count');
+  if (count) count.textContent = lojinhaProdutos.length + ' cadastrados';
+  const lista = document.getElementById('lojinha-lista');
+  if (!lista) return;
   if (lojinhaProdutos.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum produto cadastrado ainda</div>';
+    lista.innerHTML = '<div style="padding:30px;text-align:center;color:#aaa;font-style:italic">Nenhum produto cadastrado ainda</div>';
     return;
   }
-  el.innerHTML = lojinhaProdutos.map((p, i) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--cream-dark);background:white">
+  lista.innerHTML = lojinhaProdutos.map((p, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--cream-dark);background:white">
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:20px">🛍️</span>
-        <span style="font-weight:600;font-size:14px">${p.nome}</span>
+        <span style="font-weight:600;font-size:14px;color:var(--text-dark)">${p.nome}</span>
       </div>
       <button class="btn-edit-item btn-edit-del" onclick="removerProdutoLojinha(${i})">🗑 Remover</button>
     </div>
   `).join('');
+}
+
+function renderLojinhaCadastro() {
+  renderLojinhaPanel();
+  // Atualizar lista do modal de cobrança também
+  renderLojinhaProdutosLista();
 }
 
 // ====== LOJINHA ======
