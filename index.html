@@ -949,6 +949,18 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       <span>Garçons</span>
     </button>
+    <button class="nav-btn" onclick="showPanel('lojinha')" id="nav-lojinha">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span>Lojinha</span>
+    </button>
+    <button class="nav-btn" onclick="showPanel('lojinha')" id="nav-lojinha">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span>Lojinha</span>
+    </button>
+    <button class="nav-btn" onclick="showPanel('lojinha')" id="nav-lojinha">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span>Lojinha</span>
+    </button>
     <button class="nav-btn" onclick="toggleImpressora(this)" id="nav-impressora" title="Ativar/desativar impressão automática">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
       <span>Imprimir</span>
@@ -1080,6 +1092,37 @@
     </div>
   </div>
 
+  <!-- LOJINHA -->
+  <div class="panel" id="panel-lojinha">
+    <p class="section-title">Produtos da Lojinha</p>
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:20px">
+      <div>
+        <div class="card">
+          <div class="card-header"><h2>Adicionar Produto</h2></div>
+          <div class="card-body">
+            <label>Nome do Produto</label>
+            <input type="text" id="novo-lojinha-nome" placeholder="Ex: Boné, Camiseta...">
+            <button onclick="adicionarProdutoLojinha()" style="width:100%;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;margin-top:4px">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h2>Produtos Cadastrados</h2>
+            <span id="lojinha-count" style="font-size:12px;color:var(--cream-dark);font-style:italic"></span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div id="lojinha-lista"></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:12px 16px;background:rgba(200,146,42,0.1);border-radius:var(--radius);border:1px solid rgba(200,146,42,0.3)">
+          <p style="color:var(--cream-dark);font-size:13px">💡 Na hora de fechar a conta de qualquer mesa, clique em <strong style="color:var(--gold-light)">+ Lojinha</strong> para adicionar esses produtos com o valor que desejar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- GARÇONS -->
   <div class="panel" id="panel-garcons">
     <p class="section-title">Gerenciar Garçons</p>
@@ -1122,6 +1165,19 @@
   <!-- CARDÁPIO EDIT -->
   <div class="panel" id="panel-cardapio-edit">
     <p class="section-title">Gerenciar Cardápio</p>
+
+    <!-- LOJINHA -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><h2>🛍️ Produtos da Lojinha</h2></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:#888;margin-bottom:12px">Cadastre produtos da lojinha aqui. Na hora de fechar a conta, você seleciona o produto e digita o valor.</p>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input type="text" id="novo-lojinha-nome" placeholder="Nome do produto (ex: Camiseta, Boné...)" style="flex:1;margin-bottom:0">
+          <button onclick="cadastrarProdutoLojinha()" style="padding:10px 18px;background:var(--green-dark);color:var(--cream);border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;white-space:nowrap">+ Adicionar</button>
+        </div>
+        <div id="lojinha-cadastro-lista"></div>
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:220px 1fr;gap:20px;">
       <div>
         <div class="card">
@@ -1185,7 +1241,31 @@
       </div>
     </div>
   </div>
+  <!-- LOJINHA -->
+  </div>
+
 </main>
+
+<!-- MODAL LOJINHA -->
+<div class="modal-overlay" id="modal-lojinha" style="z-index:300">
+  <div class="modal-box" style="max-width:420px;width:95%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:var(--wood-dark)">🛍️ Produto da Lojinha</h3>
+      <button onclick="fecharModalLojinha()" style="background:transparent;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+    </div>
+    <!-- Produtos cadastrados -->
+    <div style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Selecione ou digite o produto</div>
+    <div id="lojinha-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:32px"></div>
+    <label>Nome do produto</label>
+    <input type="text" id="lojinha-sel-nome" placeholder="Nome do produto...">
+    <label>Valor (R$)</label>
+    <input type="number" id="lojinha-sel-valor" placeholder="0,00" min="0" step="0.50" style="margin-bottom:16px">
+    <div style="display:flex;gap:8px">
+      <button onclick="fecharModalLojinha()" style="flex:1;padding:11px;background:transparent;border:1.5px solid var(--cream-dark);border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:600;color:var(--text-mid)">Cancelar</button>
+      <button onclick="confirmarItemLojinha()" style="flex:2;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:16px;cursor:pointer">✓ Adicionar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL COBRANÇA -->
 <div class="modal-overlay" id="modal-cobranca" style="overflow-y:auto;align-items:flex-start;padding:20px 10px">
@@ -1202,6 +1282,14 @@
     <div style="padding:14px 20px;background:var(--cream)">
       <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Consumo</div>
       <div id="cob-itens"></div>
+      <!-- Itens da lojinha adicionados -->
+      <div id="cob-lojinha-itens"></div>
+      <!-- Botão adicionar da lojinha -->
+      <div style="margin:8px 0">
+        <button onclick="abrirModalLojinha()" style="width:100%;padding:8px;background:#faf6ec;border:1.5px dashed var(--gold);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--wood-mid);display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s">
+          🛍️ + Produto da Lojinha
+        </button>
+      </div>
       <div style="border-top:2px dashed var(--cream-dark);margin:12px 0"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Desconto (R$)</span>
@@ -1358,6 +1446,8 @@ try {
   useFirebase = true;
   setupFirebaseListeners();
   setupGarconsListener();
+  setupLojinhaListener();
+  setupLojinhaListener();
 } catch(e) {
   console.log('Modo local (sem Firebase):', e.message);
   useFirebase = false;
@@ -1557,7 +1647,7 @@ function showPanel(name) {
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'caixa') { renderCaixa(); renderGarconsResumo(); }
   if (name === 'garcons') { renderGarconsList(); renderGarconsResumo(); }
-  if (name === 'cardapio-edit') initEditCardapio();
+  if (name === 'cardapio-edit') { initEditCardapio(); renderLojinhaCadastro(); }
 }
 
 // ====== MESAS ======
@@ -2177,6 +2267,7 @@ function imprimirNotinhaCliente() {
 function abrirCobranca(key) {
   cobKey = key;
   cobPagamento = '';
+  lojinhaItensAdicionados = []; // limpa itens da lojinha ao abrir
   const p = pedidos[key];
   document.getElementById('cob-titulo').textContent = 'Mesa ' + p.mesa;
   document.getElementById('cob-subtitulo').textContent =
@@ -2189,6 +2280,10 @@ function abrirCobranca(key) {
   document.querySelectorAll('.pag-btn').forEach(b => b.classList.remove('selected'));
   const btn = document.getElementById('btn-fechar-conta');
   btn.disabled = true; btn.style.background = '#ccc'; btn.style.cursor = 'not-allowed';
+  // Fechar painel lojinha se estiver aberto
+  const lp = document.getElementById('lojinha-panel');
+  if (lp) lp.style.display = 'none';
+  renderLojinhaItensAdicionados();
 
   const itensEl = document.getElementById('cob-itens');
   itensEl.innerHTML = p.itens.map(it => `
@@ -2205,6 +2300,8 @@ function abrirCobranca(key) {
 function fecharCobranca() {
   document.getElementById('modal-cobranca').classList.remove('open');
   cobKey = null; cobPagamento = '';
+  cobLojinhaItens = [];
+  renderCobLojinhaItens();
 }
 
 let cobTotalFinal = 0;
@@ -2213,8 +2310,9 @@ function calcularConta() {
   if (!cobKey || !pedidos[cobKey]) return;
   const p = pedidos[cobKey];
   const desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
-  cobTotalFinal = Math.max(0, p.total - desconto);
-  document.getElementById('cob-subtotal').textContent = 'R$ ' + p.total.toFixed(2).replace('.',',');
+  const totalLojinha = cobLojinhaItens.reduce((s, it) => s + it.preco * it.qtd, 0);
+  cobTotalFinal = Math.max(0, p.total + totalLojinha - desconto);
+  document.getElementById('cob-subtotal').textContent = 'R$ ' + (p.total + totalLojinha).toFixed(2).replace('.',',');
   document.getElementById('cob-total').textContent = 'R$ ' + cobTotalFinal.toFixed(2).replace('.',',');
   calcularTroco();
 }
@@ -2247,20 +2345,23 @@ function selecionarPagamento(tipo, btn) {
 function confirmarFecharConta() {
   if (!cobKey || !cobPagamento) return;
   const p = pedidos[cobKey];
-  const desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
-  const totalFinal = Math.max(0, p.total - desconto);
   abrirModal(
     'Fechar Conta — Mesa ' + p.mesa,
-    `Total: R$ ${totalFinal.toFixed(2).replace('.',',')} · ${cobPagamento}. Confirmar?`,
+    `Total: R$ ${cobTotalFinal.toFixed(2).replace('.',',')} · ${cobPagamento}. Confirmar?`,
     () => {
-      p.total = totalFinal;
+      // Adicionar itens da lojinha ao pedido
+      lojinhaItensAdicionados.forEach(it => {
+        p.itens.push({ nome: '🛍️ ' + it.nome, qtd: it.qtd, preco: it.preco });
+      });
+      p.total = cobTotalFinal;
       p.pagamento = cobPagamento;
-      p.desconto = desconto;
+      p.desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
       p.tempoPreparo = formatarTempoMin(p.tsProducao, p.tsEntregue);
       p.tsFechar = Date.now();
       const registro = { ...p, fechadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), idHistorico: 'h_' + Date.now() };
       historico.push(registro);
       delete pedidos[cobKey];
+      lojinhaItensAdicionados = [];
       salvarPedidos();
       salvarHistorico();
       fecharCobranca();
@@ -2268,7 +2369,7 @@ function confirmarFecharConta() {
       renderMesas();
       renderCozinha();
       renderGarconsResumo();
-      showToast('✓ Mesa ' + p.mesa + ' fechada! R$ ' + totalFinal.toFixed(2).replace('.',',') + ' · ' + cobPagamento);
+      showToast('✓ Mesa ' + p.mesa + ' fechada! R$ ' + cobTotalFinal.toFixed(2).replace('.',',') + ' · ' + cobPagamento);
     }
   );
 }
@@ -2533,6 +2634,190 @@ function gerarRelatorioPDF() {
     win.onload = () => setTimeout(() => win.print(), 500);
   }
   showToast('✓ Relatório gerado! Use Ctrl+P ou o botão para imprimir/salvar PDF.');
+}
+
+function setupLojinhaListener() {
+  if (!useFirebase) return;
+  db.ref('lojinha_produtos').on('value', snap => {
+    const val = snap.val();
+    if (val) lojinhaProdutos = Array.isArray(val) ? val : Object.values(val);
+    else lojinhaProdutos = [];
+    renderLojinhaCadastro();
+  });
+}
+
+function cadastrarProdutoLojinha() {
+  const nome = document.getElementById('novo-lojinha-nome').value.trim();
+  if (!nome) { showToast('⚠️ Digite o nome do produto!'); return; }
+  if (lojinhaProdutos.find(p => p.nome.toLowerCase() === nome.toLowerCase())) {
+    showToast('⚠️ Produto já cadastrado!'); return;
+  }
+  lojinhaProdutos.push({ id: 'lj_' + Date.now(), nome });
+  salvarLojinhaProdutos();
+  document.getElementById('novo-lojinha-nome').value = '';
+  renderLojinhaCadastro();
+  showToast('✓ "' + nome + '" adicionado à lojinha!');
+}
+
+function removerProdutoLojinha(idx) {
+  const nome = lojinhaProdutos[idx].nome;
+  abrirModal('Remover Produto', `Remover "${nome}" da lojinha?`, () => {
+    lojinhaProdutos.splice(idx, 1);
+    salvarLojinhaProdutos();
+    renderLojinhaCadastro();
+    showToast(nome + ' removido.');
+  });
+}
+
+function renderLojinhaCadastro() {
+  const el = document.getElementById('lojinha-cadastro-lista');
+  if (!el) return;
+  if (lojinhaProdutos.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum produto cadastrado ainda</div>';
+    return;
+  }
+  el.innerHTML = lojinhaProdutos.map((p, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--cream-dark);background:white">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">🛍️</span>
+        <span style="font-weight:600;font-size:14px">${p.nome}</span>
+      </div>
+      <button class="btn-edit-item btn-edit-del" onclick="removerProdutoLojinha(${i})">🗑 Remover</button>
+    </div>
+  `).join('');
+}
+
+// ====== LOJINHA ======
+let produtosLojinha = [];
+let cobLojinhaItens = []; // itens da lojinha adicionados na conta atual
+
+function setupLojinhaListener() {
+  if (!useFirebase) return;
+  db.ref('lojinha').on('value', snap => {
+    produtosLojinha = snap.val() ? Object.values(snap.val()) : [];
+    renderLojinhaLista();
+  });
+}
+
+function salvarLojinha() {
+  if (!useFirebase) return;
+  const obj = {};
+  produtosLojinha.forEach((p, i) => obj[i] = p);
+  db.ref('lojinha').set(obj);
+}
+
+function adicionarProdutoLojinha() {
+  const nome = document.getElementById('novo-lojinha-nome').value.trim();
+  if (!nome) { showToast('⚠️ Digite o nome do produto!'); return; }
+  if (produtosLojinha.find(p => p.nome.toLowerCase() === nome.toLowerCase())) {
+    showToast('⚠️ Produto já cadastrado!'); return;
+  }
+  produtosLojinha.push({ id: 'lj_' + Date.now(), nome });
+  salvarLojinha();
+  document.getElementById('novo-lojinha-nome').value = '';
+  renderLojinhaLista();
+  showToast('✓ "' + nome + '" adicionado!');
+}
+
+function removerProdutoLojinha(idx) {
+  const nome = produtosLojinha[idx].nome;
+  abrirModal('Remover Produto', `Remover "${nome}" da lojinha?`, () => {
+    produtosLojinha.splice(idx, 1);
+    salvarLojinha();
+    renderLojinhaLista();
+    showToast(nome + ' removido.');
+  });
+}
+
+function renderLojinhaLista() {
+  const lista = document.getElementById('lojinha-lista');
+  if (!lista) return;
+  const count = document.getElementById('lojinha-count');
+  if (count) count.textContent = produtosLojinha.length + ' produtos';
+  if (produtosLojinha.length === 0) {
+    lista.innerHTML = '<div style="padding:30px;text-align:center;color:#aaa;font-style:italic">Nenhum produto cadastrado ainda</div>';
+    return;
+  }
+  lista.innerHTML = produtosLojinha.map((p, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--cream-dark)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">🛍️</span>
+        <span style="font-weight:600;font-size:14px;color:var(--text-dark)">${p.nome}</span>
+      </div>
+      <button class="btn-edit-item btn-edit-del" onclick="removerProdutoLojinha(${i})">🗑 Remover</button>
+    </div>
+  `).join('');
+}
+
+// Modal lojinha na cobrança
+function abrirModalLojinha() {
+  document.getElementById('lojinha-sel-nome').value = '';
+  document.getElementById('lojinha-sel-valor').value = '';
+  // Renderizar chips dos produtos cadastrados
+  const chips = document.getElementById('lojinha-chips');
+  if (produtosLojinha.length === 0) {
+    chips.innerHTML = '<span style="font-size:12px;color:#aaa;font-style:italic">Nenhum produto cadastrado — cadastre na aba Lojinha</span>';
+  } else {
+    chips.innerHTML = produtosLojinha.map(p => `
+      <button onclick="selecionarProdutoLojinha('${p.nome}')"
+        style="padding:6px 12px;background:white;border:1.5px solid var(--cream-dark);border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-mid);transition:all 0.15s"
+        onmouseover="this.style.borderColor='var(--gold)';this.style.background='#fffbf0'"
+        onmouseout="this.style.borderColor='var(--cream-dark)';this.style.background='white'">
+        ${p.nome}
+      </button>
+    `).join('');
+  }
+  document.getElementById('modal-lojinha').classList.add('open');
+}
+
+function fecharModalLojinha() {
+  document.getElementById('modal-lojinha').classList.remove('open');
+}
+
+function selecionarProdutoLojinha(nome) {
+  document.getElementById('lojinha-sel-nome').value = nome;
+  document.getElementById('lojinha-sel-valor').focus();
+  // Destacar chip selecionado
+  document.querySelectorAll('#lojinha-chips button').forEach(b => {
+    b.style.background = b.textContent.trim() === nome ? 'var(--gold)' : 'white';
+    b.style.color = b.textContent.trim() === nome ? 'var(--wood-dark)' : 'var(--text-mid)';
+    b.style.borderColor = b.textContent.trim() === nome ? 'var(--gold)' : 'var(--cream-dark)';
+  });
+}
+
+function confirmarItemLojinha() {
+  const nome = document.getElementById('lojinha-sel-nome').value.trim();
+  const valor = parseFloat(document.getElementById('lojinha-sel-valor').value);
+  if (!nome) { showToast('⚠️ Digite o nome do produto!'); return; }
+  if (!valor || valor <= 0) { showToast('⚠️ Digite o valor!'); return; }
+  cobLojinhaItens.push({ nome, preco: valor, qtd: 1 });
+  renderCobLojinhaItens();
+  calcularConta();
+  fecharModalLojinha();
+  showToast('✓ "' + nome + '" adicionado — R$ ' + valor.toFixed(2).replace('.',','));
+}
+
+function renderCobLojinhaItens() {
+  const el = document.getElementById('cob-lojinha-itens');
+  if (!el || cobLojinhaItens.length === 0) {
+    if (el) el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = cobLojinhaItens.map((it, i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--cream-dark)">
+      <span style="font-size:13px;color:var(--text-dark)">🛍️ <strong style="color:var(--wood-mid)">1×</strong> ${it.nome}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;font-weight:700;color:var(--text-dark)">R$ ${it.preco.toFixed(2).replace('.',',')}</span>
+        <span onclick="removerCobLojinha(${i})" style="cursor:pointer;color:var(--danger);font-size:16px;padding:0 4px">×</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removerCobLojinha(i) {
+  cobLojinhaItens.splice(i, 1);
+  renderCobLojinhaItens();
+  calcularConta();
 }
 
 // ====== GARÇONS ======
