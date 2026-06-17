@@ -1166,7 +1166,13 @@
           </div>
         </div>
         <div class="card" style="margin-top:14px">
-          <div class="card-header"><h2>Novo Item</h2></div>
+          <div class="card-header"><h2>Nova Categoria</h2></div>
+          <div class="card-body">
+            <label>Nome da Categoria</label>
+            <input type="text" id="new-cat-nome" placeholder="Ex: Sobremesas, Drinks...">
+            <button onclick="adicionarCategoria()" style="width:100%;padding:11px;background:var(--gold);color:var(--wood-dark);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:15px;cursor:pointer;font-weight:700;margin-top:4px">+ Criar Categoria</button>
+          </div>
+        </div>
           <div class="card-body">
             <label>Categoria</label>
             <select id="new-item-cat"></select>
@@ -1426,6 +1432,20 @@ try {
   setupFirebaseListeners();
   setupGarconsListener();
   setupLojinhaListener();
+  // Carregar categorias extras do Firebase
+  if (useFirebase) {
+    db.ref('config/categorias_extras').once('value', snap => {
+      const extras = snap.val();
+      if (extras && Array.isArray(extras)) {
+        extras.forEach(cat => {
+          if (!CATEGORIAS.includes(cat)) {
+            CATEGORIAS.push(cat);
+            if (!CARDAPIO[cat]) CARDAPIO[cat] = [];
+          }
+        });
+      }
+    });
+  }
   setupLojinhaListener();
 } catch(e) {
   console.log('Modo local (sem Firebase):', e.message);
@@ -1543,7 +1563,8 @@ const CARDAPIO = {
   ],
 };
 
-const CATEGORIAS = Object.keys(CARDAPIO);
+const CATEGORIAS_BASE = Object.keys(CARDAPIO);
+const CATEGORIAS = [...CATEGORIAS_BASE];
 let catAtual = CATEGORIAS[0];
 let tamanhoAtual = {};
 
@@ -3185,6 +3206,51 @@ setInterval(() => {
 // ====== CARDÁPIO EDIT ======
 let editCatAtual = null;
 
+function adicionarCategoria() {
+  const nome = document.getElementById('new-cat-nome').value.trim();
+  if (!nome) { showToast('⚠️ Digite o nome da categoria!'); return; }
+  const nomeNorm = nome.charAt(0).toUpperCase() + nome.slice(1);
+  if (CATEGORIAS.includes(nomeNorm)) { showToast('⚠️ Categoria já existe!'); return; }
+  CATEGORIAS.push(nomeNorm);
+  CARDAPIO[nomeNorm] = [];
+  document.getElementById('new-cat-nome').value = '';
+  // Salvar no Firebase
+  if (useFirebase) {
+    db.ref('config/categorias_extras').set(
+      CATEGORIAS.filter(c => !CATEGORIAS_BASE.includes(c))
+    );
+  }
+  initEditCardapio();
+  selecionarCatEdit(nomeNorm);
+  showToast('✓ Categoria "' + nomeNorm + '" criada!');
+}
+
+function removerCategoria(cat) {
+  if (CATEGORIAS_BASE.includes(cat)) { showToast('⚠️ Não é possível remover categorias padrão!'); return; }
+  if (CARDAPIO[cat] && CARDAPIO[cat].length > 0) {
+    abrirModal('Remover Categoria', `A categoria "${cat}" tem ${CARDAPIO[cat].length} item(s). Remover mesmo assim?`, () => {
+      _removerCat(cat);
+    });
+  } else {
+    _removerCat(cat);
+  }
+}
+
+function _removerCat(cat) {
+  CATEGORIAS.splice(CATEGORIAS.indexOf(cat), 1);
+  delete CARDAPIO[cat];
+  if (useFirebase) {
+    db.ref('config/categorias_extras').set(
+      CATEGORIAS.filter(c => !CATEGORIAS_BASE.includes(c))
+    );
+    db.ref('config/cardapio/' + cat.replace(/[.#$[\]]/g, '_')).remove();
+  }
+  editCatAtual = CATEGORIAS[0] || null;
+  initEditCardapio();
+  if (editCatAtual) selecionarCatEdit(editCatAtual);
+  showToast('Categoria "' + cat + '" removida.');
+}
+
 function initEditCardapio() {
   // Popular select de categorias para novo item
   const sel = document.getElementById('new-item-cat');
@@ -3195,10 +3261,14 @@ function initEditCardapio() {
 function renderEditCatList() {
   const list = document.getElementById('edit-cat-list');
   list.innerHTML = CATEGORIAS.map(cat => {
-    const count = CARDAPIO[cat].length;
-    return `<button class="edit-cat-btn ${editCatAtual === cat ? 'active' : ''}" onclick="selecionarCatEdit('${cat}')">
-      ${cat} <span class="cat-count">${count}</span>
-    </button>`;
+    const count = CARDAPIO[cat] ? CARDAPIO[cat].length : 0;
+    const isExtra = !CATEGORIAS_BASE.includes(cat);
+    return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+      <button class="edit-cat-btn ${editCatAtual === cat ? 'active' : ''}" onclick="selecionarCatEdit('${cat}')" style="flex:1;text-align:left">
+        ${cat} <span class="cat-count">${count}</span>
+      </button>
+      ${isExtra ? `<button onclick="removerCategoria('${cat}')" title="Remover categoria" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 7px;cursor:pointer;font-size:12px;flex-shrink:0">🗑</button>` : ''}
+    </div>`;
   }).join('');
 }
 
