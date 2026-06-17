@@ -1535,18 +1535,6 @@ let catAtual = CATEGORIAS[0];
 let tamanhoAtual = {};
 
 // ====== INIT ======
-window.onload = function() {
-  renderMesas();
-  renderMesaSelector();
-  renderCatTabs();
-  renderCardapio();
-  renderCozinha();
-  renderCaixa();
-  if (!useFirebase) {
-    showToast('⚠️ Modo local — para multi-dispositivo, configure o Firebase');
-  }
-};
-
 // ====== FIREBASE ======
 function setupFirebaseListeners() {
   db.ref('pedidos').on('value', snap => {
