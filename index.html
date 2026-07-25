@@ -2646,44 +2646,47 @@ function baixarRelatorioPDF() {
   fecharModalRelatorio();
   const { css, bodyInner, dataStr } = montarRelatorioConteudo();
 
-  const styleTag = document.createElement('style');
-  styleTag.textContent = css;
-  document.head.appendChild(styleTag);
-
-  const container = document.createElement('div');
-  container.style.position = 'absolute';
-  container.style.left = '-9999px';
-  container.style.top = '0';
-  container.style.width = '800px';
-  container.innerHTML = bodyInner;
-  document.body.appendChild(container);
+  // Renderiza num iframe isolado para não herdar/colidir com o CSS do app
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'absolute';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '0';
+  iframe.style.width = '800px';
+  iframe.style.height = '1200px';
+  iframe.style.border = 'none';
+  document.body.appendChild(iframe);
 
   showToast('⏳ Gerando PDF...');
 
-  const limpar = () => {
-    document.body.removeChild(container);
-    document.head.removeChild(styleTag);
+  const limpar = () => document.body.removeChild(iframe);
+
+  iframe.onload = () => {
+    const doc = iframe.contentDocument;
+    const alturaReal = doc.body.scrollHeight;
+    iframe.style.height = alturaReal + 'px';
+
+    html2pdf()
+      .set({
+        margin: 10,
+        filename: `relatorio-parada-do-salto-${dataStr.replace(/[^0-9a-zA-Z]+/g, '-')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      })
+      .from(doc.body)
+      .save()
+      .then(() => {
+        limpar();
+        showToast('✓ PDF baixado!');
+      })
+      .catch(e => {
+        limpar();
+        showToast('⚠️ Erro ao gerar PDF: ' + e.message);
+      });
   };
 
-  html2pdf()
-    .set({
-      margin: 10,
-      filename: `relatorio-parada-do-salto-${dataStr.replace(/[^0-9a-zA-Z]+/g, '-')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    })
-    .from(container)
-    .save()
-    .then(() => {
-      limpar();
-      showToast('✓ PDF baixado!');
-    })
-    .catch(e => {
-      limpar();
-      showToast('⚠️ Erro ao gerar PDF: ' + e.message);
-    });
+  iframe.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${bodyInner}</body></html>`;
 }
 
 // ====== LOJINHA ======
