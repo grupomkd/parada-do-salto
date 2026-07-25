@@ -2201,68 +2201,29 @@ function imprimirNotinhaCliente() {
   const dataStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
   const pagamento = cobPagamento || '—';
 
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 13px;
-    width: 72mm;
-    padding: 4mm;
-    color: #000;
-    background: #fff;
-  }
-  @media print {
-    body { width: 72mm; }
-    @page { margin: 0; size: 80mm auto; }
-    .no-print { display: none; }
-  }
-  .center { text-align: center; }
-  .bold { font-weight: bold; }
-  .linha { border-top: 1px dashed #000; margin: 6px 0; }
-  .row { display: flex; justify-content: space-between; }
-  .btn { display:block;margin:10px auto;padding:8px 20px;background:#3d2b1f;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px; }
-</style>
-</head>
-<body>
-  <button class="btn no-print" onclick="window.print()">🖨️ Imprimir</button>
-  <div class="center bold" style="font-size:15px;letter-spacing:1px">PARADA DO SALTO</div>
-  <div class="center" style="font-size:10px">Sabor que acolhe, qualidade que fica!</div>
-  <div class="center" style="font-size:10px">@paradadosalto</div>
-  <div class="linha"></div>
-  <div class="row"><span>Mesa:</span><span><b>${p.mesa}</b></span></div>
-  ${p.cliente ? `<div class="row"><span>Cliente:</span><span>${p.cliente}</span></div>` : ''}
-  ${p.garcom ? `<div class="row"><span>Atendido por:</span><span>${p.garcom}</span></div>` : ''}
-  <div class="linha"></div>
-  ${p.itens.map(it => `
-    <div class="row">
-      <span>${it.qtd}x ${it.nome}</span>
-      <span>R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
-    </div>
-  `).join('')}
-  <div class="linha"></div>
-  ${desconto > 0 ? `<div class="row"><span>Desconto:</span><span>- R$ ${desconto.toFixed(2).replace('.',',')}</span></div>` : ''}
-  <div class="row bold" style="font-size:15px;margin-top:4px">
-    <span>TOTAL</span>
-    <span>R$ ${totalFinal.toFixed(2).replace('.',',')}</span>
-  </div>
-  <div class="row" style="margin-top:4px"><span>Pagamento:</span><span>${pagamento}</span></div>
-  <div class="linha"></div>
-  <div class="center" style="font-size:10px">${dataStr}</div>
-  <div class="center" style="font-size:11px;margin-top:6px">Obrigado pela preferência!</div>
-  <div class="center" style="font-size:10px">Volte sempre! 🤝</div>
-  <br><br>
-</body>
-</html>`;
+  const payload = {
+    impresso: false,
+    ts: Date.now(),
+    tipo: 'notinha',
+    notinha: {
+      mesa:      p.mesa,
+      cliente:   p.cliente || '',
+      garcom:    p.garcom  || '',
+      itens:     p.itens,
+      desconto:  desconto,
+      total:     totalFinal,
+      pagamento: pagamento,
+      data:      dataStr
+    }
+  };
 
-  const win = window.open('', '_blank', 'width=320,height=600');
-  if (!win) { showToast('⚠️ Permita pop-ups para imprimir!'); return; }
-  win.document.write(html);
-  win.document.close();
-  win.onload = () => setTimeout(() => win.print(), 300);
+  if (useFirebase) {
+    db.ref('fila_impressao/' + Date.now()).set(payload)
+      .then(() => showToast('🖨️ Notinha enviada para impressão — Mesa ' + p.mesa))
+      .catch(e => showToast('⚠️ Erro ao enviar notinha: ' + e.message));
+  } else {
+    showToast('⚠️ Firebase offline — impressão indisponível');
+  }
 }
 
 // ====== COBRANÇA ======
@@ -3158,6 +3119,7 @@ function imprimirComanda(pedido, itensNovos) {
   const payload = {
     impresso: false,
     ts: Date.now(),
+    tipo: 'comanda',
     pedido: {
       mesa:    pedido.mesa,
       cliente: pedido.cliente || '',
