@@ -2670,7 +2670,7 @@ function baixarRelatorioPDF() {
         margin: 10,
         filename: `relatorio-parada-do-salto-${dataStr.replace(/[^0-9a-zA-Z]+/g, '-')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] }
       })
