@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Pro:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --wood-dark: #3d2b1f;
@@ -1055,7 +1056,7 @@
       <div class="card-header" style="gap:10px;flex-wrap:wrap">
         <h2>Histórico de Pedidos Fechados</h2>
         <div style="display:flex;gap:8px;margin-left:auto">
-          <button onclick="gerarRelatorioPDF()" style="background:var(--gold);color:var(--wood-dark);border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">
+          <button onclick="abrirEscolhaRelatorio()" style="background:var(--gold);color:var(--wood-dark);border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             Baixar PDF
           </button>
@@ -1396,6 +1397,19 @@
     <div class="modal-btns">
       <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
       <button class="btn-modal-confirm" id="modal-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RELATÓRIO -->
+<div class="modal-overlay" id="modal-relatorio">
+  <div class="modal-box">
+    <h3>Relatório do Dia</h3>
+    <p>Imprimir direto ou baixar o arquivo PDF?</p>
+    <div class="modal-btns" style="flex-wrap:wrap">
+      <button class="btn-modal-cancel" onclick="fecharModalRelatorio()">Cancelar</button>
+      <button class="btn-modal-confirm" style="background:var(--wood-mid)" onclick="imprimirRelatorioDia()">🖨️ Imprimir</button>
+      <button class="btn-modal-confirm" onclick="baixarRelatorioPDF()">⬇️ Baixar PDF</button>
     </div>
   </div>
 </div>
@@ -2101,7 +2115,12 @@ function confirmarFechar(key) {
 
 function fecharMesa(key) {
   const p = pedidos[key];
-  historico.push({ ...p, fechadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) });
+  const agoraFechar = new Date();
+  historico.push({
+    ...p,
+    fechadoEm: agoraFechar.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
+    fechadoEmData: agoraFechar.toLocaleDateString('pt-BR')
+  });
   delete pedidos[key];
   salvarPedidos();
   salvarHistorico();
@@ -2321,7 +2340,13 @@ function confirmarFecharConta() {
       p.desconto = parseFloat(document.getElementById('cob-desconto').value) || 0;
       p.tempoPreparo = formatarTempoMin(p.tsProducao, p.tsEntregue);
       p.tsFechar = Date.now();
-      const registro = { ...p, fechadoEm: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), idHistorico: 'h_' + Date.now() };
+      const agoraFechar = new Date();
+      const registro = {
+        ...p,
+        fechadoEm: agoraFechar.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
+        fechadoEmData: agoraFechar.toLocaleDateString('pt-BR'),
+        idHistorico: 'h_' + Date.now()
+      };
       historico.push(registro);
       delete pedidos[cobKey];
       lojinhaItensAdicionados = [];
@@ -2418,12 +2443,18 @@ function fecharModal() {
 }
 
 // ====== RELATÓRIO PDF ======
-function gerarRelatorioPDF() {
+function abrirEscolhaRelatorio() {
   if (historico.length === 0) {
     showToast('⚠️ Nenhum pedido fechado para gerar relatório!');
     return;
   }
+  document.getElementById('modal-relatorio').classList.add('open');
+}
+function fecharModalRelatorio() {
+  document.getElementById('modal-relatorio').classList.remove('open');
+}
 
+function montarRelatorioConteudo() {
   const agora = new Date();
   const dataStr = agora.toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   const horaStr = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
@@ -2464,6 +2495,7 @@ function gerarRelatorioPDF() {
 
   const linhasHistorico = [...historico].reverse().map(h => {
     const itensStr = h.itens.map(it => `${it.qtd}x ${it.nome}`).join(', ');
+    const fechadoStr = (h.fechadoEmData ? h.fechadoEmData + ' ' : '') + h.fechadoEm;
     return `
       <tr>
         <td style="font-weight:700;color:#6b4226">Mesa ${h.mesa}</td>
@@ -2471,7 +2503,7 @@ function gerarRelatorioPDF() {
         <td>${h.garcom || '—'}</td>
         <td style="font-size:11px;color:#555;max-width:150px">${itensStr}</td>
         <td style="text-align:center;font-weight:600;color:#e8961a">${h.tempoPreparo || '—'}</td>
-        <td>${h.fechadoEm}</td>
+        <td>${fechadoStr}</td>
         <td style="font-weight:700;color:#2d4a1e">R$ ${h.total.toFixed(2).replace('.',',')}</td>
       </tr>
     `;
@@ -2486,107 +2518,118 @@ function gerarRelatorioPDF() {
     </tr>
   `).join('');
 
+  const css = `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Source Sans 3', sans-serif; background: #fff; color: #1a1008; padding: 30px; max-width: 800px; margin: 0 auto; }
+    @media print { body { padding: 0; } .no-print { display:none; } }
+
+    .header { text-align: center; border-bottom: 3px solid #c8922a; padding-bottom: 20px; margin-bottom: 24px; }
+    .header h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: #3d2b1f; letter-spacing: 2px; }
+    .header .slogan { font-size: 13px; color: #a0693a; font-style: italic; margin-top: 4px; }
+    .header .data-info { margin-top: 10px; font-size: 13px; color: #666; }
+    .header .data-info strong { color: #3d2b1f; }
+
+    .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+    .card { background: #f5edd6; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #e8d9b5; }
+    .card .lbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6b4226; margin-bottom: 4px; }
+    .card .val { font-family: 'Playfair Display', serif; font-size: 22px; color: #2d4a1e; }
+    .card .val.gold { color: #c8922a; }
+
+    h2 { font-family: 'Playfair Display', serif; font-size: 17px; color: #3d2b1f; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1.5px solid #e8d9b5; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px; }
+    thead tr { background: #6b4226; }
+    thead th { color: #f5edd6; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+    tbody tr:nth-child(even) { background: #faf6ec; }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid #e8d9b5; vertical-align: top; }
+
+    .total-final { background: #3d2b1f; color: #f5edd6; border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+    .total-final .lbl { font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .total-final .val { font-family: 'Playfair Display', serif; font-size: 28px; color: #e8b84b; }
+
+    .footer { margin-top: 28px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #e8d9b5; padding-top: 14px; }
+
+    .btn-print { display: block; margin: 0 auto 24px; padding: 12px 32px; background: #c8922a; color: #3d2b1f; border: none; border-radius: 10px; font-family: 'Playfair Display', serif; font-size: 16px; cursor: pointer; letter-spacing: 1px; }
+    .btn-print:hover { background: #e8b84b; }
+  `;
+
+  const bodyInner = `
+    <div class="header">
+      <h1>PARADA DO SALTO</h1>
+      <div class="slogan">Sabor que acolhe, qualidade que fica!</div>
+      <div class="data-info">
+        <strong>Relatório do Dia</strong> · ${dataStr} · Gerado às ${horaStr}
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="lbl">Total do Dia</div>
+        <div class="val">R$ ${totalDia.toFixed(2).replace('.',',')}</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Pedidos Fechados</div>
+        <div class="val gold">${historico.length}</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Ticket Médio</div>
+        <div class="val">R$ ${ticketMedio.toFixed(2).replace('.',',')}</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Mesas em Aberto</div>
+        <div class="val gold">${pedidosAtivos}</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Tempo Médio Preparo</div>
+        <div class="val" style="font-size:18px">${tempoMedioStr}</div>
+      </div>
+    </div>
+
+    <h2>Formas de Pagamento</h2>
+    <table>
+      <thead><tr><th>Forma</th><th>Qtd Pedidos</th><th>Total</th></tr></thead>
+      <tbody>${pagLinhas || '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">Sem dados</td></tr>'}</tbody>
+    </table>
+
+    <h2>Top 5 Itens Mais Vendidos</h2>
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th>Qtd Vendida</th><th>Total Gerado</th></tr></thead>
+      <tbody>${linhasRanking || '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Sem dados</td></tr>'}</tbody>
+    </table>
+
+    <h2>Histórico de Pedidos</h2>
+    <table>
+      <thead><tr><th>Mesa</th><th>Cliente</th><th>Garçom</th><th>Itens</th><th>Tempo</th><th>Fechado em</th><th>Total</th></tr></thead>
+      <tbody>${linhasHistorico}</tbody>
+    </table>
+
+    <div class="total-final">
+      <span class="lbl">Total Arrecadado no Dia</span>
+      <span class="val">R$ ${totalDia.toFixed(2).replace('.',',')}</span>
+    </div>
+
+    <div class="footer">
+      Parada do Salto · Sistema de Gestão · Relatório gerado automaticamente em ${dataStr}
+    </div>
+  `;
+
+  return { css, bodyInner, dataStr };
+}
+
+function imprimirRelatorioDia() {
+  fecharModalRelatorio();
+  const { css, bodyInner } = montarRelatorioConteudo();
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <title>Relatório do Dia — Parada do Salto</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Source Sans 3', sans-serif; background: #fff; color: #1a1008; padding: 30px; max-width: 800px; margin: 0 auto; }
-  @media print { body { padding: 0; } .no-print { display:none; } }
-
-  .header { text-align: center; border-bottom: 3px solid #c8922a; padding-bottom: 20px; margin-bottom: 24px; }
-  .header h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: #3d2b1f; letter-spacing: 2px; }
-  .header .slogan { font-size: 13px; color: #a0693a; font-style: italic; margin-top: 4px; }
-  .header .data-info { margin-top: 10px; font-size: 13px; color: #666; }
-  .header .data-info strong { color: #3d2b1f; }
-
-  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
-  .card { background: #f5edd6; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #e8d9b5; }
-  .card .lbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6b4226; margin-bottom: 4px; }
-  .card .val { font-family: 'Playfair Display', serif; font-size: 22px; color: #2d4a1e; }
-  .card .val.gold { color: #c8922a; }
-
-  h2 { font-family: 'Playfair Display', serif; font-size: 17px; color: #3d2b1f; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1.5px solid #e8d9b5; }
-
-  table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px; }
-  thead tr { background: #6b4226; }
-  thead th { color: #f5edd6; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
-  tbody tr:nth-child(even) { background: #faf6ec; }
-  tbody td { padding: 9px 12px; border-bottom: 1px solid #e8d9b5; vertical-align: top; }
-
-  .total-final { background: #3d2b1f; color: #f5edd6; border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-  .total-final .lbl { font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-  .total-final .val { font-family: 'Playfair Display', serif; font-size: 28px; color: #e8b84b; }
-
-  .footer { margin-top: 28px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #e8d9b5; padding-top: 14px; }
-
-  .btn-print { display: block; margin: 0 auto 24px; padding: 12px 32px; background: #c8922a; color: #3d2b1f; border: none; border-radius: 10px; font-family: 'Playfair Display', serif; font-size: 16px; cursor: pointer; letter-spacing: 1px; }
-  .btn-print:hover { background: #e8b84b; }
-</style>
+<style>${css}</style>
 </head>
 <body>
-<div class="header">
-  <h1>PARADA DO SALTO</h1>
-  <div class="slogan">Sabor que acolhe, qualidade que fica!</div>
-  <div class="data-info">
-    <strong>Relatório do Dia</strong> · ${dataStr} · Gerado às ${horaStr}
-  </div>
-</div>
-
 <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
-
-<div class="cards">
-  <div class="card">
-    <div class="lbl">Total do Dia</div>
-    <div class="val">R$ ${totalDia.toFixed(2).replace('.',',')}</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Pedidos Fechados</div>
-    <div class="val gold">${historico.length}</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Ticket Médio</div>
-    <div class="val">R$ ${ticketMedio.toFixed(2).replace('.',',')}</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Mesas em Aberto</div>
-    <div class="val gold">${pedidosAtivos}</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Tempo Médio Preparo</div>
-    <div class="val" style="font-size:18px">${tempoMedioStr}</div>
-  </div>
-</div>
-
-<h2>Formas de Pagamento</h2>
-<table>
-  <thead><tr><th>Forma</th><th>Qtd Pedidos</th><th>Total</th></tr></thead>
-  <tbody>${pagLinhas || '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">Sem dados</td></tr>'}</tbody>
-</table>
-
-<h2>Top 5 Itens Mais Vendidos</h2>
-<table>
-  <thead><tr><th>#</th><th>Item</th><th>Qtd Vendida</th><th>Total Gerado</th></tr></thead>
-  <tbody>${linhasRanking || '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Sem dados</td></tr>'}</tbody>
-</table>
-
-<h2>Histórico de Pedidos</h2>
-<table>
-  <thead><tr><th>Mesa</th><th>Cliente</th><th>Garçom</th><th>Itens</th><th>Tempo</th><th>Fechado</th><th>Total</th></tr></thead>
-  <tbody>${linhasHistorico}</tbody>
-</table>
-
-<div class="total-final">
-  <span class="lbl">Total Arrecadado no Dia</span>
-  <span class="val">R$ ${totalDia.toFixed(2).replace('.',',')}</span>
-</div>
-
-<div class="footer">
-  Parada do Salto · Sistema de Gestão · Relatório gerado automaticamente em ${dataStr}
-</div>
+${bodyInner}
 </body>
 </html>`;
 
@@ -2597,6 +2640,41 @@ function gerarRelatorioPDF() {
     win.onload = () => setTimeout(() => win.print(), 500);
   }
   showToast('✓ Relatório gerado! Use Ctrl+P ou o botão para imprimir/salvar PDF.');
+}
+
+function baixarRelatorioPDF() {
+  fecharModalRelatorio();
+  const { css, bodyInner, dataStr } = montarRelatorioConteudo();
+
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = '800px';
+  container.innerHTML = `<style>${css}</style>${bodyInner}`;
+  document.body.appendChild(container);
+
+  showToast('⏳ Gerando PDF...');
+
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: `relatorio-parada-do-salto-${dataStr.replace(/[^0-9a-zA-Z]+/g, '-')}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    })
+    .from(container)
+    .save()
+    .then(() => {
+      document.body.removeChild(container);
+      showToast('✓ PDF baixado!');
+    })
+    .catch(e => {
+      document.body.removeChild(container);
+      showToast('⚠️ Erro ao gerar PDF: ' + e.message);
+    });
 }
 
 // ====== LOJINHA ======
