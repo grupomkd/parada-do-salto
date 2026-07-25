@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Pro:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --wood-dark: #3d2b1f;
@@ -1056,7 +1055,7 @@
       <div class="card-header" style="gap:10px;flex-wrap:wrap">
         <h2>Histórico de Pedidos Fechados</h2>
         <div style="display:flex;gap:8px;margin-left:auto">
-          <button onclick="abrirEscolhaRelatorio()" style="background:var(--gold);color:var(--wood-dark);border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">
+          <button onclick="abrirRelatorioDia()" style="background:var(--gold);color:var(--wood-dark);border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             Baixar PDF
           </button>
@@ -1397,19 +1396,6 @@
     <div class="modal-btns">
       <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
       <button class="btn-modal-confirm" id="modal-confirm-btn">Confirmar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL RELATÓRIO -->
-<div class="modal-overlay" id="modal-relatorio">
-  <div class="modal-box">
-    <h3>Relatório do Dia</h3>
-    <p>Imprimir direto ou baixar o arquivo PDF?</p>
-    <div class="modal-btns" style="flex-wrap:wrap">
-      <button class="btn-modal-cancel" onclick="fecharModalRelatorio()">Cancelar</button>
-      <button class="btn-modal-confirm" style="background:var(--wood-mid)" onclick="imprimirRelatorioDia()">🖨️ Imprimir</button>
-      <button class="btn-modal-confirm" onclick="baixarRelatorioPDF()">⬇️ Baixar PDF</button>
     </div>
   </div>
 </div>
@@ -2443,17 +2429,6 @@ function fecharModal() {
 }
 
 // ====== RELATÓRIO PDF ======
-function abrirEscolhaRelatorio() {
-  if (historico.length === 0) {
-    showToast('⚠️ Nenhum pedido fechado para gerar relatório!');
-    return;
-  }
-  document.getElementById('modal-relatorio').classList.add('open');
-}
-function fecharModalRelatorio() {
-  document.getElementById('modal-relatorio').classList.remove('open');
-}
-
 function montarRelatorioConteudo() {
   const agora = new Date();
   const dataStr = agora.toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
@@ -2617,76 +2592,67 @@ function montarRelatorioConteudo() {
   return { css, bodyInner, dataStr };
 }
 
-function imprimirRelatorioDia() {
-  fecharModalRelatorio();
-  const { css, bodyInner } = montarRelatorioConteudo();
+function abrirRelatorioDia() {
+  if (historico.length === 0) {
+    showToast('⚠️ Nenhum pedido fechado para gerar relatório!');
+    return;
+  }
+
+  const { css, bodyInner, dataStr } = montarRelatorioConteudo();
+  const filename = `relatorio-parada-do-salto-${dataStr.replace(/[^0-9a-zA-Z]+/g, '-')}.pdf`;
+
+  // O botão "Baixar PDF" roda o html2pdf dentro da própria página do relatório
+  // (mesmo documento, sem iframe/janela separada) — capturar conteúdo de outro
+  // documento é uma fonte conhecida de bugs de renderização no html2canvas.
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <title>Relatório do Dia — Parada do Salto</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
 <style>${css}</style>
 </head>
 <body>
-<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+<div class="no-print" style="display:flex;gap:12px;justify-content:center;margin-bottom:24px;flex-wrap:wrap">
+  <button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+  <button class="btn-print" id="btn-baixar-pdf" onclick="baixarPDF()">⬇️ Baixar PDF</button>
+</div>
+<div id="relatorio-conteudo">
 ${bodyInner}
+</div>
+<script>
+function baixarPDF() {
+  const btn = document.getElementById('btn-baixar-pdf');
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando...';
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: '${filename}',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    })
+    .from(document.getElementById('relatorio-conteudo'))
+    .save()
+    .then(() => {
+      btn.disabled = false;
+      btn.textContent = '⬇️ Baixar PDF';
+    })
+    .catch(e => {
+      btn.disabled = false;
+      btn.textContent = '⬇️ Baixar PDF';
+      alert('Erro ao gerar PDF: ' + e.message);
+    });
+}
+<\/script>
 </body>
 </html>`;
 
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  const win = window.open(url, '_blank');
-  if (win) {
-    win.onload = () => setTimeout(() => win.print(), 500);
-  }
-  showToast('✓ Relatório gerado! Use Ctrl+P ou o botão para imprimir/salvar PDF.');
-}
-
-function baixarRelatorioPDF() {
-  fecharModalRelatorio();
-  const { css, bodyInner, dataStr } = montarRelatorioConteudo();
-
-  // Renderiza num iframe isolado para não herdar/colidir com o CSS do app
-  const iframe = document.createElement('iframe');
-  iframe.style.position = 'absolute';
-  iframe.style.left = '-9999px';
-  iframe.style.top = '0';
-  iframe.style.width = '800px';
-  iframe.style.height = '1200px';
-  iframe.style.border = 'none';
-  document.body.appendChild(iframe);
-
-  showToast('⏳ Gerando PDF...');
-
-  const limpar = () => document.body.removeChild(iframe);
-
-  iframe.onload = () => {
-    const doc = iframe.contentDocument;
-    const alturaReal = doc.body.scrollHeight;
-    iframe.style.height = alturaReal + 'px';
-
-    html2pdf()
-      .set({
-        margin: 10,
-        filename: `relatorio-parada-do-salto-${dataStr.replace(/[^0-9a-zA-Z]+/g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      })
-      .from(doc.body)
-      .save()
-      .then(() => {
-        limpar();
-        showToast('✓ PDF baixado!');
-      })
-      .catch(e => {
-        limpar();
-        showToast('⚠️ Erro ao gerar PDF: ' + e.message);
-      });
-  };
-
-  iframe.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${bodyInner}</body></html>`;
+  window.open(url, '_blank');
 }
 
 // ====== LOJINHA ======
