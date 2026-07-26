@@ -3126,6 +3126,7 @@ function confirmarAdicionarItens() {
   const p = pedidos[modalPedidoKey];
   const adicional = modalCarrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
   const obs = document.getElementById('modal-obs').value.trim();
+  const itensNovos = modalCarrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco }));
   // Mesclar itens novos com existentes
   modalCarrinho.forEach(novoItem => {
     const existing = p.itens.find(it => it.nome === novoItem.label);
@@ -3139,9 +3140,14 @@ function confirmarAdicionarItens() {
   salvarPedidos();
   renderCozinha();
   renderMesas();
-  imprimirComanda(p, modalCarrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco })));
   fecharModalItens();
   showToast('✓ Itens adicionados à Mesa ' + p.mesa + '! + R$ ' + adicional.toFixed(2).replace('.',','));
+
+  abrirModal(
+    'Imprimir comanda?',
+    'Imprimir a comanda desses itens adicionados para a cozinha?',
+    () => imprimirComanda(p, itensNovos)
+  );
 }
 
 // ====== IMPRESSÃO TÉRMICA ======
