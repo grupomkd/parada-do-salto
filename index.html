@@ -1158,6 +1158,13 @@
   .ap-nome { font-size: 15px; font-weight: 800; color: var(--wood-dark); overflow-wrap: anywhere; }
   .ap-nome em { font-style: normal; font-size: 11px; font-weight: 800; background: var(--gold); color: var(--wood-dark); border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; }
   .ap-sub { font-size: 13px; color: #6f5f4f; }
+  .ap-acoes { grid-column: 2 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+  .ap-btn { min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+  .ap-btn.red { background: #fdecea; color: var(--danger); }
+  .ap-btn.green { background: #dff3df; color: #1d6b2c; }
+  .ap-btn.gray { background: #efe7d6; color: #6f5f4f; }
+  .ap-tag-adm { background: var(--wood-mid) !important; color: var(--cream) !important; }
+  .ap-bloq { color: var(--danger); font-weight: 800; }
   .ap-del { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #fdecea; color: var(--danger); font-size: 18px; cursor: pointer; }
 </style>
 </head>
@@ -4176,11 +4183,13 @@ function meuId() {
 }
 
 let acessoCfg = undefined;     // undefined = carregando · null = sem senha · objeto = com senha
+let meuBloqueado = false;      // o administrador removeu o login deste aparelho
 let acessoLiberado = false;
 let gateErros = 0, gateBloqueioAte = 0;
 
 function iniciarGate() {
   if (!useFirebase) { document.body.classList.remove('locked'); return; }   // modo local: sem senha
+  db.ref('dispositivos/' + meuId() + '/bloqueado').on('value', sn => { meuBloqueado = !!sn.val(); if (acessoCfg !== undefined) avaliarGate(); });
   db.ref('config/acesso').on('value', snap => { acessoCfg = snap.val(); avaliarGate(); },
     () => gateMostrarFalha('Sem conexão para conferir a senha. Verifique a internet e recarregue.'));
   setTimeout(() => { if (acessoCfg === undefined) gateMostrarFalha('Sem resposta do servidor. Verifique a internet e recarregue.'); }, 12000);
@@ -4190,11 +4199,20 @@ function gateMostrarFalha(msg) {
   document.getElementById('gate-status').textContent = msg;
 }
 function avaliarGate() {
+  if (meuBloqueado) { telaBloqueada(); return; }                            // login removido pelo administrador
   const cfg = acessoCfg;
   if (!cfg || !cfg.hash) { liberarAcesso(); return; }                       // sem senha configurada = aberto
   const loc = lerAcessoLocal();
   if (loc.ok && loc.v === cfg.versao) { liberarAcesso(); return; }          // este aparelho já entrou
   trancarAcesso();
+}
+function telaBloqueada() {
+  acessoLiberado = false;
+  gravarAcessoLocal({ ok: false });             // quando liberarem, precisa digitar a senha de novo
+  document.body.classList.add('locked');
+  document.getElementById('gate-form').hidden = true;
+  document.getElementById('gate-status').innerHTML = '🚫 <b>Este aparelho foi desconectado pelo administrador.</b><br>Procure o gerente para liberar o acesso.';
+  if (useFirebase) db.ref('presenca/' + meuId()).remove().catch(() => {});
 }
 function trancarAcesso() {
   acessoLiberado = false;
@@ -4257,6 +4275,8 @@ function navegadorNome() {
   if (/Safari/.test(ua)) return 'Safari';
   return 'Navegador';
 }
+let dispRegistrado = false;
+function ehAdmin() { return /Computador|^Mac$/.test(tipoAparelho()); }   // computador = administrador
 function registrarDispositivo() {
   if (!useFirebase) return;
   const id = meuId(), loc = lerAcessoLocal();
@@ -4264,21 +4284,23 @@ function registrarDispositivo() {
   const TS = firebase.database.ServerValue.TIMESTAMP;
   ref.once('value').then(sn => {
     const antes = sn.val() || {};
-    ref.update({ nome: loc.nome || antes.nome || '', tipo: tipoAparelho(), nav: navegadorNome(), primeiro: antes.primeiro || TS, ultimo: TS });
+    ref.update({ nome: loc.nome || antes.nome || '', tipo: tipoAparelho(), nav: navegadorNome(), adm: ehAdmin(), primeiro: antes.primeiro || TS, ultimo: TS });
   }).catch(() => {});
+  if (dispRegistrado) return;
+  dispRegistrado = true;
   db.ref('.info/connected').on('value', sn => {
-    if (!sn.val()) return;
+    if (!sn.val() || meuBloqueado || !acessoLiberado) return;
     const p = db.ref('presenca/' + id);
     p.onDisconnect().remove();
     p.set(TS);
     ref.child('ultimo').set(TS);
   });
-  setInterval(() => { if (!document.hidden) ref.child('ultimo').set(TS).catch(() => {}); }, 5 * 60 * 1000);
+  setInterval(() => { if (!document.hidden && !meuBloqueado && acessoLiberado) ref.child('ultimo').set(TS).catch(() => {}); }, 5 * 60 * 1000);
 }
 
 let dispTodos = {}, presencaOn = {}, acessoListenersOk = false;
 function iniciarListenersAcesso() {
-  if (acessoListenersOk || !useFirebase) return;
+  if (acessoListenersOk || !useFirebase || !ehAdmin()) return;
   acessoListenersOk = true;
   db.ref('dispositivos').on('value', sn => { dispTodos = sn.val() || {}; renderAcessoCard(); });
   db.ref('presenca').on('value', sn => { presencaOn = sn.val() || {}; renderAcessoCard(); });
@@ -4296,13 +4318,16 @@ function tempoAtras(ts) {
 function renderAcessoCard() {
   const el = document.getElementById('acesso-card');
   if (!el) return;
+  if (!ehAdmin()) { el.style.display = 'none'; return; }     // só o computador (administrador) gerencia acessos
+  el.style.display = '';
   const meu = meuId();
-  const lista = Object.entries(dispTodos).map(([id, d]) => ({ id, ...d, on: !!presencaOn[id] }))
-    .sort((a, b) => (b.on - a.on) || ((b.ultimo || 0) - (a.ultimo || 0)));
+  const lista = Object.entries(dispTodos).map(([id, d]) => ({ id, ...d, on: !!presencaOn[id] && !d.bloqueado }))
+    .sort((a, b) => (!!a.bloqueado - !!b.bloqueado) || (b.on - a.on) || ((b.ultimo || 0) - (a.ultimo || 0)));
   const online = lista.filter(d => d.on).length;
   const comSenha = acessoCfg && acessoCfg.hash;
   el.innerHTML = `
     <h3>Acesso ao sistema</h3>
+    <div class="dash-sub">Este computador é o <b>administrador</b>: só ele remove login de aparelhos e troca a senha.</div>
     <div class="ap-resumo">
       <div class="stat"><span>Online agora</span><b style="color:#1d6b2c">${online}</b></div>
       <div class="stat"><span>Aparelhos já entraram</span><b>${lista.length}</b></div>
@@ -4310,27 +4335,48 @@ function renderAcessoCard() {
     ${lista.length ? lista.map(d => `
       <div class="ap-row">
         <span class="ap-dot${d.on ? ' on' : ''}"></span>
-        <div><div class="ap-nome">${escHtml(d.nome || d.tipo || 'Aparelho')}${d.id === meu ? '<em>este aparelho</em>' : ''}</div>
-          <div class="ap-sub">${escHtml([d.nome ? d.tipo : '', d.nav].filter(Boolean).join(' · '))} · ${d.on ? '<b style="color:#1d6b2c">online agora</b>' : 'visto ' + tempoAtras(d.ultimo)}</div></div>
-        ${(!d.on && d.id !== meu) ? `<button type="button" class="ap-del" aria-label="Remover da lista" onclick="removerDispositivo('${d.id}')">🗑</button>` : '<span></span>'}
+        <div><div class="ap-nome">${escHtml(d.nome || d.tipo || 'Aparelho')}${d.id === meu ? '<em>este aparelho</em>' : ''}${(d.adm || /Computador|^Mac$/.test(d.tipo || '')) ? '<em class="ap-tag-adm">ADM</em>' : ''}</div>
+          <div class="ap-sub">${escHtml([d.nome ? d.tipo : '', d.nav].filter(Boolean).join(' · '))} · ${d.bloqueado ? '<span class="ap-bloq">🚫 login removido</span>' : d.on ? '<b style="color:#1d6b2c">online agora</b>' : 'visto ' + tempoAtras(d.ultimo)}</div></div>
+        ${d.id === meu ? '' : `<div class="ap-acoes">
+          ${d.bloqueado
+            ? `<button type="button" class="ap-btn green" onclick="liberarDispositivo('${d.id}')">✅ Liberar de novo</button><button type="button" class="ap-btn gray" onclick="removerDispositivo('${d.id}')">🗑 Apagar da lista</button>`
+            : `<button type="button" class="ap-btn red" onclick="tirarLoginDispositivo('${d.id}')">🚫 Remover login</button>${d.on ? '' : `<button type="button" class="ap-btn gray" onclick="removerDispositivo('${d.id}')">🗑 Tirar da lista</button>`}`}
+        </div>`}
       </div>`).join('') : '<div class="dash-vazio">Nenhum aparelho registrado ainda. Eles aparecem aqui depois de entrar com a senha.</div>'}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
       <button type="button" class="dash-btn" onclick="abrirAlterarSenha()">🔑 ${comSenha ? 'Alterar senha' : 'Criar senha de acesso'}</button>
       ${comSenha ? '<button type="button" class="dash-btn sec" onclick="bloquearEsteAparelho()">🔒 Bloquear este aparelho</button>' : ''}
     </div>
-    <div class="dash-sub" style="margin:12px 0 0">${comSenha ? 'Cada aparelho digita a senha uma vez e fica liberado até a senha ser trocada.' : '⚠️ Hoje o sistema está aberto: crie uma senha para exigir no primeiro acesso.'}</div>`;
+    <div class="dash-sub" style="margin:12px 0 0">${comSenha ? '“Remover login” desconecta o aparelho na hora e ele não consegue voltar nem com a senha, até você liberar. Para barrar todo mundo de uma vez, troque a senha.' : '⚠️ Hoje o sistema está aberto: crie uma senha para exigir no primeiro acesso.'}</div>`;
+}
+function tirarLoginDispositivo(id) {
+  if (!ehAdmin() || !useFirebase || id === meuId()) return;
+  const d = dispTodos[id] || {};
+  abrirModal('Remover login', `Desconectar "${d.nome || d.tipo || 'este aparelho'}"? Ele sai agora e só volta quando você liberar.`, () => {
+    db.ref('dispositivos/' + id).update({ bloqueado: true, bloqueadoEm: firebase.database.ServerValue.TIMESTAMP })
+      .then(() => { db.ref('presenca/' + id).remove().catch(() => {}); showToast('🚫 Login removido: ' + (d.nome || d.tipo || 'aparelho')); })
+      .catch(e => showToast('⚠️ Não consegui remover o login: ' + e.message));
+  });
+}
+function liberarDispositivo(id) {
+  if (!ehAdmin() || !useFirebase) return;
+  db.ref('dispositivos/' + id + '/bloqueado').remove()
+    .then(() => showToast('✅ Aparelho liberado. Ele vai pedir a senha de novo.'))
+    .catch(e => showToast('⚠️ ' + e.message));
 }
 function removerDispositivo(id) {
-  if (!useFirebase) return;
-  db.ref('dispositivos/' + id).remove().then(() => showToast('Aparelho removido da lista.')).catch(e => showToast('⚠️ ' + e.message));
+  if (!ehAdmin() || !useFirebase || id === meuId()) return;
+  db.ref('dispositivos/' + id).remove().then(() => showToast('Aparelho tirado da lista.')).catch(e => showToast('⚠️ ' + e.message));
 }
 function abrirAlterarSenha() {
+  if (!ehAdmin()) { showToast('⚠️ Só o computador (administrador) pode trocar a senha.'); return; }
   document.getElementById('senha-nova').value = '';
   document.getElementById('senha-conf').value = '';
   document.getElementById('modal-senha').classList.add('open');
   setTimeout(() => { try { document.getElementById('senha-nova').focus(); } catch (e) {} }, 100);
 }
 function salvarNovaSenha() {
+  if (!ehAdmin()) return;
   const n = document.getElementById('senha-nova').value.trim();
   const c = document.getElementById('senha-conf').value.trim();
   if (n.length < 4) { showToast('⚠️ A senha precisa ter pelo menos 4 caracteres.'); return; }
