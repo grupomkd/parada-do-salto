@@ -1169,6 +1169,63 @@
   .ap-tag-adm { background: var(--wood-mid) !important; color: var(--cream) !important; }
   .ap-bloq { color: var(--danger); font-weight: 800; }
   .ap-del { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #fdecea; color: var(--danger); font-size: 18px; cursor: pointer; }
+
+  /* ===== MONTAR PIZZA ===== */
+  .cat-tab-pizza { background: var(--gold) !important; border-color: var(--gold) !important; color: var(--wood-dark) !important; }
+  .pz-cta { width: 100%; min-height: 64px; margin: 0 0 10px; padding: 10px 14px; border: 2px solid var(--gold); border-radius: 14px; background: linear-gradient(135deg, #fff4d6, #ffe9a8); color: var(--wood-dark); font: inherit; font-size: 17px; font-weight: 800; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .pz-cta small { font-size: 13px; font-weight: 600; color: #6b4a00; }
+  #modal-pizza { align-items: center; padding: 8px; }
+  .pizza-box { width: 100%; max-width: 560px; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); display: flex; flex-direction: column; background: var(--cream); border-radius: 18px; box-shadow: 0 10px 50px rgba(0,0,0,.6); overflow: hidden; margin: auto; }
+  .pizza-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--wood-dark); color: var(--cream); }
+  .pizza-head h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin: 0; color: var(--cream); border: 0; padding: 0; }
+  .pizza-x { width: 44px; height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,.12); color: var(--cream); font-size: 26px; cursor: pointer; }
+  .pizza-body { flex: 1; overflow-y: auto; padding: 14px 16px; -webkit-overflow-scrolling: touch; }
+  .pz-sec { margin-bottom: 14px; }
+  #pz-tam, #pz-n { margin: 0; }
+  .pz-lab { display: block; font-size: 13px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--wood-mid); margin-bottom: 6px; }
+  .pz-dica { font-weight: 600; text-transform: none; letter-spacing: 0; color: #6f5f4f; }
+  .pz-seg { display: flex; gap: 8px; }
+  .pz-seg button { flex: 1; min-height: 46px; border: 2px solid var(--cream-dark); border-radius: 12px; background: white; font: inherit; font-size: 15px; font-weight: 800; color: var(--text-mid); cursor: pointer; }
+  .pz-seg button.on { background: var(--wood-mid); border-color: var(--wood-mid); color: var(--cream); }
+  .pz-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pz-slots.dois { grid-template-columns: repeat(2, 1fr); }
+  .pz-slot { min-height: 78px; padding: 8px; border: 2px dashed #c9b88f; border-radius: 12px; background: white; font: inherit; text-align: center; cursor: pointer; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .pz-slot b { font-size: 12px; color: #8a6a1f; letter-spacing: .5px; }
+  .pz-slot span { font-size: 15px; font-weight: 800; color: var(--wood-dark); line-height: 1.15; overflow-wrap: anywhere; }
+  .pz-slot.vazio span { color: #9a8c70; font-weight: 600; font-size: 14px; }
+  .pz-slot.ativo { border: 2px solid var(--gold); background: #fff8e1; box-shadow: 0 0 0 3px rgba(200,146,42,.25); }
+  .pz-slot.cheio { border-style: solid; border-color: #b9d8b9; background: #f1faf1; }
+  .pz-slot.cheio.ativo { border-color: var(--gold); background: #fff8e1; }
+  .pz-quick { display: flex; gap: 8px; margin-top: 8px; }
+  .pz-quick button { flex: 1; min-height: 44px; border: 1.5px solid var(--cream-dark); border-radius: 10px; background: #faf6ec; font: inherit; font-size: 14px; font-weight: 700; color: var(--wood-mid); cursor: pointer; }
+  #pz-busca, #pz-obs, #pz-manual { width: 100%; min-height: 50px; padding: 10px 14px; font-size: 16px !important; border: 2px solid var(--cream-dark); border-radius: 12px; background: white; margin: 0; }
+  #pz-busca:focus, #pz-obs:focus, #pz-manual:focus { outline: none; border-color: var(--gold); }
+  .pz-lista { margin-top: 8px; max-height: 280px; overflow-y: auto; border-radius: 12px; background: white; border: 1.5px solid var(--cream-dark); }
+  .pz-op { display: flex; align-items: stretch; border-bottom: 1px solid #f1e8d4; }
+  .pz-op:last-child { border-bottom: 0; }
+  .pz-op-main { flex: 1; min-width: 0; min-height: 56px; padding: 8px 12px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; }
+  .pz-op-main b { display: block; font-size: 16px; color: var(--wood-dark); }
+  .pz-op-main small { display: block; font-size: 13px; color: #6f5f4f; }
+  .pz-op-main i { font-style: normal; font-size: 11px; font-weight: 800; color: var(--wood-light); text-transform: uppercase; letter-spacing: .5px; }
+  .pz-op-preco { align-self: center; font-weight: 800; color: var(--wood-mid); padding: 0 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .pz-op-inteira { width: 76px; border: 0; border-left: 1px solid #f1e8d4; background: #fff4d6; color: #6b4a00; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+  .pz-custom { padding: 12px; background: #fff8e1; border-radius: 12px; font-size: 14px; color: var(--text-dark); display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .pz-custom .linha { display: flex; gap: 8px; }
+  .pz-custom input { flex: 1; min-height: 46px; font-size: 16px !important; padding: 8px 12px; border: 2px solid var(--cream-dark); border-radius: 10px; margin: 0; }
+  .pz-custom button { min-height: 46px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--wood-mid); color: var(--cream); font: inherit; font-weight: 800; cursor: pointer; }
+  .pz-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pz-chips button { min-height: 44px; padding: 0 14px; border: 2px solid var(--cream-dark); border-radius: 999px; background: white; font: inherit; font-size: 14px; font-weight: 700; color: var(--text-mid); cursor: pointer; }
+  .pz-chips button.on { background: var(--gold); border-color: var(--gold); color: var(--wood-dark); }
+  .pz-duo { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+  .pz-step { display: flex; align-items: center; gap: 6px; background: white; border: 2px solid var(--cream-dark); border-radius: 999px; padding: 3px; }
+  .pz-step button { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #efe7d6; font-size: 24px; cursor: pointer; color: var(--wood-dark); }
+  .pz-step button.mais { background: var(--gold); color: white; }
+  .pz-step b { min-width: 30px; text-align: center; font-size: 20px; }
+  .pizza-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--wood-dark); color: var(--cream); }
+  .pz-resumo { font-size: 14px; line-height: 1.3; margin-bottom: 8px; color: #e9dcc0; }
+  .pz-resumo b { color: white; }
+  .pz-add { width: 100%; min-height: 54px; border: 0; border-radius: 12px; background: var(--green-dark); color: var(--cream); font: inherit; font-size: 17px; font-weight: 800; cursor: pointer; }
+  .pz-add:disabled { opacity: .45; cursor: not-allowed; }
 </style>
 </head>
 <body class="locked">
@@ -1637,6 +1694,35 @@
 </div>
 
 <!-- MODAL EDITAR PEDIDO -->
+<div class="modal-overlay" id="modal-pizza">
+  <div class="pizza-box" role="dialog" aria-modal="true" aria-label="Montar pizza">
+    <div class="pizza-head"><h3>🍕 Montar pizza</h3><button type="button" class="pizza-x" aria-label="Fechar" onclick="fecharPizza()">×</button></div>
+    <div class="pizza-body" id="pz-body">
+      <div class="pz-sec"><div class="pz-lab">Tamanho</div><div class="pz-seg" id="pz-tam"></div></div>
+      <div class="pz-sec"><div class="pz-lab">Dividir em</div><div class="pz-seg" id="pz-n"></div></div>
+      <div class="pz-sec">
+        <div class="pz-lab">Sabores <span class="pz-dica">toque na parte e escolha o sabor</span></div>
+        <div class="pz-slots" id="pz-slots"></div>
+        <div class="pz-quick"><button type="button" onclick="pzInteira()">Mesmo sabor em tudo</button><button type="button" onclick="pzLimpar()">Limpar</button></div>
+      </div>
+      <div class="pz-sec">
+        <input id="pz-busca" type="search" autocomplete="off" placeholder="Digite o sabor (ex.: calab)" oninput="pzBusca(this.value)">
+        <div id="pz-lista" class="pz-lista"></div>
+      </div>
+      <div class="pz-sec"><div class="pz-lab">Borda <span class="pz-dica">+ R$ 7,00</span></div><div class="pz-chips" id="pz-borda"></div></div>
+      <div class="pz-sec">
+        <label class="pz-lab" for="pz-obs">Observação <span class="pz-dica">digite à vontade</span></label>
+        <input id="pz-obs" type="text" autocomplete="off" maxlength="80" placeholder="Ex.: sem cebola, bem assada, cortar em 8" oninput="pz.obs=this.value; pzFoot()">
+      </div>
+      <div class="pz-sec pz-duo">
+        <div><label class="pz-lab" for="pz-manual">Preço da pizza <span class="pz-dica">(opcional)</span></label><input id="pz-manual" type="number" inputmode="decimal" min="0" step="0.5" placeholder="automático" oninput="pz.manual=this.value; pzFoot()"></div>
+        <div><div class="pz-lab">Quantidade</div><div class="pz-step"><button type="button" onclick="pzQtd(-1)" aria-label="Menos">−</button><b id="pz-qtd">1</b><button type="button" class="mais" onclick="pzQtd(1)" aria-label="Mais">+</button></div></div>
+      </div>
+    </div>
+    <div class="pizza-foot" id="pz-foot"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-senha">
   <div class="modal-box">
     <h3>🔑 Alterar senha de acesso</h3>
@@ -2154,6 +2240,11 @@ function atualizarResumoMobile() {
 function renderCatTabs() {
   const tabs = document.getElementById('cat-tabs');
   tabs.innerHTML = '';
+  const tp = document.createElement('button');
+  tp.className = 'cat-tab cat-tab-pizza';
+  tp.textContent = '🍕 Montar pizza';
+  tp.onclick = () => abrirPizza();
+  tabs.appendChild(tp);
   CATEGORIAS.forEach(cat => {
     const t = document.createElement('button');
     t.className = 'cat-tab' + (cat === catAtual && !buscaCardapio ? ' active' : '');
@@ -2297,6 +2388,8 @@ function renderCardapio() {
     html = achados.slice(0, 60).map(([cat, item]) => itemCardHTML(item, cat)).join('');
   } else {
     const itens = CARDAPIO[catAtual] || [];
+    if (catAtual === 'Pizza Salgada' || catAtual === 'Pizza Doce')
+      html += '<button type="button" class="pz-cta" onclick="abrirPizza()">🍕 Montar pizza com 1, 2 ou 3 sabores<small>cobra por terço · escolha digitando o sabor</small></button>';
     const avisoCat = AVISO_CATEGORIA[catAtual];
     if (avisoCat) html += '<div class="borda-info">' + avisoCat + '</div>';
     html += itens.map(item => itemCardHTML(item, '')).join('');
@@ -2417,7 +2510,7 @@ function enviarPedido() {
   const agora = new Date();
   const hora = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const key = 'mesa' + mesaSelecionada;
-  const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco }));
+  const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco, ...(c.pizza ? { pizza: c.pizza } : {}) }));
 
   if (pedidos[key]) {
     // Mesa já tem pedido — ACUMULAR itens e total
@@ -3832,7 +3925,7 @@ function confirmarEnviarDiretoCaixa(mesa) {
   const agora = new Date();
   const hora = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const key = mesa ? 'mesa' + mesa : 'balcao' + Date.now();   // cada venda de balcão é um pedido separado
-  const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco, entregue: true }));
+  const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco, entregue: true, ...(c.pizza ? { pizza: c.pizza } : {}) }));
   const cliente = document.getElementById('cliente-nome').value || '';
   const garcom = document.getElementById('garcom-pedido').value || '';
   const obs = document.getElementById('obs-pedido').value || '';
@@ -3903,7 +3996,7 @@ function vendaDeRegistro(h) {
       id, mesa: h.mesa || 0, cliente: h.cliente || '', garcom: h.garcom || '',
       pagamento: h.pagamento || '—', total: Number(h.total) || 0, desconto: Number(h.desconto) || 0,
       hora: h.fechadoEm || '', ts,
-      itens: (h.itens || []).map(it => ({ nome: it.nome || '', qtd: Number(it.qtd) || 0, preco: Number(it.preco) || 0 }))
+      itens: (h.itens || []).map(it => ({ nome: it.nome || '', qtd: Number(it.qtd) || 0, preco: Number(it.preco) || 0, ...(it.pizza ? { pizza: it.pizza } : {}) }))
     }
   };
 }
@@ -4065,8 +4158,17 @@ function renderDashboard() {
   </div>`;
 
   // ---- itens
-  const it = {}; lista.forEach(v => (v.itens || []).forEach(i => { const o = it[i.nome] = it[i.nome] || { q: 0, t: 0 }; o.q += i.qtd; o.t += i.qtd * i.preco; }));
-  const topItens = Object.entries(it).sort((x, y) => y[1].q - x[1].q).slice(0, 8).map(([n, o]) => ({ nome: n, v: o.q, dir: o.q + 'x', sub: brl(o.t) }));
+  const it = {};
+  lista.forEach(v => (v.itens || []).forEach(i => {
+    if (i.pizza && i.pizza.sabores && i.pizza.sabores.length) {   // pizza de vários sabores: conta cada sabor pela fração
+      const pesoTot = i.pizza.sabores.reduce((a, sb) => a + sb.preco * sb.fr, 0) || 1;
+      i.pizza.sabores.forEach(sb => { const o = it['🍕 ' + sb.nome] = it['🍕 ' + sb.nome] || { q: 0, t: 0 }; o.q += i.qtd * sb.fr; o.t += i.qtd * i.preco * (sb.preco * sb.fr) / pesoTot; });
+      return;
+    }
+    const o = it[i.nome] = it[i.nome] || { q: 0, t: 0 }; o.q += i.qtd; o.t += i.qtd * i.preco;
+  }));
+  const fmtQ = q => (Math.round(q * 10) / 10).toString().replace('.', ',');
+  const topItens = Object.entries(it).sort((x, y) => y[1].q - x[1].q).slice(0, 8).map(([n, o]) => ({ nome: n, v: o.q, dir: fmtQ(o.q) + 'x', sub: brl(o.t) }));
   // ---- garçons
   const g = {}; lista.forEach(v => { const k = v.garcom || 'Sem garçom'; const o = g[k] = g[k] || { n: 0, t: 0 }; o.n++; o.t += v.total; });
   const garcons = Object.entries(g).sort((x, y) => y[1].t - x[1].t).map(([n, o]) => ({ nome: n, v: o.t, dir: brl(o.t), sub: o.n + ' pedidos' }));
@@ -4401,6 +4503,168 @@ function salvarNovaSenha() {
 }
 
 iniciarGate();
+
+
+// ====== MONTAR PIZZA (1 a 3 sabores — cobra por terço) ======
+// Preço = soma de (preço do sabor no tamanho ÷ partes) de cada parte. O mesmo sabor pode ocupar
+// mais de uma parte (ex.: Calabresa + Calabresa + Toscana). Opção de meio a meio (2 partes).
+let pz = null;
+const PZ_BORDAS = [
+  { k: '', t: 'Sem borda', p: 0 }, { k: 'requeijão', t: 'Requeijão', p: 7 }, { k: 'cheddar', t: 'Cheddar', p: 7 },
+  { k: 'chocolate ao leite', t: 'Choc. ao leite', p: 7 }, { k: 'chocolate amargo', t: 'Choc. amargo', p: 7 }
+];
+function pzSabores() {
+  const out = [];
+  ['Pizza Salgada', 'Pizza Doce'].forEach(cat => (CARDAPIO[cat] || []).forEach(it => {
+    if (it.pausado) return;
+    out.push({ id: it.id, nome: it.nome, desc: it.desc || '', cat: cat === 'Pizza Doce' ? 'doce' : 'salgada', m: it.preco, g: it.precoG || it.preco });
+  }));
+  return out;
+}
+function pzPreco(sb) { return sb.custom ? sb.preco : (pz.tam === 'G' ? sb.g : sb.m); }
+function abrirPizza() {
+  pz = { tam: 'G', n: 3, slots: [null, null, null], ativo: 0, borda: '', obs: '', manual: '', qtd: 1, busca: '' };
+  document.getElementById('pz-busca').value = '';
+  document.getElementById('pz-obs').value = '';
+  document.getElementById('pz-manual').value = '';
+  document.getElementById('pz-qtd').textContent = '1';
+  document.getElementById('pz-body').scrollTop = 0;
+  document.getElementById('modal-pizza').classList.add('open');
+  pzRender();
+}
+function fecharPizza() { document.getElementById('modal-pizza').classList.remove('open'); }
+function pzRender() { pzSeg(); pzSlots(); pzLista(); pzBordas(); pzFoot(); }
+function pzSeg() {
+  document.getElementById('pz-tam').innerHTML =
+    `<button type="button" class="${pz.tam === 'M' ? 'on' : ''}" onclick="pzSetTam('M')">Média</button><button type="button" class="${pz.tam === 'G' ? 'on' : ''}" onclick="pzSetTam('G')">Grande</button>`;
+  document.getElementById('pz-n').innerHTML =
+    `<button type="button" class="${pz.n === 3 ? 'on' : ''}" onclick="pzSetN(3)">Terços (3)</button><button type="button" class="${pz.n === 2 ? 'on' : ''}" onclick="pzSetN(2)">Meio a meio (2)</button>`;
+}
+function pzSetTam(t) { pz.tam = t; pzSeg(); pzSlots(); pzLista(); pzFoot(); }
+function pzSetN(n) {
+  pz.n = n;
+  if (pz.ativo >= n) pz.ativo = n - 1;
+  pzSeg(); pzSlots(); pzFoot();
+}
+function pzSlots() {
+  const el = document.getElementById('pz-slots');
+  el.className = 'pz-slots' + (pz.n === 2 ? ' dois' : '');
+  let h = '';
+  for (let i = 0; i < pz.n; i++) {
+    const sb = pz.slots[i];
+    h += `<button type="button" class="pz-slot ${sb ? 'cheio' : 'vazio'}${pz.ativo === i ? ' ativo' : ''}" onclick="pzAtivar(${i})"><b>${pz.n === 3 ? (i + 1) + '/3' : (i + 1) + '/2'}</b><span>${sb ? escHtml(sb.nome) : 'Escolher sabor'}</span></button>`;
+  }
+  el.innerHTML = h;
+}
+function pzAtivar(i) { pz.ativo = i; pzSlots(); try { document.getElementById('pz-busca').focus(); } catch (e) {} }
+function pzBusca(v) { pz.busca = normBusca(v).trim(); pzLista(); }
+function pzLista() {
+  const el = document.getElementById('pz-lista');
+  const q = pz.busca;
+  const lista = pzSabores().filter(sb => !q || normBusca(sb.nome).includes(q) || normBusca(sb.desc).includes(q))
+    .sort((a, b) => !q ? 0 : (normBusca(b.nome).includes(q) - normBusca(a.nome).includes(q)) || (normBusca(a.nome).startsWith(q) ? 0 : 1) - (normBusca(b.nome).startsWith(q) ? 0 : 1));
+  let h = lista.map(sb => `
+    <div class="pz-op">
+      <button type="button" class="pz-op-main" onclick="pzPick('${sb.id}')"><i>${sb.cat}</i><b>${escHtml(sb.nome)}</b><small>${escHtml(sb.desc)}</small></button>
+      <span class="pz-op-preco">${brl(pz.tam === 'G' ? sb.g : sb.m)}</span>
+      <button type="button" class="pz-op-inteira" onclick="pzPick('${sb.id}', true)">Pizza inteira</button>
+    </div>`).join('');
+  if (!lista.length) h = '<div style="padding:14px;color:#6f5f4f;font-size:15px">Nenhum sabor com esse nome no cardápio.</div>';
+  el.innerHTML = h;
+  // sabor que não está no cardápio: digitar e informar o preço de uma pizza inteira
+  let cust = document.getElementById('pz-custom');
+  if (cust) cust.remove();
+  const digitado = document.getElementById('pz-busca').value.trim();
+  if (digitado && !lista.length) {
+    const d = document.createElement('div'); d.id = 'pz-custom'; d.className = 'pz-custom';
+    d.innerHTML = `<div>Usar “<b>${escHtml(digitado)}</b>” como sabor? Informe o preço de uma pizza inteira ${pz.tam === 'G' ? 'grande' : 'média'}:</div>
+      <div class="linha"><input id="pz-cprec" type="number" inputmode="decimal" min="0" step="0.5" placeholder="R$"><button type="button" onclick="pzCustom()">Usar este sabor</button></div>`;
+    el.after(d);
+  }
+}
+function pzCustom() {
+  const nome = document.getElementById('pz-busca').value.trim();
+  const preco = parseFloat(document.getElementById('pz-cprec').value);
+  if (!nome) return;
+  if (isNaN(preco) || preco <= 0) { showToast('⚠️ Informe o preço da pizza inteira.'); return; }
+  pzPickSabor({ custom: true, nome: nome.charAt(0).toUpperCase() + nome.slice(1), preco });
+  document.getElementById('pz-busca').value = ''; pz.busca = ''; pzLista();
+}
+function pzPick(id, inteira) {
+  const sb = pzSabores().find(x => x.id === id);
+  if (!sb) return;
+  if (inteira) { for (let i = 0; i < pz.n; i++) pz.slots[i] = sb; pz.ativo = pz.n - 1; }
+  else pzPickSabor(sb);
+  pzSlots(); pzFoot();
+  if (pz.busca) { document.getElementById('pz-busca').value = ''; pz.busca = ''; pzLista(); }
+}
+function pzPickSabor(sb) {
+  pz.slots[pz.ativo] = sb;
+  const prox = pz.slots.slice(0, pz.n).findIndex(x => !x);
+  if (prox >= 0) pz.ativo = prox;
+  pzSlots(); pzFoot();
+}
+function pzInteira() {
+  const base = pz.slots[pz.ativo] || pz.slots.slice(0, pz.n).find(Boolean);
+  if (!base) { showToast('⚠️ Escolha um sabor primeiro.'); return; }
+  for (let i = 0; i < pz.n; i++) pz.slots[i] = base;
+  pzSlots(); pzFoot();
+}
+function pzLimpar() { pz.slots = [null, null, null]; pz.ativo = 0; pzSlots(); pzFoot(); }
+function pzBordas() {
+  document.getElementById('pz-borda').innerHTML = PZ_BORDAS.map(b => `<button type="button" class="${pz.borda === b.k ? 'on' : ''}" onclick="pzSetBorda('${b.k}')">${b.t}</button>`).join('');
+}
+function pzSetBorda(k) { pz.borda = k; pzBordas(); pzFoot(); }
+function pzQtd(d) { pz.qtd = Math.max(1, Math.min(20, pz.qtd + d)); document.getElementById('pz-qtd').textContent = pz.qtd; pzFoot(); }
+
+function pzCalc() {
+  const slots = pz.slots.slice(0, pz.n);
+  if (slots.some(x => !x)) return null;
+  const grupos = new Map();
+  slots.forEach(sb => { const k = sb.custom ? 'c:' + sb.nome : sb.id; const g = grupos.get(k) || { sb, partes: 0 }; g.partes++; grupos.set(k, g); });
+  let soma = 0;
+  const partes = [...grupos.values()].map(g => { const preco = pzPreco(g.sb); soma += preco * g.partes / pz.n; return { nome: g.sb.nome, partes: g.partes, fr: g.partes / pz.n, preco }; });
+  const borda = PZ_BORDAS.find(b => b.k === pz.borda) || { p: 0 };
+  const auto = Math.round((soma + borda.p) * 100) / 100;
+  const manual = parseFloat(pz.manual);
+  const unit = (!isNaN(manual) && manual > 0) ? manual : auto;
+  return { partes, borda, auto, unit };
+}
+function pzLabel(c) {
+  const sab = c.partes.map(p => p.partes === pz.n ? p.nome : `${p.partes}/${pz.n} ${p.nome}`).join(' + ');
+  let l = `Pizza ${pz.tam === 'G' ? 'G' : 'M'}: ${sab}`;
+  if (pz.borda) l += ` + borda ${pz.borda}`;
+  if (pz.obs.trim()) l += ` (${pz.obs.trim()})`;
+  return l;
+}
+function pzFoot() {
+  const el = document.getElementById('pz-foot');
+  if (!pz || !el) return;
+  const c = pzCalc();
+  if (!c) {
+    const faltam = pz.slots.slice(0, pz.n).filter(x => !x).length;
+    el.innerHTML = `<div class="pz-resumo">Faltam <b>${faltam}</b> ${faltam === 1 ? 'parte' : 'partes'} para escolher o sabor.</div><button type="button" class="pz-add" disabled>Adicionar ao pedido</button>`;
+    return;
+  }
+  const detalhe = c.partes.map(p => `${p.partes}/${pz.n} <b>${escHtml(p.nome)}</b> (${brl(p.preco / pz.n * p.partes)})`).join(' + ') + (c.borda.p ? ` + borda ${escHtml(c.borda.k)} (${brl(c.borda.p)})` : '');
+  const manualOn = Math.abs(c.unit - c.auto) > 0.004;
+  el.innerHTML = `<div class="pz-resumo">${detalhe}${manualOn ? `<br>Preço ajustado à mão (automático: ${brl(c.auto)})` : ''}</div>
+    <button type="button" class="pz-add" onclick="pzAdicionar()">Adicionar ao pedido · ${brl(c.unit * pz.qtd)}${pz.qtd > 1 ? ' (' + pz.qtd + 'x)' : ''}</button>`;
+}
+function pzAdicionar() {
+  const c = pzCalc();
+  if (!c) return;
+  const label = pzLabel(c);
+  const pizza = { tam: pz.tam, n: pz.n, borda: pz.borda, sabores: c.partes.map(p => ({ nome: p.nome, fr: Math.round(p.fr * 1000) / 1000, preco: p.preco })) };
+  const ex = carrinho.find(x => x.label === label && x.preco === c.unit);
+  if (ex) ex.qtd += pz.qtd;
+  else carrinho.push({ id: 'pizza_' + Date.now(), label, preco: c.unit, qtd: pz.qtd, pizza });
+  fecharPizza();
+  renderCarrinho();
+  renderCardapio();
+  showToast('✓ ' + pz.qtd + 'x ' + label);
+  try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+}
 
 // ====== CRONÔMETRO ======
 function formatarTempo(tsInicio, tsFim) {
