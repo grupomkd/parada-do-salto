@@ -19,7 +19,7 @@
     --green-dark: #2d4a1e;
     --text-dark: #1a1008;
     --text-mid: #4a3220;
-    --status-wait: #e8961a;
+    --status-wait: #9a5200;
     --status-prod: #1a7abf;
     --status-done: #2d8a3e;
     --danger: #c0392b;
@@ -35,6 +35,7 @@
       repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 60px),
       repeating-linear-gradient(180deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 40px);
     min-height: 100vh;
+    min-height: 100dvh;
     color: var(--text-dark);
   }
 
@@ -348,7 +349,7 @@
   .item-desc { font-size: 11px; color: #888; margin-top: 1px; }
   .item-price { font-size: 14px; font-weight: 700; color: var(--wood-mid); margin: 0 10px; }
   .add-btn {
-    width: 30px; height: 30px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     background: var(--gold);
     color: white;
@@ -409,7 +410,7 @@
     gap: 6px;
   }
   .qtd-btn {
-    width: 24px; height: 24px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     border: 1.5px solid var(--cream-dark);
     background: white;
@@ -423,7 +424,7 @@
   }
   .qtd-btn:hover { background: var(--cream-dark); }
   .ci-total { font-size: 13px; font-weight: 700; color: var(--wood-mid); min-width: 60px; text-align: right; }
-  .ci-del { color: var(--danger); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 4px; transition: background 0.15s; }
+  .ci-del { width:44px; height:44px; color: var(--danger); cursor: pointer; font-size: 22px; line-height: 1; padding: 2px 6px; border:0; background:transparent; border-radius: 4px; transition: background 0.15s; }
   .ci-del:hover { background: #fdecea; }
 
   .total-box {
@@ -519,6 +520,7 @@
   .badge-entregue { background: #e8f5e9; color: var(--status-done); border: 1.5px solid var(--status-done); }
   .pc-total { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--wood-dark); font-weight: 700; }
   .btn-status {
+    min-height: 44px;
     padding: 7px 12px;
     border-radius: 8px;
     border: none;
@@ -534,7 +536,9 @@
   .btn-entregar:hover { background: #1d6b2c; }
   .btn-fechar { background: var(--wood-mid); color: var(--cream); }
   .btn-fechar:hover { background: var(--wood-dark); }
-  .btn-cancel { background: var(--danger); color: white; padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 700; }
+  .btn-cancel { min-height:44px; background: var(--danger); color: white; padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight:700; margin-left:12px; }
+  .pedido-card-footer { gap:12px; }
+  button[onclick*="abrirEditarPedido"], button[onclick*="fecharEditarPedido"] { min-height:44px; }
   .btn-cancel:hover { background: #a02318; }
 
   .empty-state {
@@ -614,6 +618,25 @@
     transition: transform 0.3s;
   }
   .toast.show { transform: translateY(0); }
+  .toast-action { margin-left:12px; border:0; border-radius:6px; padding:7px 10px; background:var(--gold); color:var(--wood-dark); cursor:pointer; font:inherit; font-weight:700; }
+
+  .mesa-step-btn { width:44px !important; height:44px !important; }
+  .mesa-btn { min-height:72px; }
+  .mesa-btn span:last-of-type { font-size:12px; font-weight:700; }
+  .mesa-btn.livre span:last-of-type::before { content:'✓ '; }
+  .mesa-btn.ocupada span:last-of-type::before { content:'◷ '; }
+  .mesa-btn.producao span:last-of-type::before { content:'◉ '; }
+  .mesa-btn.entregue span:last-of-type::before { content:'🍽 '; }
+  .item-count { display:inline-flex; margin-top:4px; padding:2px 7px; border-radius:12px; background:var(--cream-dark); color:var(--wood-dark); font-size:12px; font-weight:700; }
+  .cardapio-item.item-added { animation:item-added .55s ease-out; }
+  @keyframes item-added { 0% { background:#dff4df; } 100% { background:white; } }
+  .pedido-mobile-bar, .mesa-selecionada-info, .historico-cards { display:none; }
+  .cardapio-search { width:100%; margin:0 0 10px; padding:10px 12px; border:1.5px solid var(--cream-dark); border-radius:8px; font:inherit; font-size:16px; color:var(--text-dark); }
+  .cardapio-no-results { padding:28px 16px; text-align:center; color:var(--text-mid); font-size:14px; }
+  .btn-secondary-print { font-size:14px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
 
   /* MODAL CONFIRMAR */
   .modal-overlay {
@@ -654,15 +677,21 @@
       padding: 8px 10px;
       flex-wrap: nowrap;
       gap: 8px;
+      overflow: visible;
     }
     .logo-circle { width: 38px; height: 38px; }
     .logo-circle svg { width: 26px; height: 26px; }
     .brand-text h1 { font-size: 15px; }
     .brand-text p { display: none; }
-    .header-nav { gap: 4px; flex-shrink: 0; }
+    header { flex-wrap: wrap; position: static; }
+    .header-nav { gap: 4px; flex:1 1 100%; order:3; min-width:0; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .header-nav::-webkit-scrollbar { display:none; }
+    .header-nav .nav-btn { flex:1 1 0; min-width:40px; justify-content:center; }
     .nav-btn {
-      padding: 7px 9px;
-      font-size: 11px;
+      min-width:44px;
+      min-height:44px;
+      padding: 7px 10px;
+      font-size: 14px;
       gap: 4px;
       border-radius: 8px;
     }
@@ -673,16 +702,26 @@
     .status-bar { padding: 5px 12px; font-size: 11px; }
 
     /* Main */
-    main { padding: 12px; }
+    main { padding: 12px 12px calc(92px + env(safe-area-inset-bottom)); }
     .section-title { font-size: 17px; margin-bottom: 12px; }
 
     /* Mesas grid */
     .mesas-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .mesa-btn { font-size: 20px; }
-    .mesa-btn span { font-size: 9px; }
+    .mesa-btn { font-size: 20px; min-height:72px; aspect-ratio:auto; }
+    .mesa-btn span { font-size: 12px; }
 
-    /* Pedido form — empilhar colunas */
+    /* Pedido form — cardápio antes do resumo */
     .pedido-form { grid-template-columns: 1fr !important; gap: 14px; }
+    .pedido-cardapio { order:1; }
+    .pedido-resumo { order:2; }
+    .pedido-resumo details > summary { display:flex; align-items:center; justify-content:space-between; min-height:44px; cursor:pointer; font-family:'Playfair Display',serif; font-size:16px; color:var(--wood-dark); list-style:none; }
+    .pedido-resumo details > summary::-webkit-details-marker { display:none; }
+    .pedido-resumo details > summary::after { content:'Mostrar resumo'; color:var(--wood-mid); font-family:'Source Sans 3',sans-serif; font-size:14px; font-weight:700; }
+    .pedido-resumo details[open] > summary::after { content:'Ocultar resumo'; }
+    .mesa-selecionada-info { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; padding:9px 10px; border:1.5px solid var(--gold); border-radius:8px; background:#fffbf0; color:var(--text-mid); font-size:14px; font-weight:700; }
+    .mesa-selecionada-info[hidden] { display:none; }
+    .mesa-selecionada-info button { min-height:36px; padding:6px 10px; border:1px solid var(--wood-mid); border-radius:6px; background:white; color:var(--wood-mid); font:inherit; font-weight:700; cursor:pointer; }
+    .mesa-soma-aviso { display:block; color:#8a4c00; font-size:12px; font-weight:700; }
     .mesa-selector { grid-template-columns: repeat(6, 1fr); gap: 5px; }
     .mesa-sel-btn { padding: 8px 4px; font-size: 13px; }
 
@@ -691,13 +730,14 @@
     .cat-tab { font-size: 11px; padding: 5px 8px; }
 
     /* Cardápio list */
-    .cardapio-list { max-height: 260px; }
-    .item-name { font-size: 12px; }
+    .cardapio-list { max-height:none; overflow:visible; }
+    .item-name { font-size:14px; }
     .item-price { font-size: 13px; }
 
     /* Carrinho */
-    .ci-name { font-size: 12px; }
-    .ci-total { font-size: 12px; min-width: 50px; }
+    .ci-name { font-size:14px; }
+    .ci-total { font-size:14px; min-width:64px; }
+    .qtd-btn, .ci-del { min-width:44px; min-height:44px; }
 
     /* Total box */
     .total-box .valor { font-size: 20px; }
@@ -724,10 +764,13 @@
     .resumo-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .resumo-card .rc-val { font-size: 20px; }
 
-    /* Tabelas — scroll horizontal */
-    .card-body { overflow-x: auto; }
-    .historico-table { min-width: 500px; }
-    .historico-table th, .historico-table td { padding: 8px 8px; font-size: 12px; }
+    /* Histórico em cartões, sem tabela com rolagem horizontal */
+    #historico-table-wrap { display:none; }
+    .historico-cards { display:grid; gap:8px; padding:12px; }
+    .historico-card { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; border:1.5px solid var(--cream-dark); border-radius:8px; background:white; font-size:14px; }
+    .historico-card strong { color:var(--wood-mid); }
+    .historico-card .historico-meta { font-size:12px; color:var(--text-mid); }
+    .historico-card .btn-reabrir { grid-column:1 / -1; min-height:44px; border:0; border-radius:8px; background:var(--status-wait); color:white; font:inherit; font-weight:700; cursor:pointer; }
 
     /* Garçons panel */
     #panel-garcons > div { grid-template-columns: 1fr !important; }
@@ -742,15 +785,28 @@
 
     /* Legenda */
     .legenda { gap: 8px; }
-    .legenda-item { font-size: 11px; }
+    .legenda-item { font-size: 13px; font-weight: 700; color: var(--cream); }
 
     /* Form inputs */
-    input[type="text"], select, textarea {
+    input[type="text"], input[type="number"], input[type="search"], select, textarea {
       font-size: 16px; /* previne zoom no iOS */
     }
 
-    /* Botão enviar */
-    .btn-enviar { font-size: 15px; padding: 12px; }
+    /* Barra fixa do pedido e ações grandes */
+    #btn-enviar { display:none; }
+    .pedido-mobile-bar { display:grid; grid-template-columns:1fr auto auto; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:150; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:var(--wood-dark); border-top:2px solid var(--gold); box-shadow:0 -4px 16px rgba(0,0,0,.25); }
+    .pedido-mobile-summary { color:var(--cream); font-size:14px; font-weight:700; align-self:center; line-height:1.25; }
+    .pedido-mobile-bar button { min-height:44px; border:0; border-radius:8px; cursor:pointer; font:inherit; font-weight:700; }
+    .pedido-mobile-toggle { padding:0 10px; background:var(--cream-dark); color:var(--wood-dark); }
+    .pedido-mobile-send { padding:0 12px; background:var(--green-dark); color:var(--cream); }
+    .toast { right:12px; left:12px; bottom:calc(84px + env(safe-area-inset-bottom)); font-size:14px; }
+    .toast:not(.show) { transform:translateY(240px); opacity:0; pointer-events:none; }
+    .modal-overlay { padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
+    .btn-cancel, .btn-status, .btn-edit-item, .btn-fechar-mesa-hist { min-height:44px; font-size:14px; }
+    .pedido-card-footer .btn-cancel { margin-left:12px; }
+    #modal-cobranca .cobranca-acoes { display:flex !important; flex-direction:column; }
+    #modal-cobranca #btn-fechar-conta { width:100%; min-height:48px; }
+    #modal-cobranca .btn-secondary-print { width:100%; min-height:44px; }
 
     /* Edit cat panel */
     .edit-cat-btn { font-size: 12px; padding: 8px 10px; }
@@ -910,6 +966,78 @@
   @media (max-width: 700px) {
     #panel-cardapio-edit > div { grid-template-columns: 1fr !important; }
   }
+
+  /* ===== PEDIDO RÁPIDO (v2) ===== */
+  .cardapio-list { border: none; background: transparent; border-radius: 0; padding: 2px 2px 4px; }
+  .cardapio-item {
+    gap: 10px; min-height: 68px; padding: 12px 12px 12px 14px; margin-bottom: 8px;
+    background: white; border: 1.5px solid var(--cream-dark); border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(61,43,31,.10);
+    transition: transform .12s ease-out, background .2s, border-color .2s, box-shadow .2s;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
+  }
+  .cardapio-item:last-child { border-bottom: 1.5px solid var(--cream-dark); }
+  .cardapio-item:hover { background: #fffbf0; }
+  .cardapio-item:active { transform: scale(.985); background: #fff4d6; }
+  .cardapio-item.no-pedido { border-color: var(--gold); background: #fff9ea; box-shadow: 0 2px 8px rgba(200,146,42,.22); }
+  .cardapio-item.esgotado { opacity: .5; background: #f1ece3; cursor: not-allowed; box-shadow: none; }
+  .cardapio-item.esgotado .item-name { text-decoration: line-through; color: #8a7d6d; }
+  .badge-esgotado { font-size: 12px; font-weight: 800; letter-spacing: .5px; color: var(--danger); background: #fdecea; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .item-info { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .item-name { font-size: 16px; font-weight: 700; line-height: 1.25; color: var(--text-dark); }
+  .item-desc { font-size: 13px; line-height: 1.3; color: #6f5f4f; margin-top: 0; }
+  .item-cat { align-self: flex-start; font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--wood-light); }
+  .item-preco { font-size: 16px; font-weight: 800; color: var(--wood-mid); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .item-count { align-self: flex-start; font-size: 12px; font-weight: 700; color: #8a4c00; background: #fbe9c5; padding: 2px 8px; border-radius: 999px; }
+  .add-btn { width: 48px; height: 48px; flex: 0 0 auto; font-size: 28px; font-weight: 400; box-shadow: 0 2px 6px rgba(200,146,42,.45); }
+  .add-btn:hover { transform: none; }
+  .add-btn:active { transform: scale(.92); background: var(--wood-mid); }
+  .stepper { display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto; padding: 3px; background: var(--cream); border: 1.5px solid var(--cream-dark); border-radius: 999px; }
+  .step-btn { width: 44px; height: 44px; border: 0; border-radius: 50%; background: white; color: var(--wood-dark); font-size: 26px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(61,43,31,.2); touch-action: manipulation; }
+  .step-btn.mais { background: var(--gold); color: white; }
+  .step-btn:active { transform: scale(.9); }
+  .step-qtd { min-width: 30px; text-align: center; font-size: 20px; font-weight: 800; color: var(--wood-dark); font-variant-numeric: tabular-nums; }
+  .size-seg { display: inline-flex; align-self: flex-start; margin-top: 4px; border: 1.5px solid var(--cream-dark); border-radius: 10px; overflow: hidden; background: white; }
+  .size-seg button { min-height: 40px; padding: 0 12px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 700; color: var(--text-mid); cursor: pointer; touch-action: manipulation; }
+  .size-seg button + button { border-left: 1.5px solid var(--cream-dark); }
+  .size-seg button b { font-weight: 800; margin-left: 4px; }
+  .size-seg button.on { background: var(--wood-mid); color: var(--cream); }
+  .borda-info { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; background: #fbe9c5; color: #6b3d00; font-size: 13px; font-weight: 600; }
+  .cardapio-no-results { padding: 26px 16px; text-align: center; color: var(--cream); font-size: 15px; background: rgba(255,255,255,.07); border-radius: 12px; }
+  .cardapio-sticky { background: var(--wood-dark); padding: 2px 0 6px; }
+  .cardapio-search { height: 50px; border-radius: 12px; font-size: 16px; margin-bottom: 8px; }
+  .cat-tabs { gap: 8px; margin-bottom: 4px; }
+  .cat-tab { min-height: 44px; padding: 0 16px; font-size: 15px; font-weight: 700; border-radius: 999px; white-space: nowrap; touch-action: manipulation; }
+  .cat-tab.active { background: var(--gold); border-color: var(--gold); color: var(--wood-dark); box-shadow: 0 2px 8px rgba(200,146,42,.4); }
+  .fav-strip { margin: 6px 0 10px; }
+  .fav-strip[hidden] { display: none; }
+  .fav-titulo { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; }
+  .fav-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .fav-chips::-webkit-scrollbar { display: none; }
+  .fav-chip { flex: 0 0 auto; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--gold); border-radius: 999px; background: var(--cream); color: var(--wood-dark); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; touch-action: manipulation; }
+  .fav-chip:active { transform: scale(.95); }
+  .fav-chip.tem { background: var(--gold); color: var(--wood-dark); }
+  .fav-n { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--wood-dark); color: var(--cream); font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+  @keyframes item-added { 0% { background: #cfeccf; border-color: #5aa65a; } 100% { background: #fff9ea; } }
+  .pedido-form > *, .cardapio-sticky, .fav-strip, .cardapio-list { min-width: 0; }
+  .pc-item { align-items: center; gap: 8px; min-height: 44px; }
+  .pc-item-name { flex: 1; min-width: 0; text-align: left; font-size: 15px; overflow-wrap: anywhere; }
+  .pc-item-qtd { white-space: nowrap; color: #6f5f4f; font-size: 14px; font-weight: 700; }
+  .pc-item-check { font-size: 20px; }
+  @media (max-width: 420px) {
+    .header-nav { gap: 3px; }
+    .header-nav .nav-btn { min-width: 34px; padding: 7px 0; }
+  }
+  @media (max-width: 768px) {
+    .cardapio-titulo { display: none; }
+    #panel-lojinha > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+    .cardapio-sticky { position: sticky; top: 0; z-index: 90; margin: 0 -12px; padding: 6px 12px 8px; box-shadow: 0 6px 10px -6px rgba(0,0,0,.55); }
+    .cat-tabs { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; margin-bottom: 0; }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab { flex: 0 0 auto; scroll-snap-align: center; }
+    .cardapio-list { padding: 0; }
+    .cardapio-item { min-height: 72px; }
+  }
 </style>
 </head>
 <body>
@@ -979,9 +1107,9 @@
       </div>
       <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.25);padding:8px 14px;border-radius:10px;border:1px solid rgba(200,146,42,0.3)">
         <span style="color:var(--cream-dark);font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase">Mesas:</span>
-        <button onclick="removerMesa()" style="width:30px;height:30px;border-radius:50%;background:var(--danger);color:white;border:none;cursor:pointer;font-size:20px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.background='#a02318'" onmouseout="this.style.background='var(--danger)'">−</button>
+        <button class="mesa-step-btn" aria-label="Remover mesa" onclick="removerMesa()" style="width:30px;height:30px;border-radius:50%;background:var(--danger);color:white;border:none;cursor:pointer;font-size:20px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.background='#a02318'" onmouseout="this.style.background='var(--danger)'">−</button>
         <span id="total-mesas-display" style="color:var(--gold-light);font-family:'Playfair Display',serif;font-size:22px;font-weight:700;min-width:28px;text-align:center">13</span>
-        <button onclick="adicionarMesa()" style="width:30px;height:30px;border-radius:50%;background:var(--green-dark);color:white;border:none;cursor:pointer;font-size:20px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.background='#1d6b2c'" onmouseout="this.style.background='var(--green-dark)'">+</button>
+        <button class="mesa-step-btn" aria-label="Adicionar mesa" onclick="adicionarMesa()" style="width:30px;height:30px;border-radius:50%;background:var(--green-dark);color:white;border:none;cursor:pointer;font-size:20px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.background='#1d6b2c'" onmouseout="this.style.background='var(--green-dark)'">+</button>
       </div>
     </div>
     <div class="mesas-grid" id="mesas-grid">
@@ -992,7 +1120,7 @@
   <div class="panel" id="panel-pedido">
     <p class="section-title">Novo Pedido</p>
     <div class="pedido-form">
-      <div class="form-section">
+      <div class="form-section pedido-resumo">
         <h3>1. Selecionar Mesa</h3>
         <div class="mesa-selector" id="mesa-selector"></div>
         <label>Garçom</label>
@@ -1001,23 +1129,35 @@
         </select>
         <label>Cliente (opcional)</label>
         <input type="text" id="cliente-nome" placeholder="Nome do cliente...">
-        <h3 style="margin-top:4px">2. Resumo do Pedido</h3>
-        <div class="carrinho" id="carrinho">
-          <div class="carrinho-empty">Nenhum item adicionado</div>
-        </div>
-        <div class="total-box">
-          <span class="label">TOTAL DO PEDIDO</span>
-          <span class="valor" id="total-display">R$ 0,00</span>
-        </div>
-        <label>Observações</label>
-        <textarea class="obs-area" id="obs-pedido" placeholder="Ex: sem cebola, bem passado..."></textarea>
-        <button class="btn-enviar" id="btn-enviar" onclick="enviarPedido()">✓ ENVIAR PARA COZINHA</button>
+        <div class="mesa-selecionada-info" id="mesa-selecionada-info" hidden></div>
+        <details id="pedido-resumo-details" open>
+          <summary>2. Resumo do Pedido</summary>
+          <div class="carrinho" id="carrinho">
+            <div class="carrinho-empty">Nenhum item adicionado</div>
+          </div>
+          <div class="total-box">
+            <span class="label">TOTAL DO PEDIDO</span>
+            <span class="valor" id="total-display">R$ 0,00</span>
+          </div>
+          <label>Observação para todo o pedido</label>
+          <textarea class="obs-area" id="obs-pedido" placeholder="Ex: sem cebola, bem passado..."></textarea>
+          <button class="btn-enviar" id="btn-enviar" onclick="enviarPedido()">✓ ENVIAR PARA COZINHA</button>
+        </details>
       </div>
-      <div class="form-section">
-        <h3>3. Escolher Itens</h3>
-        <div class="cat-tabs" id="cat-tabs"></div>
+      <div class="form-section pedido-cardapio">
+        <h3 class="cardapio-titulo">3. Escolher Itens</h3>
+        <div class="cardapio-sticky">
+          <input class="cardapio-search" type="search" id="cardapio-busca" inputmode="search" autocomplete="off" placeholder="Buscar item em todo o cardápio..." aria-label="Buscar no cardápio" oninput="atualizarBuscaCardapio(this.value)">
+          <div class="cat-tabs" id="cat-tabs"></div>
+        </div>
+        <div class="fav-strip" id="fav-strip"></div>
         <div class="cardapio-list" id="cardapio-list"></div>
       </div>
+    </div>
+    <div class="pedido-mobile-bar" aria-label="Resumo e envio do pedido">
+      <div class="pedido-mobile-summary" id="pedido-mobile-summary">Mesa — · 0 itens · R$ 0,00</div>
+      <button class="pedido-mobile-toggle" type="button" onclick="alternarResumoPedido()">Resumo</button>
+      <button class="pedido-mobile-send" type="button" onclick="enviarPedido()">Enviar</button>
     </div>
   </div>
 
@@ -1063,6 +1203,8 @@
         </div>
       </div>
       <div class="card-body" style="padding:0">
+        <div id="historico-cards" class="historico-cards"></div>
+        <div id="historico-table-wrap">
         <table class="historico-table">
           <thead>
             <tr>
@@ -1080,6 +1222,7 @@
             <tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;font-style:italic;">Nenhum pedido fechado ainda</td></tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </div>
@@ -1244,7 +1387,7 @@
     <label>Nome do produto</label>
     <input type="text" id="lojinha-sel-nome" placeholder="Nome do produto...">
     <label>Valor (R$)</label>
-    <input type="number" id="lojinha-sel-valor" placeholder="0,00" min="0" step="0.50" style="margin-bottom:16px">
+    <input type="number" inputmode="decimal" id="lojinha-sel-valor" placeholder="0,00" min="0" step="0.50" style="margin-bottom:16px">
     <div style="display:flex;gap:8px">
       <button onclick="fecharModalLojinha()" style="flex:1;padding:11px;background:transparent;border:1.5px solid var(--cream-dark);border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:600;color:var(--text-mid)">Cancelar</button>
       <button onclick="confirmarItemLojinha()" style="flex:2;padding:11px;background:var(--green-dark);color:var(--cream);border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:16px;cursor:pointer">✓ Adicionar</button>
@@ -1278,7 +1421,7 @@
       <div style="border-top:2px dashed var(--cream-dark);margin:12px 0"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Desconto (R$)</span>
-        <input type="number" id="cob-desconto" value="0" min="0" step="0.50" oninput="calcularConta()"
+        <input type="number" inputmode="decimal" id="cob-desconto" value="0" min="0" step="0.50" oninput="calcularConta()"
           style="width:90px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
@@ -1304,7 +1447,7 @@
       <div id="cob-troco-box" style="display:none;background:#fff;border:1.5px solid var(--cream-dark);border-radius:8px;padding:10px 14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <span style="font-size:13px;font-weight:600;color:var(--text-mid)">Recebido (R$)</span>
-          <input type="number" id="cob-recebido" min="0" step="0.01"
+          <input type="number" inputmode="decimal" id="cob-recebido" min="0" step="0.01"
             oninput="calcularTroco()" onkeyup="calcularTroco()" onchange="calcularTroco()"
             style="width:100px;padding:6px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:14px;font-weight:700;text-align:right">
         </div>
@@ -1314,14 +1457,14 @@
         </div>
       </div>
       <div style="font-size:11px;color:#aaa;margin-bottom:8px;text-align:center" id="cob-pag-selecionado">Selecione a forma de pagamento</div>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+      <div class="cobranca-acoes" style="display:grid;grid-template-columns:1fr auto;gap:8px">
         <button onclick="confirmarFecharConta()" id="btn-fechar-conta" disabled
           style="padding:14px;background:#ccc;color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:17px;cursor:not-allowed;letter-spacing:1px;transition:all 0.2s">
           Fechar Conta
         </button>
-        <button onclick="imprimirNotinhaCliente()" title="Imprimir notinha do cliente"
-          style="padding:14px 16px;background:var(--gold);color:var(--wood-dark);border:none;border-radius:var(--radius);cursor:pointer;font-size:20px">
-          🧾
+        <button class="btn-secondary-print" onclick="imprimirNotinhaCliente()" title="Imprimir notinha do cliente"
+          style="padding:14px 16px;background:var(--gold);color:var(--wood-dark);border:none;border-radius:var(--radius);cursor:pointer">
+          🧾 Imprimir notinha
         </button>
       </div>
     </div>
@@ -1567,6 +1710,10 @@ const CATEGORIAS_BASE = Object.keys(CARDAPIO);
 const CATEGORIAS = [...CATEGORIAS_BASE];
 let catAtual = CATEGORIAS[0];
 let tamanhoAtual = {};
+let buscaCardapio = '';
+let ultimoItemAdicionado = null;
+let desfazerCarrinho = null;
+let desfazerTimer = null;
 
 // ====== INIT ======
 // ====== FIREBASE ======
@@ -1650,6 +1797,12 @@ function showPanel(name) {
   if (name === 'garcons') { renderGarconsList(); renderGarconsResumo(); }
   if (name === 'lojinha') renderLojinhaLista();
   if (name === 'cardapio-edit') initEditCardapio();
+  if (name === 'pedido') {
+    favSnap = null;
+    const det = document.getElementById('pedido-resumo-details');
+    if (det) det.open = !window.matchMedia('(max-width:768px)').matches;
+    atualizarMesaSelecionadaInfo(); atualizarResumoMobile(); renderCardapio();
+  }
 }
 
 // ====== MESAS ======
@@ -1702,10 +1855,10 @@ function removerMesa() {
 }
 
 function statusLabel(s) {
-  if (s === 'livre') return 'Livre';
-  if (s === 'aguardando') return 'Aguardando';
-  if (s === 'producao') return 'Em Produção';
-  if (s === 'entregue') return 'Entregue';
+  if (s === 'livre') return 'LIVRE';
+  if (s === 'aguardando') return 'AGUARDA';
+  if (s === 'producao') return 'PREPARO';
+  if (s === 'entregue') return 'ENTREGUE';
   return s;
 }
 
@@ -1715,6 +1868,7 @@ function abrirMesa(num, pedido) {
     document.querySelectorAll('.mesa-sel-btn').forEach(b => b.classList.remove('selected'));
     const btn = document.querySelector(`.mesa-sel-btn[data-mesa="${num}"]`);
     if (btn) btn.classList.add('selected');
+    atualizarMesaSelecionadaInfo();
     showPanel('pedido');
     showToast('Mesa ' + num + ' selecionada!');
   } else {
@@ -1723,6 +1877,7 @@ function abrirMesa(num, pedido) {
     document.querySelectorAll('.mesa-sel-btn').forEach(b => b.classList.remove('selected'));
     const btn = document.querySelector(`.mesa-sel-btn[data-mesa="${num}"]`);
     if (btn) btn.classList.add('selected');
+    atualizarMesaSelecionadaInfo();
     showPanel('pedido');
     showToast('➕ Mesa ' + num + ' já tem pedido — novos itens serão acumulados!');
   }
@@ -1743,9 +1898,43 @@ function renderMesaSelector() {
       mesaSelecionada = i;
       document.querySelectorAll('.mesa-sel-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
+      atualizarMesaSelecionadaInfo();
     };
     sel.appendChild(btn);
   }
+  atualizarMesaSelecionadaInfo();
+}
+
+function atualizarMesaSelecionadaInfo() {
+  const info = document.getElementById('mesa-selecionada-info');
+  if (!info) return;
+  if (!mesaSelecionada) { info.hidden = true; atualizarResumoMobile(); return; }
+  const existente = pedidos['mesa' + mesaSelecionada];
+  info.hidden = false;
+  info.innerHTML = `<span>🪑 Mesa ${mesaSelecionada}${existente ? '<small class="mesa-soma-aviso">Pedido existente; itens serão somados</small>' : ''}</span><button type="button" onclick="trocarMesa()">Trocar</button>`;
+  atualizarResumoMobile();
+}
+
+function trocarMesa() {
+  const seletor = document.getElementById('mesa-selector');
+  if (seletor) seletor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const selecionada = seletor && seletor.querySelector('.mesa-sel-btn.selected');
+  if (selecionada) selecionada.focus();
+}
+
+function alternarResumoPedido() {
+  const resumo = document.getElementById('pedido-resumo-details');
+  if (!resumo) return;
+  resumo.open = !resumo.open;
+  if (resumo.open) resumo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function atualizarResumoMobile() {
+  const el = document.getElementById('pedido-mobile-summary');
+  if (!el) return;
+  const qtd = carrinho.reduce((s, item) => s + item.qtd, 0);
+  const total = carrinho.reduce((s, item) => s + item.preco * item.qtd, 0);
+  el.textContent = `Mesa ${mesaSelecionada || '—'} · ${qtd} ${qtd === 1 ? 'item' : 'itens'} · R$ ${total.toFixed(2).replace('.', ',')}`;
 }
 
 // ====== CARDÁPIO ======
@@ -1754,97 +1943,151 @@ function renderCatTabs() {
   tabs.innerHTML = '';
   CATEGORIAS.forEach(cat => {
     const t = document.createElement('button');
-    t.className = 'cat-tab' + (cat === catAtual ? ' active' : '');
+    t.className = 'cat-tab' + (cat === catAtual && !buscaCardapio ? ' active' : '');
     t.textContent = cat;
     t.onclick = () => {
       catAtual = cat;
+      limparBuscaCardapio();
       document.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
+      try { t.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (e) {}
       renderCardapio();
     };
     tabs.appendChild(t);
   });
 }
 
+function limparBuscaCardapio() {
+  buscaCardapio = '';
+  const inp = document.getElementById('cardapio-busca');
+  if (inp) inp.value = '';
+}
+
+function normBusca(txt) {
+  return String(txt || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function atualizarBuscaCardapio(valor) {
+  buscaCardapio = normBusca(valor).trim();
+  document.querySelectorAll('.cat-tab').forEach(x => x.classList.toggle('active', !buscaCardapio && x.textContent === catAtual));
+  renderCardapio();
+}
+
+// ----- Pedido rápido: helpers -----
+function acharItem(id) {
+  for (const cat of Object.values(CARDAPIO)) {
+    const it = cat.find(x => x.id === id);
+    if (it) return it;
+  }
+  return null;
+}
+function labelDe(item) {
+  if (!item.tam) return item.nome;
+  return `${item.nome} (${tamanhoAtual[item.id] || 'M'})`;
+}
+function tocarItem(id) {
+  const it = acharItem(id);
+  if (!it || it.pausado) return;
+  if (it.tam) addItemComTam(id, it.nome, it.preco, it.precoG);
+  else addItem(id, it.nome, it.preco, '');
+}
+function stepItem(id, delta, e) {
+  if (e) e.stopPropagation();
+  const it = acharItem(id);
+  if (!it) return;
+  if (delta > 0) { tocarItem(id); return; }
+  const i = carrinho.findIndex(c => c.label === labelDe(it));
+  if (i >= 0) changeQtd(i, -1);
+}
+
+// Favoritos: contagem de toques só neste aparelho (localStorage) — não vai pro Firebase
+const FAV_KEY = 'pds_favoritos_v1';
+function lerFavs() { try { return JSON.parse(localStorage.getItem(FAV_KEY)) || {}; } catch (e) { return {}; } }
+function contarFav(id) {
+  try { const f = lerFavs(); f[id] = (f[id] || 0) + 1; localStorage.setItem(FAV_KEY, JSON.stringify(f)); } catch (e) {}
+}
+function topFavs(n) {
+  const f = lerFavs();
+  return Object.entries(f).sort((a, b) => b[1] - a[1]).map(([id]) => acharItem(id)).filter(it => it && !it.pausado).slice(0, n);
+}
+// A lista de favoritos é "congelada" ao abrir a tela de pedido, pra faixa não aparecer
+// nem mudar de lugar no meio do pedido (empurraria os itens e o garçom tocaria no item errado).
+let favSnap = null;
+function renderFavs() {
+  const el = document.getElementById('fav-strip');
+  if (!el) return;
+  if (!favSnap) favSnap = topFavs(8).map(it => it.id);
+  const favs = buscaCardapio ? [] : favSnap.map(acharItem).filter(Boolean);
+  if (!favs.length) { el.innerHTML = ''; el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<div class="fav-titulo">Mais pedidos</div><div class="fav-chips">' + favs.map(it => {
+    const n = carrinho.filter(c => c.id === it.id).reduce((a, c) => a + c.qtd, 0);
+    return `<button type="button" class="fav-chip${n ? ' tem' : ''}" onclick="tocarItem('${it.id}')">${it.nome}${it.tam ? ' (' + (tamanhoAtual[it.id] || 'M') + ')' : ''}${n ? `<span class="fav-n">${n}</span>` : ''}</button>`;
+  }).join('') + '</div>';
+}
+
+function itemCardHTML(item, catLabel) {
+  const id = item.id;
+  const qtdTotal = carrinho.filter(c => c.id === id).reduce((a, c) => a + c.qtd, 0);
+  const tag = catLabel ? `<span class="item-cat">${catLabel}</span>` : '';
+  const desc = item.desc ? `<div class="item-desc">${item.desc}</div>` : '';
+  if (item.pausado) {
+    return `<div class="cardapio-item esgotado"><div class="item-info"><div class="item-name">${item.nome}</div>${desc}</div><span class="badge-esgotado">ESGOTADO</span></div>`;
+  }
+  let seg = '', preco = '';
+  let qtdLabel;
+  if (item.tam) {
+    if (!tamanhoAtual[id]) tamanhoAtual[id] = 'M';
+    const t = tamanhoAtual[id];
+    seg = `<div class="size-seg" role="group" aria-label="Tamanho">
+      <button type="button" class="${t === 'M' ? 'on' : ''}" onclick="setTam('${id}','M',event)">M <b>R$ ${item.preco.toFixed(2).replace('.', ',')}</b></button>
+      <button type="button" class="${t === 'G' ? 'on' : ''}" onclick="setTam('${id}','G',event)">G <b>R$ ${item.precoG.toFixed(2).replace('.', ',')}</b></button>
+    </div>`;
+    qtdLabel = (carrinho.find(c => c.label === labelDe(item)) || {}).qtd || 0;
+  } else {
+    preco = `<div class="item-preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>`;
+    qtdLabel = (carrinho.find(c => c.label === item.nome) || {}).qtd || 0;
+  }
+  const outro = item.tam && qtdTotal > qtdLabel ? `<span class="item-count">+${qtdTotal - qtdLabel} no outro tamanho</span>` : '';
+  const acao = qtdLabel > 0
+    ? `<div class="stepper"><button type="button" class="step-btn" aria-label="Diminuir ${item.nome}" onclick="stepItem('${id}',-1,event)">−</button><span class="step-qtd">${qtdLabel}</span><button type="button" class="step-btn mais" aria-label="Aumentar ${item.nome}" onclick="stepItem('${id}',1,event)">+</button></div>`
+    : `<button type="button" class="add-btn" aria-label="Adicionar ${item.nome}" onclick="stepItem('${id}',1,event)">+</button>`;
+  return `<div class="cardapio-item${qtdLabel ? ' no-pedido' : ''}${ultimoItemAdicionado === id ? ' item-added' : ''}" data-item="${id}" onclick="tocarItem('${id}')">
+    <div class="item-info">${tag}<div class="item-name">${item.nome}</div>${desc}${seg}${outro}</div>
+    ${preco}${acao}
+  </div>`;
+}
+
 function renderCardapio() {
   const list = document.getElementById('cardapio-list');
-  list.innerHTML = '';
-  const itens = CARDAPIO[catAtual] || [];
-
-  // Borda info para pizzas salgadas
-  if (catAtual === 'Pizza Salgada') {
-    const info = document.createElement('div');
-    info.className = 'borda-info';
-    info.style.cssText = 'padding:6px 12px;background:#fffbf0;border-bottom:1px solid var(--cream-dark);font-size:11px;color:#888;';
-    info.textContent = '+ R$ 7,00 por borda (requeijão ou cheddar)';
-    list.appendChild(info);
-  }
-
-  itens.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'cardapio-item';
-
-    if (item.pausado) {
-      // Item esgotado — mostrar cinza, sem botão de adicionar
-      div.style.cssText = 'opacity:0.45;background:#f5f5f5;cursor:not-allowed';
-      div.innerHTML = `
-        <div class="item-info">
-          <div class="item-name" style="text-decoration:line-through;color:#999">${item.nome}</div>
-          ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
-        </div>
-        <span style="font-size:11px;font-weight:700;color:#e74c3c;padding:2px 8px;border-radius:10px;background:#fdecea;white-space:nowrap">ESGOTADO</span>
-      `;
-      list.appendChild(div);
+  let html = '';
+  if (buscaCardapio) {
+    const q = buscaCardapio.replace('r$', '').trim();
+    const achados = [];
+    CATEGORIAS.forEach(cat => (CARDAPIO[cat] || []).forEach(item => {
+      const preco = Number(item.preco).toFixed(2).replace('.', ',');
+      if (normBusca(item.nome).includes(q) || normBusca(item.desc).includes(q) || normBusca(cat).includes(q) || preco.includes(q)) achados.push([cat, item]);
+    }));
+    if (!achados.length) {
+      list.innerHTML = '<div class="cardapio-no-results">Nada encontrado para essa busca.</div>';
+      renderFavs();
       return;
     }
-
-    if (item.tam) {
-      if (!tamanhoAtual[item.id]) tamanhoAtual[item.id] = 'M';
-      const precoAtual = tamanhoAtual[item.id] === 'G' ? item.precoG : item.preco;
-      div.innerHTML = `
-        <div class="item-info">
-          <div class="item-name">${item.nome}</div>
-          ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
-          <div class="size-btns" style="margin-top:4px">
-            <button class="size-btn ${tamanhoAtual[item.id]==='M'?'active':''}" onclick="setTam('${item.id}','M',event)">M</button>
-            <button class="size-btn ${tamanhoAtual[item.id]==='G'?'active':''}" onclick="setTam('${item.id}','G',event)">G</button>
-          </div>
-        </div>
-        <span class="item-price" id="price-${item.id}">R$ ${precoAtual.toFixed(2).replace('.',',')}</span>
-        <button class="add-btn" onclick="addItemComTam('${item.id}', '${item.nome}', ${item.preco}, ${item.precoG})">+</button>
-      `;
-    } else {
-      div.innerHTML = `
-        <div class="item-info">
-          <div class="item-name">${item.nome}</div>
-          ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
-        </div>
-        <span class="item-price">R$ ${item.preco.toFixed(2).replace('.',',')}</span>
-        <button class="add-btn" onclick="addItem('${item.id}', '${item.nome}', ${item.preco}, '')">+</button>
-      `;
-    }
-    list.appendChild(div);
-  });
+    html = achados.slice(0, 60).map(([cat, item]) => itemCardHTML(item, cat)).join('');
+  } else {
+    const itens = CARDAPIO[catAtual] || [];
+    if (catAtual === 'Pizza Salgada') html += '<div class="borda-info">+ R$ 7,00 por borda (requeijão ou cheddar)</div>';
+    html += itens.map(item => itemCardHTML(item, '')).join('');
+    if (!itens.length) html += '<div class="cardapio-no-results">Nenhum item nesta categoria.</div>';
+  }
+  list.innerHTML = html;
+  renderFavs();
 }
 
 function setTam(id, tam, e) {
-  e.stopPropagation();
+  if (e) e.stopPropagation();
   tamanhoAtual[id] = tam;
-  // Atualizar preço exibido
-  let item = null;
-  for (const cat of Object.values(CARDAPIO)) {
-    item = cat.find(x => x.id === id);
-    if (item) break;
-  }
-  if (item) {
-    const priceEl = document.getElementById('price-' + id);
-    const p = tam === 'G' ? item.precoG : item.preco;
-    if (priceEl) priceEl.textContent = 'R$ ' + p.toFixed(2).replace('.',',');
-  }
-  // Atualizar botões
-  const btns = e.target.parentElement.querySelectorAll('.size-btn');
-  btns.forEach(b => b.classList.remove('active'));
-  e.target.classList.add('active');
+  renderCardapio();
 }
 
 // ====== CARRINHO ======
@@ -1863,8 +2106,16 @@ function addItem(id, nome, preco, tam) {
   } else {
     carrinho.push({ id, label, preco, qtd: 1 });
   }
+  contarFav(id);
+  ultimoItemAdicionado = id;
+  try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
   renderCarrinho();
-  showToast('✓ ' + label + ' adicionado!');
+  renderCardapio();
+  window.setTimeout(() => {
+    if (ultimoItemAdicionado === id) ultimoItemAdicionado = null;
+    const el = document.querySelector('[data-item="' + id + '"]');
+    if (el) el.classList.remove('item-added');
+  }, 700);
 }
 
 function renderCarrinho() {
@@ -1872,32 +2123,68 @@ function renderCarrinho() {
   if (carrinho.length === 0) {
     el.innerHTML = '<div class="carrinho-empty">Nenhum item adicionado</div>';
     document.getElementById('total-display').textContent = 'R$ 0,00';
+    atualizarResumoMobile();
     return;
   }
   el.innerHTML = carrinho.map((item, i) => `
     <div class="carrinho-item">
       <span class="ci-name">${item.label}</span>
       <div class="ci-qtd">
-        <button class="qtd-btn" onclick="changeQtd(${i}, -1)">−</button>
+        <button class="qtd-btn" aria-label="Diminuir ${item.label}" onclick="changeQtd(${i}, -1)">−</button>
         <span style="font-weight:700;min-width:20px;text-align:center">${item.qtd}</span>
-        <button class="qtd-btn" onclick="changeQtd(${i}, 1)">+</button>
+        <button class="qtd-btn" aria-label="Aumentar ${item.label}" onclick="changeQtd(${i}, 1)">+</button>
       </div>
       <span class="ci-total">R$ ${(item.preco * item.qtd).toFixed(2).replace('.',',')}</span>
-      <span class="ci-del" onclick="removeItem(${i})">×</span>
+      <button class="ci-del" aria-label="Remover ${item.label}" onclick="removeItem(${i})">×</button>
     </div>
   `).join('');
   const total = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
   document.getElementById('total-display').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  atualizarResumoMobile();
 }
 
 function changeQtd(i, delta) {
+  if (!carrinho[i]) return;
+  const itemAntes = { ...carrinho[i] };
   carrinho[i].qtd += delta;
-  if (carrinho[i].qtd <= 0) carrinho.splice(i, 1);
+  if (carrinho[i].qtd <= 0) {
+    carrinho.splice(i, 1);
+    oferecerDesfazer(itemAntes, i);
+  }
   renderCarrinho();
+  renderCardapio();
 }
 function removeItem(i) {
+  if (!carrinho[i]) return;
+  const itemRemovido = { ...carrinho[i] };
   carrinho.splice(i, 1);
+  oferecerDesfazer(itemRemovido, i);
   renderCarrinho();
+  renderCardapio();
+}
+
+function oferecerDesfazer(item, indice) {
+  desfazerCarrinho = { item, indice };
+  if (desfazerTimer) clearTimeout(desfazerTimer);
+  const toast = document.getElementById('toast');
+  clearTimeout(showToast._timer);
+  toast.innerHTML = `Item removido.<button class="toast-action" type="button" onclick="desfazerRemocaoCarrinho()">Desfazer</button>`;
+  toast.classList.add('show');
+  desfazerTimer = setTimeout(() => {
+    desfazerCarrinho = null;
+    toast.classList.remove('show');
+  }, 6000);
+}
+
+function desfazerRemocaoCarrinho() {
+  if (!desfazerCarrinho) return;
+  const { item, indice } = desfazerCarrinho;
+  carrinho.splice(Math.min(indice, carrinho.length), 0, item);
+  desfazerCarrinho = null;
+  if (desfazerTimer) clearTimeout(desfazerTimer);
+  renderCarrinho();
+  renderCardapio();
+  showToast('Item restaurado.');
 }
 
 // ====== ENVIAR PEDIDO ======
@@ -2177,8 +2464,10 @@ function renderCaixa() {
 
   // Histórico
   const tbody = document.getElementById('historico-body');
+  const cards = document.getElementById('historico-cards');
   if (historico.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:30px;font-style:italic;">Nenhum pedido fechado ainda</td></tr>';
+    if (cards) cards.innerHTML = '<div class="cardapio-no-results">Nenhum pedido fechado ainda.</div>';
     return;
   }
   tbody.innerHTML = [...historico].reverse().map((h, i) => {
@@ -2195,6 +2484,17 @@ function renderCaixa() {
       <td><button onclick="reabrirMesa(${realIdx})" style="background:var(--status-wait);color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700" title="Desfazer fechamento">↩ Reabrir</button></td>
     </tr>
   `}).join('');
+  if (cards) {
+    cards.innerHTML = [...historico].reverse().map((h, i) => {
+      const realIdx = historico.length - 1 - i;
+      return `<article class="historico-card">
+        <strong>Mesa ${h.mesa}</strong><strong class="td-valor">R$ ${h.total.toFixed(2).replace('.',',')}</strong>
+        <span class="historico-meta">Hora: ${h.fechadoEm || '—'} · ${h.tempoPreparo || '—'}</span><span class="historico-meta">Pagamento: ${h.pagamento || '—'}</span>
+        <span class="historico-meta">${h.cliente || h.garcom || 'Sem identificação'}</span>
+        <button class="btn-reabrir" onclick="reabrirMesa(${realIdx})">↩ Reabrir</button>
+      </article>`;
+    }).join('');
+  }
 }
 
 function imprimirNotinhaCliente() {
@@ -2413,7 +2713,8 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ====== MODAL ======
@@ -2932,7 +3233,7 @@ function renderEditarItens() {
         <button class="qtd-btn" onclick="changeEditarQtd(${i},1)">+</button>
       </div>
       <span class="ci-total" style="font-size:13px">R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
-      <span class="ci-del" onclick="removeEditarItem(${i})">×</span>
+      <button class="ci-del" aria-label="Remover ${it.nome}" onclick="removeEditarItem(${i})">×</button>
     </div>
   `).join('');
   const total = editarItens.reduce((s, it) => s + it.preco * it.qtd, 0);
@@ -3104,7 +3405,7 @@ function renderModalCarrinho() {
         <button class="qtd-btn" onclick="changeModalQtd(${i},1)">+</button>
       </div>
       <span class="ci-total">R$ ${(item.preco * item.qtd).toFixed(2).replace('.',',')}</span>
-      <span class="ci-del" onclick="removeModalItem(${i})">×</span>
+      <button class="ci-del" aria-label="Remover ${item.label}" onclick="removeModalItem(${i})">×</button>
     </div>
   `).join('');
   const total = modalCarrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
