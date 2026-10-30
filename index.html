@@ -1055,6 +1055,80 @@
     .cardapio-list { padding: 0; }
     .cardapio-item { min-height: 72px; }
   }
+
+  /* ===== DASHBOARD DE VENDAS ===== */
+  .dash { display: flex; flex-direction: column; gap: 14px; }
+  .dash-card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.25); min-width: 0; }
+  .dash-card h3 { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--wood-dark); margin: 0 0 12px; border: 0; padding: 0; }
+  .dash-sub { font-size: 13px; color: #6f5f4f; margin: -6px 0 12px; }
+  .dash-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kpi { background: white; border-radius: 16px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.25); min-width: 0; }
+  .kpi.hoje { grid-column: 1 / -1; background: linear-gradient(135deg, var(--gold) 0%, #a06f12 100%); color: var(--wood-dark); }
+  .kpi-lab { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mid); }
+  .kpi.hoje .kpi-lab { color: rgba(61,43,31,.8); }
+  .kpi-val { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--wood-dark); margin: 4px 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .kpi.hoje .kpi-val { font-size: 40px; }
+  .kpi:not(.hoje) .kpi-val { font-size: clamp(18px, 5.6vw, 28px); white-space: nowrap; overflow-wrap: normal; }
+  .kpi-meta { font-size: 13px; color: #6f5f4f; }
+  .kpi.hoje .kpi-meta { color: rgba(61,43,31,.85); }
+  .delta { display: inline-block; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-top: 4px; }
+  .delta.up { background: #dff3df; color: #1d6b2c; }
+  .delta.down { background: #fdecea; color: #a02318; }
+  .delta.na { background: #efe7d6; color: #6f5f4f; }
+  .kpi.hoje .delta.up, .kpi.hoje .delta.down, .kpi.hoje .delta.na { background: rgba(255,255,255,.55); }
+  .dash-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .dash-chips::-webkit-scrollbar { display: none; }
+  .dash-chip { flex: 0 0 auto; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--cream-dark); background: white; font: inherit; font-size: 15px; font-weight: 700; color: var(--text-mid); cursor: pointer; }
+  .dash-chip.on { background: var(--wood-mid); border-color: var(--wood-mid); color: var(--cream); }
+  .dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat { background: #faf6ec; border-radius: 12px; padding: 10px 12px; min-width: 0; }
+  .stat b { display: block; font-size: 20px; color: var(--wood-dark); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .stat span { font-size: 12px; font-weight: 700; color: #6f5f4f; text-transform: uppercase; letter-spacing: .6px; }
+  .bars { display: flex; align-items: stretch; gap: 3px; height: 190px; }
+  .bar { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 6px; touch-action: manipulation; }
+  .bar-track { flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-height: 0; }
+  .bar-fill { width: 100%; max-width: 46px; background: #c9a77a; border-radius: 5px 5px 0 0; min-height: 2px; }
+  .bar.zero .bar-fill { background: #eadfc8; }
+  .bar.best .bar-fill { background: var(--gold); }
+  .bar.sel .bar-fill { background: var(--wood-mid); }
+  .bar-val { font-size: 11px; font-weight: 800; color: var(--wood-dark); margin-bottom: 2px; white-space: nowrap; }
+  .bar-lab { height: 18px; font-size: 11px; font-weight: 700; color: #6f5f4f; line-height: 18px; white-space: nowrap; }
+  .dia-sel { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #faf6ec; font-size: 14px; color: var(--text-dark); min-height: 44px; }
+  .dia-sel b { color: var(--wood-dark); }
+  .legenda-pag { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .lg-row { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+  .lg-dot { width: 14px; height: 14px; border-radius: 4px; flex: 0 0 auto; }
+  .lg-nome { flex: 1; font-weight: 700; color: var(--text-dark); }
+  .lg-val { font-weight: 800; color: var(--wood-dark); font-variant-numeric: tabular-nums; }
+  .lg-pct { width: 46px; text-align: right; color: #6f5f4f; font-weight: 700; }
+  .stack { display: flex; height: 26px; border-radius: 8px; overflow: hidden; background: #eadfc8; }
+  .stack > div { height: 100%; min-width: 2px; }
+  .rank-row { display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid #f1e8d4; }
+  .rank-row:last-child { border-bottom: 0; }
+  .rank-n { font-weight: 800; color: var(--gold); text-align: center; }
+  .rank-nome { font-size: 15px; font-weight: 700; color: var(--text-dark); overflow-wrap: anywhere; }
+  .rank-bar { height: 8px; border-radius: 4px; background: #eadfc8; margin-top: 5px; overflow: hidden; }
+  .rank-bar > i { display: block; height: 100%; background: var(--gold); border-radius: 4px; }
+  .rank-val { font-size: 14px; font-weight: 800; color: var(--wood-dark); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rank-val small { display: block; font-weight: 600; color: #6f5f4f; font-size: 12px; }
+  .dia-row { border-bottom: 1px solid #f1e8d4; }
+  .dia-row:last-child { border-bottom: 0; }
+  .dia-head { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; min-height: 56px; padding: 8px 2px; background: none; border: 0; font: inherit; text-align: left; cursor: pointer; }
+  .dia-nome { font-size: 16px; font-weight: 800; color: var(--wood-dark); }
+  .dia-total { font-size: 16px; font-weight: 800; color: var(--green-dark); text-align: right; font-variant-numeric: tabular-nums; }
+  .dia-info { font-size: 13px; color: #6f5f4f; grid-column: 1 / -1; }
+  .dia-info .mini { display: block; height: 6px; border-radius: 3px; background: #eadfc8; margin-top: 6px; overflow: hidden; }
+  .dia-info .mini > i { display: block; height: 100%; background: var(--gold); }
+  .dia-pedidos { padding: 4px 0 12px; display: flex; flex-direction: column; gap: 8px; }
+  .ped-h { background: #faf6ec; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+  .ped-h-top { display: flex; justify-content: space-between; gap: 8px; font-weight: 800; color: var(--wood-dark); }
+  .ped-h-sub { color: #6f5f4f; font-size: 13px; margin-top: 2px; }
+  .ped-h-itens { color: var(--text-dark); font-size: 13px; margin-top: 4px; }
+  .dash-vazio { padding: 22px 12px; text-align: center; color: #6f5f4f; font-size: 15px; background: #faf6ec; border-radius: 12px; }
+  .dash-btn { min-height: 44px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--wood-mid); color: var(--cream); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+  .dash-btn.sec { background: #faf6ec; color: var(--wood-mid); border: 1.5px solid var(--cream-dark); }
+  .dash-duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  @media (max-width: 768px) { .kpi.hoje .kpi-val { font-size: 36px; } }
 </style>
 </head>
 <body>
@@ -1085,6 +1159,10 @@
     <button class="nav-btn" onclick="showPanel('caixa')" id="nav-caixa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M6 14h.01M10 14h4"/></svg>
       <span>Caixa</span>
+    </button>
+    <button class="nav-btn" onclick="showPanel('dashboard')" id="nav-dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+      <span>Dashboard</span>
     </button>
     <button class="nav-btn" onclick="showPanel('cardapio-edit')" id="nav-cardapio-edit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1277,6 +1355,12 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="panel" id="panel-dashboard">
+    <p class="section-title">Dashboard de Vendas</p>
+    <div id="dash-root" class="dash"></div>
   </div>
 
   <!-- GARÇONS -->
@@ -1739,7 +1823,9 @@ function setupFirebaseListeners() {
   db.ref('historico').on('value', snap => {
     historico = snap.val() ? Object.values(snap.val()) : [];
     renderCaixa();
+    arquivarVendas(historico); // garante que tudo que está no histórico do dia também está no arquivo
   });
+  setTimeout(setupVendasListener, 0); // adiado: usa constantes definidas mais abaixo no script
   db.ref('config/totalMesas').on('value', snap => {
     const val = snap.val();
     if (val && val !== totalMesas) {
@@ -1849,6 +1935,7 @@ function showPanel(name) {
   document.getElementById('panel-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'caixa') { renderCaixa(); renderGarconsResumo(); }
+  if (name === 'dashboard') renderDashboard();
   if (name === 'garcons') { renderGarconsList(); renderGarconsResumo(); }
   if (name === 'lojinha') renderLojinhaLista();
   if (name === 'cardapio-edit') initEditCardapio();
@@ -1989,7 +2076,7 @@ function atualizarResumoMobile() {
   if (!el) return;
   const qtd = carrinho.reduce((s, item) => s + item.qtd, 0);
   const total = carrinho.reduce((s, item) => s + item.preco * item.qtd, 0);
-  el.textContent = `Mesa ${mesaSelecionada || '—'} · ${qtd} ${qtd === 1 ? 'item' : 'itens'} · R$ ${total.toFixed(2).replace('.', ',')}`;
+  el.textContent = `${mesaSelecionada ? 'Mesa ' + mesaSelecionada : 'Sem mesa'} · ${qtd} ${qtd === 1 ? 'item' : 'itens'} · R$ ${total.toFixed(2).replace('.', ',')}`;
 }
 
 // ====== CARDÁPIO ======
@@ -2380,7 +2467,7 @@ function renderCozinha() {
       <div class="pedido-card">
         <div class="pedido-card-header ${p.status}">
           <div>
-            <div class="pc-mesa ${p.status}">Mesa ${p.mesa}</div>
+            <div class="pc-mesa ${p.status}">${rotMesa(p.mesa)}</div>
             ${p.cliente ? `<div style="font-size:12px;color:var(--text-mid);font-weight:600">${p.cliente}</div>` : ''}
             ${p.garcom ? `<div style="font-size:11px;color:#888;margin-top:1px">🧑‍🍳 ${p.garcom}</div>` : ''}
           </div>
@@ -2422,7 +2509,7 @@ function mudarStatus(key, novoStatus) {
     salvarPedidos();
     renderCozinha();
     renderMesas();
-    showToast('Status da Mesa ' + pedidos[key].mesa + ' → ' + statusLabel(novoStatus));
+    showToast('Status da ' + rotMesa(pedidos[key].mesa) + ' → ' + statusLabel(novoStatus));
   }
 }
 
@@ -2435,7 +2522,7 @@ function toggleItemEntregue(key, idx) {
   if (todosEntregues && p.status === 'producao') {
     p.status = 'entregue';
     p.tsEntregue = Date.now();
-    showToast('✅ Todos os itens da Mesa ' + p.mesa + ' entregues!');
+    showToast('✅ Todos os itens da ' + rotMesa(p.mesa) + ' entregues!');
   }
   salvarPedidos();
   renderCozinha();
@@ -2445,7 +2532,7 @@ function toggleItemEntregue(key, idx) {
 function confirmarFechar(key) {
   const p = pedidos[key];
   abrirModal(
-    'Fechar Mesa ' + p.mesa,
+    'Fechar ' + rotMesa(p.mesa),
     `Fechar a mesa ${p.mesa} e registrar R$ ${p.total.toFixed(2).replace('.',',')} no caixa?`,
     () => fecharMesa(key)
   );
@@ -2465,18 +2552,18 @@ function fecharMesa(key) {
   renderCozinha();
   renderMesas();
   renderCaixa();
-  showToast('✓ Mesa ' + p.mesa + ' fechada! R$ ' + p.total.toFixed(2).replace('.',',') + ' registrado.');
+  showToast('✓ ' + rotMesa(p.mesa) + ' fechada! R$ ' + p.total.toFixed(2).replace('.',',') + ' registrado.');
 }
 
 function confirmarCancelar(key) {
   const p = pedidos[key];
-  abrirModal('Cancelar Pedido', `Cancelar pedido da Mesa ${p.mesa}?`, () => {
+  abrirModal('Cancelar Pedido', `Cancelar pedido da ${rotMesa(p.mesa)}?`, () => {
     delete pedidos[key];
     salvarPedidos();
     renderCozinha();
     renderMesas();
     renderMesaSelector();
-    showToast('Pedido da Mesa ' + p.mesa + ' cancelado.');
+    showToast('Pedido da ' + rotMesa(p.mesa) + ' cancelado.');
   });
 }
 
@@ -2516,9 +2603,9 @@ function renderCaixa() {
     if (listaPedidos.length === 0) {
       mesasAbertas.innerHTML = '<div style="color:#aaa;font-size:13px;font-style:italic;padding:10px 0">Nenhuma mesa em aberto no momento</div>';
     } else {
-      mesasAbertas.innerHTML = listaPedidos.sort((a,b) => a[1].mesa - b[1].mesa).map(([key, p]) => `
+      mesasAbertas.innerHTML = listaPedidos.sort((a,b) => (ehBalcao(a[1]) ? 1e9 + (a[1].ts || 0) : a[1].mesa) - (ehBalcao(b[1]) ? 1e9 + (b[1].ts || 0) : b[1].mesa)).map(([key, p]) => `
         <div class="caixa-mesa-card status-${p.status}" onclick="abrirCobranca('${key}')">
-          <div class="cm-num">Mesa ${p.mesa}</div>
+          <div class="cm-num">${rotMesa(p.mesa)}</div>
           <div class="cm-cliente">${p.cliente || p.garcom || '—'}</div>
           <div class="cm-total">R$ ${p.total.toFixed(2).replace('.',',')}</div>
           <div class="cm-status">${statusLabel(p.status)}</div>
@@ -2539,7 +2626,7 @@ function renderCaixa() {
     const realIdx = historico.length - 1 - i;
     return `
     <tr>
-      <td class="td-mesa">Mesa ${h.mesa}</td>
+      <td class="td-mesa">${rotMesa(h.mesa)}</td>
       <td>${h.cliente || '—'}</td>
       <td>${h.garcom || '—'}</td>
       <td><span style="background:#e8f5e9;color:#2d8a3e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${h.pagamento || '—'}</span></td>
@@ -2553,7 +2640,7 @@ function renderCaixa() {
     cards.innerHTML = [...historico].reverse().map((h, i) => {
       const realIdx = historico.length - 1 - i;
       return `<article class="historico-card">
-        <strong>Mesa ${h.mesa}</strong><strong class="td-valor">R$ ${h.total.toFixed(2).replace('.',',')}</strong>
+        <strong>${rotMesa(h.mesa)}</strong><strong class="td-valor">R$ ${h.total.toFixed(2).replace('.',',')}</strong>
         <span class="historico-meta">Hora: ${h.fechadoEm || '—'} · ${h.tempoPreparo || '—'}</span><span class="historico-meta">Pagamento: ${h.pagamento || '—'}</span>
         <span class="historico-meta">${h.cliente || h.garcom || 'Sem identificação'}</span>
         <button class="btn-reabrir" onclick="reabrirMesa(${realIdx})">↩ Reabrir</button>
@@ -2576,7 +2663,8 @@ function imprimirNotinhaCliente() {
     ts: Date.now(),
     tipo: 'notinha',
     notinha: {
-      mesa:      p.mesa,
+      mesa:      ehBalcao(p) ? 0 : p.mesa,
+      balcao:    ehBalcao(p),
       cliente:   p.cliente || '',
       garcom:    p.garcom  || '',
       itens:     [...p.itens, ...itensLojinha],
@@ -2589,7 +2677,7 @@ function imprimirNotinhaCliente() {
 
   if (useFirebase) {
     db.ref('fila_impressao/' + Date.now()).set(payload)
-      .then(() => showToast('🖨️ Notinha enviada para impressão — Mesa ' + p.mesa))
+      .then(() => showToast('🖨️ Notinha enviada para impressão — ' + rotMesa(p.mesa)))
       .catch(e => showToast('⚠️ Erro ao enviar notinha: ' + e.message));
   } else {
     showToast('⚠️ Firebase offline — impressão indisponível');
@@ -2621,7 +2709,7 @@ function renderCobItens() {
 function atualizarCobranca() {
   const p = pedidos[cobKey];
   if (!p) { fecharCobranca(); return; }
-  document.getElementById('cob-titulo').textContent = 'Mesa ' + p.mesa;
+  document.getElementById('cob-titulo').textContent = rotMesa(p.mesa);
   document.getElementById('cob-subtitulo').textContent =
     [p.cliente, p.garcom].filter(Boolean).join(' · ') || 'Sem identificação';
   renderCobItens();
@@ -2651,7 +2739,7 @@ function cobRemoverItem(i) {
   if (!p || !p.itens[i]) return;
   const it = p.itens[i];
   if (p.itens.length === 1) { cancelarPedidoCobranca(); return; }
-  abrirModal('Remover item', `Remover "${it.nome}" (${it.qtd}x) do pedido da Mesa ${p.mesa}?`, () => {
+  abrirModal('Remover item', `Remover "${it.nome}" (${it.qtd}x) do pedido da ${rotMesa(p.mesa)}?`, () => {
     const q = pedidos[cobKey];
     if (!q) return;
     const idx = q.itens.findIndex(x => x.nome === it.nome);
@@ -2666,7 +2754,7 @@ function cancelarPedidoCobranca() {
   const key = cobKey;
   const p = pedidos[key];
   if (!p) return;
-  abrirModal('Cancelar pedido', `Cancelar o pedido INTEIRO da Mesa ${p.mesa} (R$ ${p.total.toFixed(2).replace('.', ',')})? Isso apaga o pedido.`, () => {
+  abrirModal('Cancelar pedido', `Cancelar o pedido INTEIRO da ${rotMesa(p.mesa)} (R$ ${p.total.toFixed(2).replace('.', ',')})? Isso apaga o pedido.`, () => {
     if (!pedidos[key]) return;
     delete pedidos[key];
     salvarPedidos();
@@ -2675,7 +2763,7 @@ function cancelarPedidoCobranca() {
     renderMesas();
     renderMesaSelector();
     renderCaixa();
-    showToast('Pedido da Mesa ' + p.mesa + ' cancelado.');
+    showToast('Pedido da ' + rotMesa(p.mesa) + ' cancelado.');
   });
 }
 
@@ -2684,7 +2772,7 @@ function abrirCobranca(key) {
   cobPagamento = '';
   lojinhaItensAdicionados = []; // limpa itens da lojinha ao abrir
   const p = pedidos[key];
-  document.getElementById('cob-titulo').textContent = 'Mesa ' + p.mesa;
+  document.getElementById('cob-titulo').textContent = rotMesa(p.mesa);
   document.getElementById('cob-subtitulo').textContent =
     [p.cliente, p.garcom].filter(Boolean).join(' · ') || 'Sem identificação';
   document.getElementById('cob-desconto').value = '0';
@@ -2755,7 +2843,7 @@ function confirmarFecharConta() {
   if (!cobKey || !cobPagamento) return;
   const p = pedidos[cobKey];
   abrirModal(
-    'Fechar Conta — Mesa ' + p.mesa,
+    'Fechar Conta — ' + rotMesa(p.mesa),
     `Total: R$ ${cobTotalFinal.toFixed(2).replace('.',',')} · ${cobPagamento}. Confirmar?`,
     () => {
       // Adicionar itens da lojinha ao pedido
@@ -2775,6 +2863,7 @@ function confirmarFecharConta() {
         idHistorico: 'h_' + Date.now()
       };
       historico.push(registro);
+      arquivarVendas([registro]);
       delete pedidos[cobKey];
       lojinhaItensAdicionados = [];
       salvarPedidos();
@@ -2784,31 +2873,34 @@ function confirmarFecharConta() {
       renderMesas();
       renderCozinha();
       renderGarconsResumo();
-      showToast('✓ Mesa ' + p.mesa + ' fechada! R$ ' + cobTotalFinal.toFixed(2).replace('.',',') + ' · ' + cobPagamento);
+      showToast('✓ ' + rotMesa(p.mesa) + ' fechada! R$ ' + cobTotalFinal.toFixed(2).replace('.',',') + ' · ' + cobPagamento);
     }
   );
 }
 
 function confirmarZerarDia() {
-  abrirModal('Zerar o Dia', 'Isso vai apagar todo o histórico do dia. Confirma?', () => {
-    historico = [];
-    salvarHistorico();
-    renderCaixa();
-    showToast('Dia zerado!');
+  abrirModal('Zerar o Dia', 'Isso limpa o histórico do dia (e o PDF). As vendas ficam guardadas no Dashboard. Confirma?', () => {
+    const jaGuardado = arquivarVendas(historico); // salva no arquivo ANTES de limpar
+    Promise.resolve(jaGuardado).then(() => {
+      historico = [];
+      salvarHistorico();
+      renderCaixa();
+      showToast('Dia zerado! As vendas continuam no Dashboard.');
+    });
   });
 }
 
 function reabrirMesa(idx) {
   const h = historico[idx];
   if (!h) return;
-  const key = 'mesa' + h.mesa;
+  const key = ehBalcao(h) ? 'balcao' + (h.tsFechar || Date.now()) : 'mesa' + h.mesa;
   if (pedidos[key]) {
-    showToast('⚠️ Mesa ' + h.mesa + ' já tem pedido em aberto!');
+    showToast('⚠️ ' + rotMesa(h.mesa) + ' já tem pedido em aberto!');
     return;
   }
   abrirModal(
-    'Reabrir Mesa ' + h.mesa,
-    `Reabrir a conta da Mesa ${h.mesa} (R$ ${h.total.toFixed(2).replace('.',',')} · ${h.pagamento})? O registro será removido do histórico.`,
+    'Reabrir ' + rotMesa(h.mesa),
+    `Reabrir a conta da ${rotMesa(h.mesa)} (R$ ${h.total.toFixed(2).replace('.',',')} · ${h.pagamento})? O registro será removido do histórico.`,
     () => {
       // Restaurar pedido sem campos de fechamento
       const p = { ...h };
@@ -2819,13 +2911,14 @@ function reabrirMesa(idx) {
       delete p.idHistorico;
       p.status = 'entregue'; // volta como entregue pra mesa poder pedir mais ou fechar de novo
       pedidos[key] = p;
+      desarquivarVenda(h);
       historico.splice(idx, 1);
       salvarPedidos();
       salvarHistorico();
       renderCaixa();
       renderMesas();
       renderCozinha();
-      showToast('↩ Mesa ' + h.mesa + ' reaberta! Verifique na aba Cozinha ou Caixa.');
+      showToast('↩ ' + rotMesa(h.mesa) + ' reaberta! Verifique na aba Cozinha ou Caixa.');
     }
   );
 }
@@ -2915,7 +3008,7 @@ function montarRelatorioConteudo() {
     const fechadoStr = (h.fechadoEmData ? h.fechadoEmData + ' ' : '') + h.fechadoEm;
     return `
       <tr>
-        <td style="font-weight:700;color:#6b4226">Mesa ${h.mesa}</td>
+        <td style="font-weight:700;color:#6b4226">${rotMesa(h.mesa)}</td>
         <td>${h.cliente || '—'}</td>
         <td>${h.garcom || '—'}</td>
         <td style="font-size:11px;color:#555;max-width:150px">${itensStr}</td>
@@ -3340,8 +3433,9 @@ function abrirEditarPedido(key) {
   editarPedidoKey = key;
   const p = pedidos[key];
   editarItens = p.itens.map(it => ({ ...it }));
-  document.getElementById('modal-editar-title').textContent = 'Editar Pedido — Mesa ' + p.mesa;
-  document.getElementById('editar-mesa').value = p.mesa;
+  document.getElementById('modal-editar-title').textContent = 'Editar Pedido — ' + rotMesa(p.mesa);
+  document.getElementById('editar-mesa').value = ehBalcao(p) ? '' : p.mesa;
+  document.getElementById('editar-mesa').placeholder = ehBalcao(p) ? 'Balcão (sem mesa)' : '';
   document.getElementById('editar-cliente').value = p.cliente || '';
   document.getElementById('editar-obs').value = p.obs || '';
   // Popular e selecionar garçom
@@ -3395,10 +3489,12 @@ function removeEditarItem(i) {
 function salvarEdicaoPedido() {
   if (!editarPedidoKey) return;
   if (editarItens.length === 0) { showToast('⚠️ O pedido precisa ter pelo menos 1 item!'); return; }
-  const novaMesa = parseInt(document.getElementById('editar-mesa').value);
-  if (!novaMesa || novaMesa < 1) { showToast('⚠️ Número de mesa inválido!'); return; }
-
   const p = pedidos[editarPedidoKey];
+  const rawMesa = document.getElementById('editar-mesa').value.trim();
+  let novaMesa = parseInt(rawMesa);
+  if (ehBalcao(p) && !rawMesa) novaMesa = p.mesa;              // continua sendo balcão
+  else if (!novaMesa || novaMesa < 1) { showToast('⚠️ Número de mesa inválido!'); return; }
+  const keyAtual = editarPedidoKey;
   const mesaAntiga = p.mesa;
   p.cliente = document.getElementById('editar-cliente').value.trim();
   p.garcom = document.getElementById('editar-garcom').value || '';
@@ -3414,10 +3510,11 @@ function salvarEdicaoPedido() {
       return;
     }
     p.mesa = novaMesa;
+    delete p.balcao;
     pedidos[novaKey] = p;
     delete pedidos[editarPedidoKey];
     // Atualizar totalMesas se necessário
-    if (novaMesa > totalMesas) {
+    if (typeof novaMesa === 'number' && novaMesa > totalMesas) {
       totalMesas = novaMesa;
       salvarTotalMesas();
     }
@@ -3428,7 +3525,7 @@ function salvarEdicaoPedido() {
   renderMesas();
   renderMesaSelector();
   fecharEditarPedido();
-  if (document.getElementById('modal-cobranca').classList.contains('open')) { cobKey = 'mesa' + novaMesa; atualizarCobranca(); }
+  if (document.getElementById('modal-cobranca').classList.contains('open')) { cobKey = (typeof novaMesa === 'number') ? 'mesa' + novaMesa : keyAtual; atualizarCobranca(); }
   renderCaixa();
   showToast('✓ Pedido atualizado!' + (novaMesa !== mesaAntiga ? ' Movido para Mesa ' + novaMesa : ''));
 }
@@ -3443,7 +3540,7 @@ function abrirAdicionarItens(key) {
   modalPedidoKey = key;
   modalCarrinho = [];
   modalCatAtual = CATEGORIAS[0];
-  document.getElementById('modal-itens-title').textContent = 'Adicionar Itens — Mesa ' + pedidos[key].mesa;
+  document.getElementById('modal-itens-title').textContent = 'Adicionar Itens — ' + rotMesa(pedidos[key].mesa);
   document.getElementById('modal-obs').value = '';
   renderModalCatTabs();
   renderModalCardapio();
@@ -3585,7 +3682,7 @@ function confirmarAdicionarItens() {
   renderCozinha();
   renderMesas();
   fecharModalItens();
-  showToast('✓ Itens adicionados à Mesa ' + p.mesa + '! + R$ ' + adicional.toFixed(2).replace('.',','));
+  showToast('✓ Itens adicionados à ' + rotMesa(p.mesa) + '! + R$ ' + adicional.toFixed(2).replace('.',','));
 
   abrirModal(
     'Imprimir comanda?',
@@ -3627,7 +3724,7 @@ function imprimirComanda(pedido, itensNovos) {
     ts: Date.now(),
     tipo: 'comanda',
     pedido: {
-      mesa:    pedido.mesa,
+      mesa:    ehBalcao(pedido) ? 0 : pedido.mesa,
       cliente: pedido.cliente || '',
       garcom:  pedido.garcom  || '',
       itens:   itensNovos,
@@ -3638,7 +3735,7 @@ function imprimirComanda(pedido, itensNovos) {
   };
   if (useFirebase) {
     db.ref('fila_impressao/' + Date.now()).set(payload)
-      .then(() => showToast('🖨️ Comanda enviada para impressão — Mesa ' + pedido.mesa))
+      .then(() => showToast('🖨️ Comanda enviada para impressão — ' + rotMesa(pedido.mesa)))
       .catch(e => showToast('⚠️ Erro ao enviar comanda: ' + e.message));
   } else {
     showToast('⚠️ Firebase offline — impressão indisponível');
@@ -3648,22 +3745,22 @@ function imprimirComanda(pedido, itensNovos) {
 // Envia o pedido DIRETO pro caixa (ex.: só uma água): não passa pela cozinha, não imprime
 // comanda e entra na mesa já como entregue. Pede confirmação, porque a cozinha NÃO recebe.
 function enviarDiretoCaixa() {
-  if (!mesaSelecionada) { showToast('⚠️ Selecione uma mesa!'); return; }
   if (carrinho.length === 0) { showToast('⚠️ Adicione itens ao pedido!'); return; }
   const total = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
   const resumo = carrinho.map(c => c.qtd + 'x ' + c.label).join(', ');
-  const mesa = mesaSelecionada;
+  const mesa = mesaSelecionada;   // null = venda avulsa (Balcão), sem mesa
   abrirModal('Enviar direto para o Caixa?',
-    `Mesa ${mesa}: ${resumo} — R$ ${total.toFixed(2).replace('.', ',')}. A COZINHA NÃO vai receber este pedido.`,
+    `${mesa ? 'Mesa ' + mesa : 'Balcão (sem mesa)'}: ${resumo} — R$ ${total.toFixed(2).replace('.', ',')}. A COZINHA NÃO vai receber este pedido.`,
     () => confirmarEnviarDiretoCaixa(mesa));
 }
 
 function confirmarEnviarDiretoCaixa(mesa) {
   if (mesaSelecionada !== mesa || carrinho.length === 0) return;
+  const rotulo = mesa ? 'Mesa ' + mesa : 'Balcão';
   const total = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
   const agora = new Date();
   const hora = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-  const key = 'mesa' + mesa;
+  const key = mesa ? 'mesa' + mesa : 'balcao' + Date.now();   // cada venda de balcão é um pedido separado
   const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco, entregue: true }));
   const cliente = document.getElementById('cliente-nome').value || '';
   const garcom = document.getElementById('garcom-pedido').value || '';
@@ -3683,7 +3780,7 @@ function confirmarEnviarDiretoCaixa(mesa) {
     if (obs) p.obs = p.obs ? p.obs + ' | ' + obs : obs;
   } else {
     pedidos[key] = {
-      mesa: mesa, cliente: cliente, garcom: garcom, itens: novosItens, obs: obs,
+      mesa: mesa || 'Balcão', cliente: cliente, garcom: garcom, itens: novosItens, obs: obs,
       total: total, hora: hora, status: 'entregue', direto: true,
       ts: Date.now(), tsEntregue: Date.now()
     };
@@ -3698,8 +3795,266 @@ function confirmarEnviarDiretoCaixa(mesa) {
   renderCardapio();
   renderMesas();
   renderMesaSelector();
-  showToast('✓ Mesa ' + mesa + ' enviada direto para o Caixa — R$ ' + total.toFixed(2).replace('.', ','));
+  showToast('✓ ' + rotulo + ' enviado direto para o Caixa — R$ ' + total.toFixed(2).replace('.', ','));
   showPanel('caixa');
+}
+
+
+// ====== ARQUIVO PERMANENTE DE VENDAS + DASHBOARD ======
+// Cada conta fechada é guardada também em vendas/<dia>/<id>. O "Zerar Dia" só limpa
+// o histórico do dia (e o PDF) — o arquivo fica pra sempre e alimenta o Dashboard.
+const DIA_VIRA_AS = 5; // dia comercial: contas fechadas antes das 5h contam pro dia anterior
+// "Mesa 5" para mesas; "Balcão" para venda avulsa (sem mesa)
+function rotMesa(m) { return (typeof m === 'number' || /^\d+$/.test(String(m))) ? 'Mesa ' + m : (m || 'Balcão'); }
+function ehBalcao(p) { return !!p && !(typeof p.mesa === 'number' || /^\d+$/.test(String(p.mesa))); }
+const DIAS_SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const DIAS_SEM_LONGO = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const pad2 = n => String(n).padStart(2, '0');
+function keyDe(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function dataDe(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); }
+function addDias(k, n) { const d = dataDe(k); d.setDate(d.getDate() + n); return keyDe(d); }
+function chaveDia(ts) { return keyDe(new Date(ts - DIA_VIRA_AS * 3600000)); }
+function hojeKey() { return chaveDia(Date.now()); }
+function rotuloDia(k) { const d = dataDe(k); return DIAS_SEM[d.getDay()] + ' ' + pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1); }
+function brl(v) { return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+function brlCurto(v) { return v >= 1000 ? (v / 1000).toFixed(1).replace('.', ',') + 'k' : String(Math.round(v)); }
+function escHtml(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+let vendasPorDia = {};            // { '2026-10-30': { idHistorico: venda } }
+const vendasArquivadas = new Set(); // ids que já estão no arquivo (evita regravar)
+
+function vendaDeRegistro(h) {
+  const ts = h.tsFechar || h.ts || Date.now();
+  const id = h.idHistorico || ('h_' + ts + '_' + h.mesa);
+  return {
+    id, dia: chaveDia(ts),
+    venda: {
+      id, mesa: h.mesa || 0, cliente: h.cliente || '', garcom: h.garcom || '',
+      pagamento: h.pagamento || '—', total: Number(h.total) || 0, desconto: Number(h.desconto) || 0,
+      hora: h.fechadoEm || '', ts,
+      itens: (h.itens || []).map(it => ({ nome: it.nome || '', qtd: Number(it.qtd) || 0, preco: Number(it.preco) || 0 }))
+    }
+  };
+}
+
+function arquivarVendas(lista) {
+  const upd = {};
+  (lista || []).forEach(h => {
+    if (!h) return;
+    const { id, dia, venda } = vendaDeRegistro(h);
+    if (vendasArquivadas.has(id)) return;
+    upd['vendas/' + dia + '/' + id] = venda;
+    vendasArquivadas.add(id);
+    (vendasPorDia[dia] = vendasPorDia[dia] || {})[id] = venda;
+  });
+  if (!Object.keys(upd).length) return Promise.resolve();
+  if (!useFirebase) return Promise.resolve();
+  return db.ref().update(upd).catch(e => {
+    Object.keys(upd).forEach(path => vendasArquivadas.delete(path.split('/')[2]));
+    showToast('⚠️ Não consegui guardar no arquivo de vendas: ' + e.message);
+  });
+}
+
+function desarquivarVenda(h) {
+  const { id, dia } = vendaDeRegistro(h);
+  vendasArquivadas.delete(id);
+  if (vendasPorDia[dia]) delete vendasPorDia[dia][id];
+  if (useFirebase) db.ref('vendas/' + dia + '/' + id).remove().catch(() => {});
+}
+
+function setupVendasListener() {
+  const desde = addDias(hojeKey(), -400);
+  db.ref('vendas').orderByKey().startAt(desde).on('value', snap => {
+    vendasPorDia = snap.val() || {};
+    Object.values(vendasPorDia).forEach(dia => Object.keys(dia || {}).forEach(id => vendasArquivadas.add(id)));
+    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
+  });
+}
+
+// ----- cálculos -----
+function vendasEntre(a, b) {
+  const out = [];
+  Object.keys(vendasPorDia).forEach(k => {
+    if (k < a || k > b) return;
+    Object.values(vendasPorDia[k] || {}).forEach(v => out.push({ ...v, dia: k }));
+  });
+  return out;
+}
+function somaEntre(a, b) { const l = vendasEntre(a, b); return { tot: l.reduce((s, v) => s + (v.total || 0), 0), n: l.length }; }
+function diasEntre(a, b) { const l = []; for (let k = a; k <= b; k = addDias(k, 1)) l.push(k); return l; }
+function iniSemana(k) { const d = dataDe(k); return addDias(k, -((d.getDay() + 6) % 7)); }
+function iniMes(k) { return k.slice(0, 8) + '01'; }
+function mesAnterior(k) {
+  const d = dataDe(k); d.setDate(1); d.setMonth(d.getMonth() - 1);
+  const ini = keyDe(d); const fimMes = keyDe(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+  return { ini, fim: fimMes };
+}
+function deltaHtml(atual, ant, rotulo) {
+  if (!ant) return `<span class="delta na">sem ${rotulo} p/ comparar</span>`;
+  const pct = (atual - ant) / ant * 100;
+  const up = pct >= 0;
+  return `<span class="delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(0)}% vs ${rotulo}</span>`;
+}
+
+let dashPeriodo = '30';            // '7' | '30' | '90' | 'mes' | 'mespassado'
+let dashDiaSel = null;
+let dashDiasAbertos = new Set();
+let dashDiasMax = 14;
+
+function dashRange() {
+  const h = hojeKey();
+  if (dashPeriodo === '7') return [addDias(h, -6), h];
+  if (dashPeriodo === '90') return [addDias(h, -89), h];
+  if (dashPeriodo === 'mes') return [iniMes(h), h];
+  if (dashPeriodo === 'mespassado') { const m = mesAnterior(h); return [m.ini, m.fim]; }
+  return [addDias(h, -29), h];
+}
+function dashSetPeriodo(p) { dashPeriodo = p; dashDiaSel = null; dashDiasMax = 14; renderDashboard(); }
+function dashSelDia(k) { dashDiaSel = k; dashDiasAbertos.add(k); renderDashboard(); }
+function dashToggleDia(k) { if (dashDiasAbertos.has(k)) dashDiasAbertos.delete(k); else dashDiasAbertos.add(k); renderDashboard(); }
+function dashMaisDias() { dashDiasMax += 14; renderDashboard(); }
+
+const PAG_CORES = { 'Dinheiro': '#2d8a3e', 'Pix': '#16a39a', 'Débito': '#1a7abf', 'Crédito': '#7b3fb0', 'Voucher': '#e07b1a', 'Misto': '#8a7d6d' };
+
+function dashPagamentos(lista) {
+  const m = {}; lista.forEach(v => { const k = v.pagamento || '—'; m[k] = (m[k] || 0) + (v.total || 0); });
+  const tot = Object.values(m).reduce((a, b) => a + b, 0) || 1;
+  const arr = Object.entries(m).sort((a, b) => b[1] - a[1]);
+  if (!arr.length) return '<div class="dash-vazio">Sem vendas no período.</div>';
+  return `<div class="stack">${arr.map(([k, v]) => `<div style="width:${v / tot * 100}%;background:${PAG_CORES[k] || '#8a7d6d'}" title="${escHtml(k)}"></div>`).join('')}</div>
+    <div class="legenda-pag">${arr.map(([k, v]) => `<div class="lg-row"><span class="lg-dot" style="background:${PAG_CORES[k] || '#8a7d6d'}"></span><span class="lg-nome">${escHtml(k)}</span><span class="lg-val">${brl(v)}</span><span class="lg-pct">${(v / tot * 100).toFixed(0)}%</span></div>`).join('')}</div>`;
+}
+
+function dashRanking(linhas, vazio) {
+  if (!linhas.length) return `<div class="dash-vazio">${vazio}</div>`;
+  const max = Math.max(...linhas.map(l => l.v)) || 1;
+  return linhas.map((l, i) => `<div class="rank-row"><span class="rank-n">${i + 1}</span><div><div class="rank-nome">${escHtml(l.nome)}</div><div class="rank-bar"><i style="width:${l.v / max * 100}%"></i></div></div><div class="rank-val">${l.dir}<small>${l.sub || ''}</small></div></div>`).join('');
+}
+
+function dashBarrasSimples(itens, melhorChave, fmt) {
+  const max = Math.max(1, ...itens.map(i => i.v));
+  return `<div class="bars" style="height:150px">${itens.map(i => {
+    const h = Math.max(i.v > 0 ? 4 : 1, Math.round(i.v / max * 100));
+    return `<div class="bar${i.k === melhorChave ? ' best' : ''}${i.v === 0 ? ' zero' : ''}" style="cursor:default"><div class="bar-track">${i.v > 0 ? `<span class="bar-val">${fmt(i.v)}</span>` : ''}<div class="bar-fill" style="height:${h}%"></div></div><span class="bar-lab">${i.lab}</span></div>`;
+  }).join('')}</div>`;
+}
+
+function renderDashboard() {
+  const root = document.getElementById('dash-root');
+  if (!root) return;
+  const h = hojeKey();
+  const todas = Object.keys(vendasPorDia).length;
+
+  // ---- KPIs
+  const hoje = somaEntre(h, h), ontem = somaEntre(addDias(h, -1), addDias(h, -1));
+  const iS = iniSemana(h), diasSem = Math.round((dataDe(h) - dataDe(iS)) / 86400000);
+  const sem = somaEntre(iS, h), semAnt = somaEntre(addDias(iS, -7), addDias(iS, -7 + diasSem));
+  const iM = iniMes(h), mAnt = mesAnterior(h), diaMes = dataDe(h).getDate();
+  const fimAntCmp = addDias(mAnt.ini, Math.min(diaMes, dataDe(mAnt.fim).getDate()) - 1);
+  const mes = somaEntre(iM, h), mesAntCmp = somaEntre(mAnt.ini, fimAntCmp);
+  const tk = x => x.n ? brl(x.tot / x.n) : '—';
+  const kpis = `<div class="dash-kpis">
+    <div class="kpi hoje"><div class="kpi-lab">Hoje · ${rotuloDia(h)}</div><div class="kpi-val">${brl(hoje.tot)}</div><div class="kpi-meta">${hoje.n} pedido${hoje.n === 1 ? '' : 's'} · ticket médio ${tk(hoje)}</div>${deltaHtml(hoje.tot, ontem.tot, 'ontem')}</div>
+    <div class="kpi"><div class="kpi-lab">Esta semana</div><div class="kpi-val">${brl(sem.tot)}</div><div class="kpi-meta">${sem.n} pedidos</div>${deltaHtml(sem.tot, semAnt.tot, 'sem. passada')}</div>
+    <div class="kpi"><div class="kpi-lab">Este mês</div><div class="kpi-val">${brl(mes.tot)}</div><div class="kpi-meta">${mes.n} pedidos</div>${deltaHtml(mes.tot, mesAntCmp.tot, 'mês passado')}</div>
+  </div>`;
+
+  // ---- período escolhido
+  const [a, b] = dashRange();
+  const lista = vendasEntre(a, b);
+  const dias = diasEntre(a, b);
+  const porDia = {}; lista.forEach(v => { porDia[v.dia] = (porDia[v.dia] || 0) + v.total; });
+  const totPer = lista.reduce((s, v) => s + v.total, 0);
+  const diasComVenda = Object.keys(porDia).filter(k => porDia[k] > 0);
+  let melhor = null; diasComVenda.forEach(k => { if (melhor === null || porDia[k] > porDia[melhor]) melhor = k; });
+  const chips = [['7', '7 dias'], ['30', '30 dias'], ['90', '90 dias'], ['mes', 'Este mês'], ['mespassado', 'Mês passado']]
+    .map(([k, t]) => `<button type="button" class="dash-chip${dashPeriodo === k ? ' on' : ''}" onclick="dashSetPeriodo('${k}')">${t}</button>`).join('');
+
+  const labBarra = k => { const d = dataDe(k); if (dias.length <= 8) return DIAS_SEM[d.getDay()]; if (dias.length <= 35) return (d.getDate() % 5 === 0 || d.getDate() === 1) ? pad2(d.getDate()) : ''; return d.getDate() === 1 ? pad2(d.getMonth() + 1) + '/' : ''; };
+  const maxDia = Math.max(1, ...dias.map(k => porDia[k] || 0));
+  const barras = `<div class="bars">${dias.map(k => {
+    const v = porDia[k] || 0, hh = Math.max(v > 0 ? 3 : 1, Math.round(v / maxDia * 100));
+    return `<button type="button" class="bar${k === melhor ? ' best' : ''}${k === dashDiaSel ? ' sel' : ''}${v === 0 ? ' zero' : ''}" onclick="dashSelDia('${k}')" aria-label="${rotuloDia(k)}: ${brl(v)}"><div class="bar-track">${dias.length <= 8 && v > 0 ? `<span class="bar-val">${brlCurto(v)}</span>` : ''}<div class="bar-fill" style="height:${hh}%"></div></div><span class="bar-lab">${labBarra(k)}</span></button>`;
+  }).join('')}</div>`;
+  let selTxt = 'Toque numa barra para ver o dia.';
+  if (dashDiaSel) { const v = vendasEntre(dashDiaSel, dashDiaSel); const t = v.reduce((s, x) => s + x.total, 0); selTxt = `<b>${rotuloDia(dashDiaSel)}</b> · ${brl(t)} · ${v.length} pedido${v.length === 1 ? '' : 's'}${v.length ? ' · ticket ' + brl(t / v.length) : ''}`; }
+
+  const stats = `<div class="dash-stats">
+    <div class="stat"><span>Faturamento</span><b>${brl(totPer)}</b></div>
+    <div class="stat"><span>Pedidos</span><b>${lista.length}</b></div>
+    <div class="stat"><span>Ticket médio</span><b>${lista.length ? brl(totPer / lista.length) : '—'}</b></div>
+    <div class="stat"><span>Média por dia aberto</span><b>${diasComVenda.length ? brl(totPer / diasComVenda.length) : '—'}</b></div>
+    <div class="stat" style="grid-column:1/-1"><span>Melhor dia 🏆</span><b>${melhor ? rotuloDia(melhor) + ' · ' + brl(porDia[melhor]) + ' · ' + vendasEntre(melhor, melhor).length + ' pedidos' : '—'}</b></div>
+  </div>`;
+
+  // ---- itens
+  const it = {}; lista.forEach(v => (v.itens || []).forEach(i => { const o = it[i.nome] = it[i.nome] || { q: 0, t: 0 }; o.q += i.qtd; o.t += i.qtd * i.preco; }));
+  const topItens = Object.entries(it).sort((x, y) => y[1].q - x[1].q).slice(0, 8).map(([n, o]) => ({ nome: n, v: o.q, dir: o.q + 'x', sub: brl(o.t) }));
+  // ---- garçons
+  const g = {}; lista.forEach(v => { const k = v.garcom || 'Sem garçom'; const o = g[k] = g[k] || { n: 0, t: 0 }; o.n++; o.t += v.total; });
+  const garcons = Object.entries(g).sort((x, y) => y[1].t - x[1].t).map(([n, o]) => ({ nome: n, v: o.t, dir: brl(o.t), sub: o.n + ' pedidos' }));
+  // ---- dia da semana (média por dia aberto)
+  const ws = Array.from({ length: 7 }, () => ({ t: 0, d: new Set() }));
+  lista.forEach(v => { const wd = dataDe(v.dia).getDay(); ws[wd].t += v.total; ws[wd].d.add(v.dia); });
+  const ordem = [1, 2, 3, 4, 5, 6, 0];
+  const wsItens = ordem.map(w => ({ k: w, lab: DIAS_SEM[w], v: ws[w].d.size ? ws[w].t / ws[w].d.size : 0 }));
+  const wsMelhor = wsItens.reduce((m, x) => x.v > (m ? m.v : 0) ? x : m, null);
+  // ---- horário
+  const hr = Array(24).fill(0); lista.forEach(v => { hr[new Date(v.ts).getHours()]++; });
+  let hMin = 8, hMax = 22; hr.forEach((n, i) => { if (n) { hMin = Math.min(hMin, i); hMax = Math.max(hMax, i); } });
+  const hrItens = []; for (let i = hMin; i <= hMax; i++) hrItens.push({ k: i, lab: i % 2 === 0 ? i + 'h' : '', v: hr[i] });
+  const hrMelhor = hr.some(n => n) ? hr.indexOf(Math.max(...hr)) : null;
+
+  // ---- dia a dia
+  const diasLista = Object.keys(porDia).filter(k => (vendasPorDia[k] && Object.keys(vendasPorDia[k]).length)).sort().reverse();
+  const diaAdia = diasLista.slice(0, dashDiasMax).map(k => {
+    const v = Object.values(vendasPorDia[k]).sort((x, y) => (x.ts || 0) - (y.ts || 0));
+    const t = v.reduce((s, x) => s + x.total, 0);
+    const aberto = dashDiasAbertos.has(k);
+    const peds = aberto ? `<div class="dia-pedidos">${v.map(x => `<div class="ped-h"><div class="ped-h-top"><span>${escHtml(x.hora || '')} · ${rotMesa(x.mesa)}</span><span>${brl(x.total)}</span></div><div class="ped-h-sub">${escHtml([x.garcom, x.cliente, x.pagamento].filter(Boolean).join(' · '))}</div><div class="ped-h-itens">${(x.itens || []).map(i => i.qtd + 'x ' + escHtml(i.nome)).join(', ')}</div></div>`).join('')}</div>` : '';
+    return `<div class="dia-row"><button type="button" class="dia-head" onclick="dashToggleDia('${k}')"><span class="dia-nome">${DIAS_SEM_LONGO[dataDe(k).getDay()]}, ${pad2(dataDe(k).getDate())}/${pad2(dataDe(k).getMonth() + 1)}${k === melhor ? ' 🏆' : ''}</span><span class="dia-total">${brl(t)}</span><span class="dia-info">${v.length} pedidos · ticket ${brl(t / v.length)} ${aberto ? '▲' : '▼'}<span class="mini"><i style="width:${t / (porDia[melhor] || t) * 100}%"></i></span></span></button>${peds}</div>`;
+  }).join('');
+
+  root.innerHTML = `
+    ${todas ? '' : '<div class="dash-card"><div class="dash-vazio">Ainda não há vendas guardadas. Cada conta fechada passa a ser guardada aqui automaticamente.</div></div>'}
+    ${kpis}
+    <div class="dash-card">
+      <h3>Faturamento por dia</h3>
+      <div class="dash-chips" style="margin-bottom:12px">${chips}</div>
+      ${stats}
+      ${barras}
+      <div class="dia-sel">${selTxt}</div>
+    </div>
+    <div class="dash-duo">
+      <div class="dash-card"><h3>Formas de pagamento</h3>${dashPagamentos(lista)}</div>
+      <div class="dash-card"><h3>Mais vendidos</h3>${dashRanking(topItens, 'Sem vendas no período.')}</div>
+      <div class="dash-card"><h3>Dias da semana</h3><div class="dash-sub">Média de faturamento por dia aberto${wsMelhor && wsMelhor.v ? ' · melhor: <b>' + DIAS_SEM_LONGO[wsMelhor.k] + '</b>' : ''}</div>${dashBarrasSimples(wsItens, wsMelhor && wsMelhor.v ? wsMelhor.k : null, brlCurto)}</div>
+      <div class="dash-card"><h3>Horário de pico</h3><div class="dash-sub">Pedidos por hora (conta fechada)${hrMelhor !== null ? ' · pico: <b>' + hrMelhor + 'h</b>' : ''}</div>${dashBarrasSimples(hrItens, hrMelhor, String)}</div>
+      <div class="dash-card"><h3>Garçons</h3>${dashRanking(garcons, 'Sem vendas no período.')}</div>
+    </div>
+    <div class="dash-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px"><h3 style="margin:0">Dia a dia</h3><button type="button" class="dash-btn sec" onclick="dashCSV()">⬇ Baixar planilha (CSV)</button></div>
+      <div class="dash-sub">Toque num dia para ver os pedidos fechados.</div>
+      ${diaAdia || '<div class="dash-vazio">Nenhum dia com vendas neste período.</div>'}
+      ${diasLista.length > dashDiasMax ? '<div style="text-align:center;margin-top:10px"><button type="button" class="dash-btn" onclick="dashMaisDias()">Mostrar mais dias</button></div>' : ''}
+    </div>`;
+}
+
+function dashCSV() {
+  const [a, b] = dashRange();
+  const lista = vendasEntre(a, b).sort((x, y) => (x.ts || 0) - (y.ts || 0));
+  if (!lista.length) { showToast('⚠️ Nenhuma venda neste período.'); return; }
+  const cel = t => '"' + String(t == null ? '' : t).replace(/"/g, '""') + '"';
+  const num = n => String(Number(n || 0).toFixed(2)).replace('.', ',');
+  const linhas = [['Data', 'Hora', 'Mesa', 'Garçom', 'Cliente', 'Pagamento', 'Total', 'Itens'].join(';')];
+  lista.forEach(v => linhas.push([cel(v.dia.split('-').reverse().join('/')), cel(v.hora), v.mesa, cel(v.garcom), cel(v.cliente), cel(v.pagamento), num(v.total), cel((v.itens || []).map(i => i.qtd + 'x ' + i.nome).join(', '))].join(';')));
+  const blob = new Blob(['﻿' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const aEl = document.createElement('a');
+  aEl.href = url; aEl.download = `vendas-parada-do-salto-${a}_a_${b}.csv`;
+  document.body.appendChild(aEl); aEl.click(); aEl.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  showToast('✓ Planilha gerada (' + lista.length + ' vendas)');
 }
 
 // ====== CRONÔMETRO ======
