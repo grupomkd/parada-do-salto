@@ -1809,6 +1809,7 @@ function salvarCategoria(cat) {
     nome: i.nome,
     preco: i.preco,
     ...(i.precoG ? { precoG: i.precoG, tam: true } : {}),
+    ...(i.tl ? { tl: i.tl } : {}),
     ...(i.desc ? { desc: i.desc } : {}),
     ...(i.pausado ? { pausado: true } : {})
   }));
@@ -2010,9 +2011,11 @@ function acharItem(id) {
   }
   return null;
 }
+// Rótulo do tamanho: itens com `tl` (ex.: ['P','M']) usam rótulos próprios; a chave interna segue M/G
+function tamRot(item, t) { return item && item.tl ? item.tl[t === 'G' ? 1 : 0] : t; }
 function labelDe(item) {
   if (!item.tam) return item.nome;
-  return `${item.nome} (${tamanhoAtual[item.id] || 'M'})`;
+  return `${item.nome} (${tamRot(item, tamanhoAtual[item.id] || 'M')})`;
 }
 function tocarItem(id) {
   const it = acharItem(id);
@@ -2069,8 +2072,8 @@ function itemCardHTML(item, catLabel) {
     if (!tamanhoAtual[id]) tamanhoAtual[id] = 'M';
     const t = tamanhoAtual[id];
     seg = `<div class="size-seg" role="group" aria-label="Tamanho">
-      <button type="button" class="${t === 'M' ? 'on' : ''}" onclick="setTam('${id}','M',event)">M <b>R$ ${item.preco.toFixed(2).replace('.', ',')}</b></button>
-      <button type="button" class="${t === 'G' ? 'on' : ''}" onclick="setTam('${id}','G',event)">G <b>R$ ${item.precoG.toFixed(2).replace('.', ',')}</b></button>
+      <button type="button" class="${t === 'M' ? 'on' : ''}" onclick="setTam('${id}','M',event)">${tamRot(item, 'M')} <b>R$ ${item.preco.toFixed(2).replace('.', ',')}</b></button>
+      <button type="button" class="${t === 'G' ? 'on' : ''}" onclick="setTam('${id}','G',event)">${tamRot(item, 'G')} <b>R$ ${item.precoG.toFixed(2).replace('.', ',')}</b></button>
     </div>`;
     qtdLabel = (carrinho.find(c => c.label === labelDe(item)) || {}).qtd || 0;
   } else {
@@ -2086,6 +2089,12 @@ function itemCardHTML(item, catLabel) {
     ${preco}${acao}
   </div>`;
 }
+
+const AVISO_CATEGORIA = {
+  'Pizza Salgada': '+ R$ 7,00 por borda (requeijão ou cheddar)',
+  'Pizza Doce': '+ R$ 7,00 por borda doce (chocolate ao leite ou amargo)',
+  'Prato Feito': 'Acompanha: arroz, feijão, fritas, ovo frito e salada'
+};
 
 function renderCardapio() {
   const list = document.getElementById('cardapio-list');
@@ -2105,7 +2114,8 @@ function renderCardapio() {
     html = achados.slice(0, 60).map(([cat, item]) => itemCardHTML(item, cat)).join('');
   } else {
     const itens = CARDAPIO[catAtual] || [];
-    if (catAtual === 'Pizza Salgada') html += '<div class="borda-info">+ R$ 7,00 por borda (requeijão ou cheddar)</div>';
+    const avisoCat = AVISO_CATEGORIA[catAtual];
+    if (avisoCat) html += '<div class="borda-info">' + avisoCat + '</div>';
     html += itens.map(item => itemCardHTML(item, '')).join('');
     if (!itens.length) html += '<div class="cardapio-no-results">Nenhum item nesta categoria.</div>';
   }
@@ -2124,7 +2134,7 @@ function setTam(id, tam, e) {
 function addItemComTam(id, nome, precoM, precoG) {
   const tam = tamanhoAtual[id] || 'M';
   const preco = tam === 'G' ? precoG : precoM;
-  addItem(id, nome, preco, tam);
+  addItem(id, nome, preco, tamRot(acharItem(id), tam));
 }
 
 function addItem(id, nome, preco, tam) {
