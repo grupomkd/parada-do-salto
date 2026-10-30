@@ -631,6 +631,8 @@
   .cardapio-item.item-added { animation:item-added .55s ease-out; }
   @keyframes item-added { 0% { background:#dff4df; } 100% { background:white; } }
   .pedido-mobile-bar, .mesa-selecionada-info, .historico-cards { display:none; }
+  .btn-enviar-caixa { width:100%; margin-top:8px; min-height:44px; padding:10px; border:2px solid var(--gold); border-radius:var(--radius); background:#fff7e0; color:var(--wood-dark); font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
+  .btn-enviar-caixa:hover { background:var(--gold-light); }
   .cardapio-search { width:100%; margin:0 0 10px; padding:10px 12px; border:1.5px solid var(--cream-dark); border-radius:8px; font:inherit; font-size:16px; color:var(--text-dark); }
   .cardapio-no-results { padding:28px 16px; text-align:center; color:var(--text-mid); font-size:14px; }
   .btn-secondary-print { font-size:14px; }
@@ -702,7 +704,7 @@
     .status-bar { padding: 5px 12px; font-size: 11px; }
 
     /* Main */
-    main { padding: 12px 12px calc(92px + env(safe-area-inset-bottom)); }
+    main { padding: 12px 12px calc(124px + env(safe-area-inset-bottom)); }
     .section-title { font-size: 17px; margin-bottom: 12px; }
 
     /* Mesas grid */
@@ -794,12 +796,15 @@
 
     /* Barra fixa do pedido e ações grandes */
     #btn-enviar { display:none; }
-    .pedido-mobile-bar { display:grid; grid-template-columns:1fr auto auto; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:150; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:var(--wood-dark); border-top:2px solid var(--gold); box-shadow:0 -4px 16px rgba(0,0,0,.25); }
-    .pedido-mobile-summary { color:var(--cream); font-size:14px; font-weight:700; align-self:center; line-height:1.25; }
-    .pedido-mobile-bar button { min-height:44px; border:0; border-radius:8px; cursor:pointer; font:inherit; font-weight:700; }
-    .pedido-mobile-toggle { padding:0 10px; background:var(--cream-dark); color:var(--wood-dark); }
-    .pedido-mobile-send { padding:0 12px; background:var(--green-dark); color:var(--cream); }
-    .toast { right:12px; left:12px; bottom:calc(84px + env(safe-area-inset-bottom)); font-size:14px; }
+    .pedido-mobile-bar { display:flex; flex-direction:column;  gap:6px; position:fixed; left:0; right:0; bottom:0; z-index:150; padding:8px 12px calc(10px + env(safe-area-inset-bottom)); background:var(--wood-dark); border-top:2px solid var(--gold); box-shadow:0 -4px 16px rgba(0,0,0,.25); }
+    .pedido-mobile-summary { color:var(--cream); font-size:14px; font-weight:700; line-height:1.2; }
+    .pedido-mobile-acoes { display:grid; grid-template-columns:auto 1fr 1fr; gap:8px; }
+    .pedido-mobile-bar button { min-height:46px; border:0; border-radius:8px; cursor:pointer; font:inherit; font-weight:800; }
+    .pedido-mobile-toggle { padding:0 12px; background:var(--cream-dark); color:var(--wood-dark); }
+    .pedido-mobile-caixa { background:var(--gold); color:var(--wood-dark); }
+    .pedido-mobile-send { background:var(--green-dark); color:var(--cream); }
+    #btn-enviar-caixa { display:none; }
+    .toast { right:12px; left:12px; bottom:calc(116px + env(safe-area-inset-bottom)); font-size:14px; }
     .toast:not(.show) { transform:translateY(240px); opacity:0; pointer-events:none; }
     .modal-overlay { padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
     .btn-cancel, .btn-status, .btn-edit-item, .btn-fechar-mesa-hist { min-height:44px; font-size:14px; }
@@ -1142,6 +1147,7 @@
           <label>Observação para todo o pedido</label>
           <textarea class="obs-area" id="obs-pedido" placeholder="Ex: sem cebola, bem passado..."></textarea>
           <button class="btn-enviar" id="btn-enviar" onclick="enviarPedido()">✓ ENVIAR PARA COZINHA</button>
+          <button class="btn-enviar-caixa" id="btn-enviar-caixa" type="button" onclick="enviarDiretoCaixa()">💵 Enviar direto para o CAIXA (sem cozinha)</button>
         </details>
       </div>
       <div class="form-section pedido-cardapio">
@@ -1156,8 +1162,11 @@
     </div>
     <div class="pedido-mobile-bar" aria-label="Resumo e envio do pedido">
       <div class="pedido-mobile-summary" id="pedido-mobile-summary">Mesa — · 0 itens · R$ 0,00</div>
-      <button class="pedido-mobile-toggle" type="button" onclick="alternarResumoPedido()">Resumo</button>
-      <button class="pedido-mobile-send" type="button" onclick="enviarPedido()">Enviar</button>
+      <div class="pedido-mobile-acoes">
+        <button class="pedido-mobile-toggle" type="button" onclick="alternarResumoPedido()">Resumo</button>
+        <button class="pedido-mobile-caixa" type="button" onclick="enviarDiretoCaixa()">Caixa</button>
+        <button class="pedido-mobile-send" type="button" onclick="enviarPedido()">Cozinha</button>
+      </div>
     </div>
   </div>
 
@@ -2297,6 +2306,7 @@ function filtrarCozinha(f, btn) {
 function renderCozinha() {
   const grid = document.getElementById('cozinha-grid');
   let lista = Object.values(pedidos).filter(p => p);
+  lista = lista.filter(p => !(p.direto && p.itens && p.itens.length && p.itens.every(it => it.entregue)));
   if (filtroAtual !== 'todos') lista = lista.filter(p => p.status === filtroAtual);
   lista.sort((a, b) => a.ts - b.ts);
   if (lista.length === 0) {
@@ -3539,6 +3549,63 @@ function imprimirComanda(pedido, itensNovos) {
   } else {
     showToast('⚠️ Firebase offline — impressão indisponível');
   }
+}
+
+// Envia o pedido DIRETO pro caixa (ex.: só uma água): não passa pela cozinha, não imprime
+// comanda e entra na mesa já como entregue. Pede confirmação, porque a cozinha NÃO recebe.
+function enviarDiretoCaixa() {
+  if (!mesaSelecionada) { showToast('⚠️ Selecione uma mesa!'); return; }
+  if (carrinho.length === 0) { showToast('⚠️ Adicione itens ao pedido!'); return; }
+  const total = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
+  const resumo = carrinho.map(c => c.qtd + 'x ' + c.label).join(', ');
+  const mesa = mesaSelecionada;
+  abrirModal('Enviar direto para o Caixa?',
+    `Mesa ${mesa}: ${resumo} — R$ ${total.toFixed(2).replace('.', ',')}. A COZINHA NÃO vai receber este pedido.`,
+    () => confirmarEnviarDiretoCaixa(mesa));
+}
+
+function confirmarEnviarDiretoCaixa(mesa) {
+  if (mesaSelecionada !== mesa || carrinho.length === 0) return;
+  const total = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
+  const agora = new Date();
+  const hora = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const key = 'mesa' + mesa;
+  const novosItens = carrinho.map(c => ({ nome: c.label, qtd: c.qtd, preco: c.preco, entregue: true }));
+  const cliente = document.getElementById('cliente-nome').value || '';
+  const garcom = document.getElementById('garcom-pedido').value || '';
+  const obs = document.getElementById('obs-pedido').value || '';
+
+  if (pedidos[key]) {
+    // Mesa já tem pedido: soma os itens (já entregues) e NÃO volta o pedido pra cozinha
+    const p = pedidos[key];
+    if (!p.itens) p.itens = [];
+    novosItens.forEach(n => {
+      const ex = p.itens.find(it => it.nome === n.nome && it.entregue);
+      if (ex) ex.qtd += n.qtd; else p.itens.push(n);
+    });
+    p.total += total;
+    if (!p.cliente && cliente) p.cliente = cliente;
+    if (!p.garcom && garcom) p.garcom = garcom;
+    if (obs) p.obs = p.obs ? p.obs + ' | ' + obs : obs;
+  } else {
+    pedidos[key] = {
+      mesa: mesa, cliente: cliente, garcom: garcom, itens: novosItens, obs: obs,
+      total: total, hora: hora, status: 'entregue', direto: true,
+      ts: Date.now(), tsEntregue: Date.now()
+    };
+  }
+  salvarPedidos();
+  carrinho = [];
+  mesaSelecionada = null;
+  document.getElementById('cliente-nome').value = '';
+  document.getElementById('garcom-pedido').value = '';
+  document.getElementById('obs-pedido').value = '';
+  renderCarrinho();
+  renderCardapio();
+  renderMesas();
+  renderMesaSelector();
+  showToast('✓ Mesa ' + mesa + ' enviada direto para o Caixa — R$ ' + total.toFixed(2).replace('.', ','));
+  showPanel('caixa');
 }
 
 // ====== CRONÔMETRO ======
