@@ -631,6 +631,18 @@
   .cardapio-item.item-added { animation:item-added .55s ease-out; }
   @keyframes item-added { 0% { background:#dff4df; } 100% { background:white; } }
   .pedido-mobile-bar, .mesa-selecionada-info, .historico-cards { display:none; }
+  .cob-item { padding: 8px 0; border-bottom: 1px solid var(--cream-dark); }
+  .cob-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 15px; color: var(--text-dark); }
+  .cob-item-top .cob-preco { font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cob-item-ctl { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 6px; }
+  .cob-qtd-btn { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--cream-dark); background: white; color: var(--wood-dark); font-size: 24px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
+  .cob-qtd-btn.mais { background: var(--gold); border-color: var(--gold); color: white; }
+  .cob-qtd-num { min-width: 34px; text-align: center; font-size: 20px; font-weight: 800; color: var(--wood-dark); }
+  .cob-del-item { margin-left: 8px; width: 44px; height: 44px; border-radius: 10px; border: 0; background: #fdecea; color: var(--danger); font-size: 22px; cursor: pointer; }
+  .cob-acoes-pedido { display: flex; gap: 8px; margin: 10px 0 4px; }
+  .cob-acoes-pedido button { flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .cob-btn-editar { border: 1.5px solid var(--wood-mid); background: white; color: var(--wood-mid); }
+  .cob-btn-cancelar { border: 1.5px solid var(--danger); background: #fdecea; color: var(--danger); }
   .btn-enviar-caixa { width:100%; margin-top:8px; min-height:44px; padding:10px; border:2px solid var(--gold); border-radius:var(--radius); background:#fff7e0; color:var(--wood-dark); font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
   .btn-enviar-caixa:hover { background:var(--gold-light); }
   .cardapio-search { width:100%; margin:0 0 10px; padding:10px 12px; border:1.5px solid var(--cream-dark); border-radius:8px; font:inherit; font-size:16px; color:var(--text-dark); }
@@ -1419,6 +1431,10 @@
     <div style="padding:14px 20px;background:var(--cream)">
       <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Consumo</div>
       <div id="cob-itens"></div>
+      <div class="cob-acoes-pedido">
+        <button type="button" class="cob-btn-editar" onclick="abrirEditarPedido(cobKey)">✏️ Editar pedido</button>
+        <button type="button" class="cob-btn-cancelar" onclick="cancelarPedidoCobranca()">🗑 Cancelar pedido</button>
+      </div>
       <!-- Itens da lojinha adicionados -->
       <div id="cob-lojinha-itens"></div>
       <!-- Botão adicionar da lojinha -->
@@ -2581,6 +2597,88 @@ function imprimirNotinhaCliente() {
 }
 
 // ====== COBRANÇA ======
+// Lista de itens da cobrança, com +/− e remover (corrige quantidade lançada errada)
+function renderCobItens() {
+  const p = pedidos[cobKey];
+  const el = document.getElementById('cob-itens');
+  if (!p || !el) return;
+  el.innerHTML = p.itens.map((it, i) => `
+    <div class="cob-item">
+      <div class="cob-item-top">
+        <span><strong style="color:var(--wood-mid)">${it.qtd}×</strong> ${it.nome}</span>
+        <span class="cob-preco">R$ ${(it.preco * it.qtd).toFixed(2).replace('.', ',')}</span>
+      </div>
+      <div class="cob-item-ctl">
+        <button type="button" class="cob-qtd-btn" aria-label="Diminuir ${it.nome}" onclick="cobAlterarQtd(${i},-1)">−</button>
+        <span class="cob-qtd-num">${it.qtd}</span>
+        <button type="button" class="cob-qtd-btn mais" aria-label="Aumentar ${it.nome}" onclick="cobAlterarQtd(${i},1)">+</button>
+        <button type="button" class="cob-del-item" aria-label="Remover ${it.nome}" onclick="cobRemoverItem(${i})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function atualizarCobranca() {
+  const p = pedidos[cobKey];
+  if (!p) { fecharCobranca(); return; }
+  document.getElementById('cob-titulo').textContent = 'Mesa ' + p.mesa;
+  document.getElementById('cob-subtitulo').textContent =
+    [p.cliente, p.garcom].filter(Boolean).join(' · ') || 'Sem identificação';
+  renderCobItens();
+  calcularConta();
+}
+
+function aposAlterarPedido(p) {
+  p.total = p.itens.reduce((s, it) => s + it.preco * it.qtd, 0);
+  salvarPedidos();
+  renderMesas();
+  renderCozinha();
+  renderCaixa();
+  atualizarCobranca();
+}
+
+function cobAlterarQtd(i, delta) {
+  const p = pedidos[cobKey];
+  if (!p || !p.itens[i]) return;
+  const it = p.itens[i];
+  if (it.qtd + delta <= 0) { cobRemoverItem(i); return; }
+  it.qtd += delta;
+  aposAlterarPedido(p);
+}
+
+function cobRemoverItem(i) {
+  const p = pedidos[cobKey];
+  if (!p || !p.itens[i]) return;
+  const it = p.itens[i];
+  if (p.itens.length === 1) { cancelarPedidoCobranca(); return; }
+  abrirModal('Remover item', `Remover "${it.nome}" (${it.qtd}x) do pedido da Mesa ${p.mesa}?`, () => {
+    const q = pedidos[cobKey];
+    if (!q) return;
+    const idx = q.itens.findIndex(x => x.nome === it.nome);
+    if (idx < 0) return;
+    q.itens.splice(idx, 1);
+    aposAlterarPedido(q);
+    showToast('Item removido: ' + it.nome);
+  });
+}
+
+function cancelarPedidoCobranca() {
+  const key = cobKey;
+  const p = pedidos[key];
+  if (!p) return;
+  abrirModal('Cancelar pedido', `Cancelar o pedido INTEIRO da Mesa ${p.mesa} (R$ ${p.total.toFixed(2).replace('.', ',')})? Isso apaga o pedido.`, () => {
+    if (!pedidos[key]) return;
+    delete pedidos[key];
+    salvarPedidos();
+    fecharCobranca();
+    renderCozinha();
+    renderMesas();
+    renderMesaSelector();
+    renderCaixa();
+    showToast('Pedido da Mesa ' + p.mesa + ' cancelado.');
+  });
+}
+
 function abrirCobranca(key) {
   cobKey = key;
   cobPagamento = '';
@@ -2602,13 +2700,7 @@ function abrirCobranca(key) {
   if (lp) lp.style.display = 'none';
   renderLojinhaItensAdicionados();
 
-  const itensEl = document.getElementById('cob-itens');
-  itensEl.innerHTML = p.itens.map(it => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--cream-dark)">
-      <span style="font-size:13px;color:var(--text-dark)"><strong style="color:var(--wood-mid)">${it.qtd}×</strong> ${it.nome}</span>
-      <span style="font-size:13px;font-weight:700;color:var(--text-dark);white-space:nowrap;margin-left:10px">R$ ${(it.preco * it.qtd).toFixed(2).replace('.',',')}</span>
-    </div>
-  `).join('');
+  renderCobItens();
 
   calcularConta();
   document.getElementById('modal-cobranca').classList.add('open');
@@ -3336,6 +3428,8 @@ function salvarEdicaoPedido() {
   renderMesas();
   renderMesaSelector();
   fecharEditarPedido();
+  if (document.getElementById('modal-cobranca').classList.contains('open')) { cobKey = 'mesa' + novaMesa; atualizarCobranca(); }
+  renderCaixa();
   showToast('✓ Pedido atualizado!' + (novaMesa !== mesaAntiga ? ' Movido para Mesa ' + novaMesa : ''));
 }
 
