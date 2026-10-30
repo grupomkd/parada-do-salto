@@ -1129,9 +1129,55 @@
   .dash-btn.sec { background: #faf6ec; color: var(--wood-mid); border: 1.5px solid var(--cream-dark); }
   .dash-duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
   @media (max-width: 768px) { .kpi.hoje .kpi-val { font-size: 36px; } }
+
+  /* ===== ACESSO POR SENHA ===== */
+  body.locked { overflow: hidden; height: 100vh; }
+  body.locked > *:not(#gate):not(script):not(style) { visibility: hidden; }
+  #gate { display: none; position: fixed; inset: 0; z-index: 99999; align-items: center; justify-content: center; padding: 16px; background: radial-gradient(ellipse at top, #5a3b27 0%, var(--wood-dark) 70%); overflow-y: auto; }
+  body.locked #gate { display: flex; }
+  .gate-box { width: 100%; max-width: 380px; background: var(--cream); border-radius: 18px; padding: 26px 22px; box-shadow: 0 10px 50px rgba(0,0,0,.55); text-align: center; border-top: 5px solid var(--gold); }
+  .gate-titulo { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--wood-dark); letter-spacing: 1px; }
+  .gate-sub { font-size: 14px; color: var(--text-mid); margin: 2px 0 18px; }
+  .gate-status { font-size: 15px; color: var(--text-mid); padding: 10px 0; }
+  #gate-form { text-align: left; }
+  #gate-form[hidden] { display: none; }
+  #gate-form label { display: block; font-size: 14px; font-weight: 700; color: var(--wood-dark); margin: 0 0 6px; }
+  #gate-form label span { font-weight: 400; color: #6f5f4f; }
+  #gate-form input { width: 100%; min-height: 50px; font-size: 18px !important; margin-bottom: 14px; padding: 10px 14px; border: 2px solid var(--cream-dark); border-radius: 12px; background: white; }
+  #gate-form input:focus { outline: none; border-color: var(--gold); }
+  .gate-btn { width: 100%; min-height: 52px; border: 0; border-radius: 12px; background: var(--green-dark); color: var(--cream); font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; }
+  .gate-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .gate-erro { min-height: 22px; margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--danger); text-align: center; }
+  #modal-senha input { width: 100%; min-height: 46px; font-size: 16px; padding: 8px 12px; border: 1.5px solid var(--cream-dark); border-radius: 8px; background: white; }
+  .ap-resumo { display: flex; gap: 10px; margin-bottom: 12px; }
+  .ap-resumo .stat { flex: 1; }
+  .ap-row { display: grid; grid-template-columns: 14px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1e8d4; }
+  .ap-row:last-child { border-bottom: 0; }
+  .ap-dot { width: 12px; height: 12px; border-radius: 50%; background: #c9bfae; }
+  .ap-dot.on { background: #2dbd4e; box-shadow: 0 0 0 4px rgba(45,189,78,.2); }
+  .ap-nome { font-size: 15px; font-weight: 800; color: var(--wood-dark); overflow-wrap: anywhere; }
+  .ap-nome em { font-style: normal; font-size: 11px; font-weight: 800; background: var(--gold); color: var(--wood-dark); border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; }
+  .ap-sub { font-size: 13px; color: #6f5f4f; }
+  .ap-del { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #fdecea; color: var(--danger); font-size: 18px; cursor: pointer; }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div id="gate" role="dialog" aria-modal="true" aria-label="Acesso ao sistema">
+  <div class="gate-box">
+    <div class="gate-titulo">PARADA DO SALTO</div>
+    <div class="gate-sub">Sistema de gestão</div>
+    <div id="gate-status" class="gate-status">Verificando acesso…</div>
+    <form id="gate-form" onsubmit="gateEntrar(event)" hidden>
+      <label for="gate-senha">Senha de acesso</label>
+      <input id="gate-senha" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Digite a senha">
+      <label for="gate-nome">Nome deste aparelho <span>(opcional)</span></label>
+      <input id="gate-nome" type="text" autocomplete="off" maxlength="30" placeholder="Ex.: Celular da Priscila">
+      <button type="submit" class="gate-btn">Entrar</button>
+      <div id="gate-erro" class="gate-erro" role="alert"></div>
+    </form>
+  </div>
+</div>
 
 <header>
   <div class="logo-area">
@@ -1581,6 +1627,21 @@
 </div>
 
 <!-- MODAL EDITAR PEDIDO -->
+<div class="modal-overlay" id="modal-senha">
+  <div class="modal-box">
+    <h3>🔑 Alterar senha de acesso</h3>
+    <p>Quem já está logado continua. Os outros aparelhos vão pedir a senha nova na próxima vez.</p>
+    <label for="senha-nova" style="font-size:13px;font-weight:700">Nova senha</label>
+    <input id="senha-nova" type="password" autocomplete="new-password" autocapitalize="none" placeholder="Mínimo 4 caracteres" style="margin:6px 0 12px">
+    <label for="senha-conf" style="font-size:13px;font-weight:700">Repita a nova senha</label>
+    <input id="senha-conf" type="password" autocomplete="new-password" autocapitalize="none" placeholder="Repita a senha" style="margin:6px 0 4px">
+    <div class="modal-btns" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="dash-btn sec" type="button" onclick="document.getElementById('modal-senha').classList.remove('open')">Cancelar</button>
+      <button class="dash-btn" type="button" onclick="salvarNovaSenha()">Salvar senha</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-editar">
   <div class="modal-box" style="max-width:500px;width:95%;max-height:90vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -4037,7 +4098,10 @@ function renderDashboard() {
       <div class="dash-sub">Toque num dia para ver os pedidos fechados.</div>
       ${diaAdia || '<div class="dash-vazio">Nenhum dia com vendas neste período.</div>'}
       ${diasLista.length > dashDiasMax ? '<div style="text-align:center;margin-top:10px"><button type="button" class="dash-btn" onclick="dashMaisDias()">Mostrar mais dias</button></div>' : ''}
-    </div>`;
+    </div>
+    <div class="dash-card" id="acesso-card"></div>`;
+  iniciarListenersAcesso();
+  renderAcessoCard();
 }
 
 function dashCSV() {
@@ -4056,6 +4120,232 @@ function dashCSV() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   showToast('✓ Planilha gerada (' + lista.length + ' vendas)');
 }
+
+
+// ====== ACESSO POR SENHA + CONTROLE DE APARELHOS ======
+// A senha NÃO fica no código: só um "hash" dela (config/acesso no Firebase). Depois de digitar
+// a senha uma vez, o aparelho fica liberado (localStorage) até a senha ser trocada.
+// ATENÇÃO: é uma trava na porta, não um cofre — as regras do Firebase continuam abertas.
+const ACESSO_LS = 'pds_acesso_v1';
+
+function sha256(ascii) {
+  function rr(v, a) { return (v >>> a) | (v << (32 - a)); }
+  var mp = Math.pow, mw = mp(2, 32), result = '', words = [], bl = ascii.length * 8;
+  var hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [], pc = k.length, comp = {};
+  for (var c = 2; pc < 64; c++) {
+    if (!comp[c]) {
+      for (var i = 0; i < 313; i += c) comp[i] = c;
+      hash[pc] = (mp(c, .5) * mw) | 0; k[pc++] = (mp(c, 1 / 3) * mw) | 0;
+    }
+  }
+  ascii += '\x80';
+  while (ascii.length % 64 - 56) ascii += '\x00';
+  for (var i = 0; i < ascii.length; i++) { var j = ascii.charCodeAt(i); if (j >> 8) return; words[i >> 2] |= j << ((3 - i) % 4) * 8; }
+  words[words.length] = ((bl / mw) | 0); words[words.length] = bl;
+  for (var j = 0; j < words.length;) {
+    var w = words.slice(j, j += 16), old = hash;
+    hash = hash.slice(0, 8);
+    for (var i = 0; i < 64; i++) {
+      var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];
+      var t1 = hash[7] + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] +
+        (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) | 0);
+      var t2 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(t1 + t2) | 0].concat(hash); hash[4] = (hash[4] + t1) | 0;
+    }
+    for (var i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+  }
+  for (var i = 0; i < 8; i++) for (var j = 3; j + 1; j--) { var b = (hash[i] >> (j * 8)) & 255; result += ((b < 16) ? 0 : '') + b.toString(16); }
+  return result;
+}
+function sha256hex(str) { return sha256(unescape(encodeURIComponent(str))); }
+function hashSenha(senha, salt, iter) {
+  let h = sha256hex(salt + ':' + String(senha).trim().toLowerCase());
+  for (let i = 0; i < iter; i++) h = sha256hex(h + salt);
+  return h;
+}
+function aleatorioHex(n) { let o = ''; for (let i = 0; i < n; i++) o += Math.floor(Math.random() * 16).toString(16); return o; }
+
+function lerAcessoLocal() { try { return JSON.parse(localStorage.getItem(ACESSO_LS)) || {}; } catch (e) { return {}; } }
+function gravarAcessoLocal(o) { try { localStorage.setItem(ACESSO_LS, JSON.stringify({ ...lerAcessoLocal(), ...o })); } catch (e) {} }
+function meuId() {
+  const o = lerAcessoLocal();
+  if (o.id) return o.id;
+  const id = 'd' + Date.now().toString(36) + aleatorioHex(6);
+  gravarAcessoLocal({ id });
+  return id;
+}
+
+let acessoCfg = undefined;     // undefined = carregando · null = sem senha · objeto = com senha
+let acessoLiberado = false;
+let gateErros = 0, gateBloqueioAte = 0;
+
+function iniciarGate() {
+  if (!useFirebase) { document.body.classList.remove('locked'); return; }   // modo local: sem senha
+  db.ref('config/acesso').on('value', snap => { acessoCfg = snap.val(); avaliarGate(); },
+    () => gateMostrarFalha('Sem conexão para conferir a senha. Verifique a internet e recarregue.'));
+  setTimeout(() => { if (acessoCfg === undefined) gateMostrarFalha('Sem resposta do servidor. Verifique a internet e recarregue.'); }, 12000);
+}
+function gateMostrarFalha(msg) {
+  if (acessoLiberado) return;
+  document.getElementById('gate-status').textContent = msg;
+}
+function avaliarGate() {
+  const cfg = acessoCfg;
+  if (!cfg || !cfg.hash) { liberarAcesso(); return; }                       // sem senha configurada = aberto
+  const loc = lerAcessoLocal();
+  if (loc.ok && loc.v === cfg.versao) { liberarAcesso(); return; }          // este aparelho já entrou
+  trancarAcesso();
+}
+function trancarAcesso() {
+  acessoLiberado = false;
+  document.body.classList.add('locked');
+  document.getElementById('gate-status').textContent = 'Digite a senha para entrar.';
+  const f = document.getElementById('gate-form');
+  f.hidden = false;
+  document.getElementById('gate-nome').value = lerAcessoLocal().nome || '';
+  document.getElementById('gate-senha').value = '';
+  try { document.getElementById('gate-senha').focus(); } catch (e) {}
+}
+function liberarAcesso() {
+  document.body.classList.remove('locked');
+  if (acessoLiberado) return;
+  acessoLiberado = true;
+  registrarDispositivo();
+}
+function gateEntrar(ev) {
+  ev.preventDefault();
+  const cfg = acessoCfg;
+  const erro = document.getElementById('gate-erro');
+  if (!cfg || !cfg.hash) { liberarAcesso(); return; }
+  const agora = Date.now();
+  if (agora < gateBloqueioAte) { erro.textContent = 'Muitas tentativas. Aguarde ' + Math.ceil((gateBloqueioAte - agora) / 1000) + 's.'; return; }
+  const senha = document.getElementById('gate-senha').value;
+  if (!senha) { erro.textContent = 'Digite a senha.'; return; }
+  if (hashSenha(senha, cfg.salt, cfg.iter) === cfg.hash) {
+    gateErros = 0; erro.textContent = '';
+    gravarAcessoLocal({ ok: true, v: cfg.versao, nome: document.getElementById('gate-nome').value.trim() });
+    liberarAcesso();
+  } else {
+    gateErros++;
+    document.getElementById('gate-senha').value = '';
+    if (gateErros >= 5) { gateBloqueioAte = agora + 30000; gateErros = 0; erro.textContent = 'Muitas tentativas. Aguarde 30s.'; }
+    else erro.textContent = 'Senha incorreta. Tente de novo.';
+  }
+}
+function bloquearEsteAparelho() {
+  gravarAcessoLocal({ ok: false });
+  trancarAcesso();
+}
+
+// ----- aparelhos -----
+function tipoAparelho() {
+  const ua = navigator.userAgent || '';
+  if (/iPhone/.test(ua)) return 'iPhone';
+  if (/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'iPad';
+  if (/Android/.test(ua)) return /Mobile/.test(ua) ? 'Celular Android' : 'Tablet Android';
+  if (/Windows/.test(ua)) return 'Computador Windows';
+  if (/Mac/.test(ua)) return 'Mac';
+  if (/Linux/.test(ua)) return 'Computador Linux';
+  return 'Aparelho';
+}
+function navegadorNome() {
+  const ua = navigator.userAgent || '';
+  if (/Edg\//.test(ua)) return 'Edge';
+  if (/OPR\/|Opera/.test(ua)) return 'Opera';
+  if (/Firefox|FxiOS/.test(ua)) return 'Firefox';
+  if (/Chrome|CriOS/.test(ua)) return 'Chrome';
+  if (/Safari/.test(ua)) return 'Safari';
+  return 'Navegador';
+}
+function registrarDispositivo() {
+  if (!useFirebase) return;
+  const id = meuId(), loc = lerAcessoLocal();
+  const ref = db.ref('dispositivos/' + id);
+  const TS = firebase.database.ServerValue.TIMESTAMP;
+  ref.once('value').then(sn => {
+    const antes = sn.val() || {};
+    ref.update({ nome: loc.nome || antes.nome || '', tipo: tipoAparelho(), nav: navegadorNome(), primeiro: antes.primeiro || TS, ultimo: TS });
+  }).catch(() => {});
+  db.ref('.info/connected').on('value', sn => {
+    if (!sn.val()) return;
+    const p = db.ref('presenca/' + id);
+    p.onDisconnect().remove();
+    p.set(TS);
+    ref.child('ultimo').set(TS);
+  });
+  setInterval(() => { if (!document.hidden) ref.child('ultimo').set(TS).catch(() => {}); }, 5 * 60 * 1000);
+}
+
+let dispTodos = {}, presencaOn = {}, acessoListenersOk = false;
+function iniciarListenersAcesso() {
+  if (acessoListenersOk || !useFirebase) return;
+  acessoListenersOk = true;
+  db.ref('dispositivos').on('value', sn => { dispTodos = sn.val() || {}; renderAcessoCard(); });
+  db.ref('presenca').on('value', sn => { presencaOn = sn.val() || {}; renderAcessoCard(); });
+}
+function tempoAtras(ts) {
+  if (!ts) return '—';
+  const m = Math.round((Date.now() - ts) / 60000);
+  if (m < 1) return 'agora há pouco';
+  if (m < 60) return 'há ' + m + ' min';
+  const h = Math.round(m / 60);
+  if (h < 24) return 'há ' + h + ' h';
+  const d = Math.round(h / 24);
+  return 'há ' + d + (d === 1 ? ' dia' : ' dias');
+}
+function renderAcessoCard() {
+  const el = document.getElementById('acesso-card');
+  if (!el) return;
+  const meu = meuId();
+  const lista = Object.entries(dispTodos).map(([id, d]) => ({ id, ...d, on: !!presencaOn[id] }))
+    .sort((a, b) => (b.on - a.on) || ((b.ultimo || 0) - (a.ultimo || 0)));
+  const online = lista.filter(d => d.on).length;
+  const comSenha = acessoCfg && acessoCfg.hash;
+  el.innerHTML = `
+    <h3>Acesso ao sistema</h3>
+    <div class="ap-resumo">
+      <div class="stat"><span>Online agora</span><b style="color:#1d6b2c">${online}</b></div>
+      <div class="stat"><span>Aparelhos já entraram</span><b>${lista.length}</b></div>
+    </div>
+    ${lista.length ? lista.map(d => `
+      <div class="ap-row">
+        <span class="ap-dot${d.on ? ' on' : ''}"></span>
+        <div><div class="ap-nome">${escHtml(d.nome || d.tipo || 'Aparelho')}${d.id === meu ? '<em>este aparelho</em>' : ''}</div>
+          <div class="ap-sub">${escHtml([d.nome ? d.tipo : '', d.nav].filter(Boolean).join(' · '))} · ${d.on ? '<b style="color:#1d6b2c">online agora</b>' : 'visto ' + tempoAtras(d.ultimo)}</div></div>
+        ${(!d.on && d.id !== meu) ? `<button type="button" class="ap-del" aria-label="Remover da lista" onclick="removerDispositivo('${d.id}')">🗑</button>` : '<span></span>'}
+      </div>`).join('') : '<div class="dash-vazio">Nenhum aparelho registrado ainda. Eles aparecem aqui depois de entrar com a senha.</div>'}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+      <button type="button" class="dash-btn" onclick="abrirAlterarSenha()">🔑 ${comSenha ? 'Alterar senha' : 'Criar senha de acesso'}</button>
+      ${comSenha ? '<button type="button" class="dash-btn sec" onclick="bloquearEsteAparelho()">🔒 Bloquear este aparelho</button>' : ''}
+    </div>
+    <div class="dash-sub" style="margin:12px 0 0">${comSenha ? 'Cada aparelho digita a senha uma vez e fica liberado até a senha ser trocada.' : '⚠️ Hoje o sistema está aberto: crie uma senha para exigir no primeiro acesso.'}</div>`;
+}
+function removerDispositivo(id) {
+  if (!useFirebase) return;
+  db.ref('dispositivos/' + id).remove().then(() => showToast('Aparelho removido da lista.')).catch(e => showToast('⚠️ ' + e.message));
+}
+function abrirAlterarSenha() {
+  document.getElementById('senha-nova').value = '';
+  document.getElementById('senha-conf').value = '';
+  document.getElementById('modal-senha').classList.add('open');
+  setTimeout(() => { try { document.getElementById('senha-nova').focus(); } catch (e) {} }, 100);
+}
+function salvarNovaSenha() {
+  const n = document.getElementById('senha-nova').value.trim();
+  const c = document.getElementById('senha-conf').value.trim();
+  if (n.length < 4) { showToast('⚠️ A senha precisa ter pelo menos 4 caracteres.'); return; }
+  if (n !== c) { showToast('⚠️ As senhas não são iguais.'); return; }
+  if (!useFirebase) { showToast('⚠️ Sem Firebase não dá para guardar a senha.'); return; }
+  const salt = aleatorioHex(16), iter = 5000;
+  const versao = ((acessoCfg && acessoCfg.versao) || 0) + 1;
+  const antes = lerAcessoLocal();
+  gravarAcessoLocal({ ok: true, v: versao });   // este aparelho já fica liberado (antes do Firebase avisar a mudança)
+  db.ref('config/acesso').set({ salt, iter, hash: hashSenha(n, salt, iter), versao })
+    .then(() => { document.getElementById('modal-senha').classList.remove('open'); showToast('✓ Senha salva. Os outros aparelhos vão pedir a nova senha.'); })
+    .catch(e => { gravarAcessoLocal({ ok: antes.ok, v: antes.v }); showToast('⚠️ Não salvou a senha: ' + e.message); });
+}
+
+iniciarGate();
 
 // ====== CRONÔMETRO ======
 function formatarTempo(tsInicio, tsFim) {
