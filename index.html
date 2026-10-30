@@ -1575,20 +1575,6 @@ try {
   setupFirebaseListeners();
   setupGarconsListener();
   setupLojinhaListener();
-  // Carregar categorias extras do Firebase
-  if (useFirebase) {
-    db.ref('config/categorias_extras').once('value', snap => {
-      const extras = snap.val();
-      if (extras && Array.isArray(extras)) {
-        extras.forEach(cat => {
-          if (!CATEGORIAS.includes(cat)) {
-            CATEGORIAS.push(cat);
-            if (!CARDAPIO[cat]) CARDAPIO[cat] = [];
-          }
-        });
-      }
-    });
-  }
   setupLojinhaListener();
 } catch(e) {
   console.log('Modo local (sem Firebase):', e.message);
@@ -1739,23 +1725,57 @@ function setupFirebaseListeners() {
       renderMesaSelector();
     }
   });
+  // O cardápio só é aplicado quando as DUAS partes chegaram (itens e categorias extras).
+  // Antes, se os itens chegassem primeiro, os produtos de categorias criadas pelo
+  // usuário eram ignorados — e na próxima gravação a categoria era salva vazia.
+  db.ref('config/categorias_extras').on('value', snap => {
+    fbExtras = snap.val();
+    fbExtrasOk = true;
+    aplicarCardapioFB();
+  });
   db.ref('config/cardapio').on('value', snap => {
-    const val = snap.val();
-    if (val) {
-      // Mapear chaves sanitizadas de volta para nomes de categoria
-      Object.keys(CARDAPIO).forEach(cat => {
-        const key = cat.replace(/[.#$[\]/]/g, '_');
-        const raw = val[key];
-        if (raw) {
-          // Firebase pode converter arrays em objetos {0:.., 1:..}
-          CARDAPIO[cat] = Array.isArray(raw) ? raw : Object.values(raw);
-        }
-      });
-      renderCatTabs();
-      renderCardapio();
-      if (editCatAtual) renderEditItems();
+    fbCardapio = snap.val();
+    fbCardapioOk = true;
+    aplicarCardapioFB();
+  });
+}
+
+let fbExtras = null, fbCardapio = null, fbExtrasOk = false, fbCardapioOk = false;
+function chaveCat(cat) { return cat.replace(/[.#$[\]/]/g, '_'); }
+function cardapioPronto() { return fbExtrasOk && fbCardapioOk; }
+
+function aplicarCardapioFB() {
+  if (!cardapioPronto()) return;
+  // 1) categorias extras (lista pode vir como array ou objeto)
+  const extras = Array.isArray(fbExtras) ? fbExtras : (fbExtras ? Object.values(fbExtras) : []);
+  extras.forEach(cat => {
+    if (cat && !CATEGORIAS.includes(cat)) CATEGORIAS.push(cat);
+    if (cat && !CARDAPIO[cat]) CARDAPIO[cat] = [];
+  });
+  // 2) itens: chaves do Firebase que não casam com nenhuma categoria conhecida viram categoria,
+  //    pra nunca esconder (nem apagar) produto salvo
+  const val = fbCardapio || {};
+  const porChave = {};
+  CATEGORIAS.forEach(cat => { porChave[chaveCat(cat)] = cat; });
+  Object.keys(val).forEach(key => {
+    if (!porChave[key]) {
+      CATEGORIAS.push(key);
+      CARDAPIO[key] = [];
+      porChave[key] = key;
     }
   });
+  Object.keys(val).forEach(key => {
+    const raw = val[key];
+    if (!raw) return;
+    // Firebase pode converter arrays em objetos {0:.., 1:..}
+    const lista = Array.isArray(raw) ? raw : Object.values(raw);
+    CARDAPIO[porChave[key]] = lista.filter(i => i && i.nome);
+  });
+  if (!CATEGORIAS.includes(catAtual)) catAtual = CATEGORIAS[0];
+  renderCatTabs();
+  renderCardapio();
+  if (document.getElementById('new-item-cat')) initEditCardapio();
+  if (editCatAtual && CARDAPIO[editCatAtual]) renderEditItems();
 }
 
 function salvarPedidos() {
@@ -1770,21 +1790,30 @@ function salvarHistorico() {
     db.ref('historico').set(obj);
   }
 }
-function salvarConfig() {
+function salvarTotalMesas() {
   if (!useFirebase) return;
-  db.ref('config/totalMesas').set(totalMesas);
-  // Salvar cada categoria individualmente para preservar arrays
-  Object.keys(CARDAPIO).forEach(cat => {
-    // Limpar itens undefined/null antes de salvar
-    const itens = CARDAPIO[cat].filter(i => i && i.nome).map(i => ({
-      id: i.id || 'item_' + Date.now(),
-      nome: i.nome,
-      preco: i.preco,
-      ...(i.precoG ? { precoG: i.precoG, tam: true } : {}),
-      ...(i.desc ? { desc: i.desc } : {})
-    }));
-    db.ref('config/cardapio/' + cat.replace(/[.#$[\]/]/g, '_')).set(itens);
-  });
+  db.ref('config/totalMesas').set(totalMesas)
+    .catch(e => showToast('⚠️ Erro ao salvar o nº de mesas: ' + e.message));
+}
+
+// Grava SÓ a categoria alterada (antes regravava o cardápio inteiro a cada mudança,
+// o que podia apagar categorias ainda não carregadas). Devolve uma Promise.
+function salvarCategoria(cat) {
+  if (!useFirebase) return Promise.resolve();
+  if (!cardapioPronto()) {
+    showToast('⚠️ O cardápio ainda está carregando. Tente de novo em instantes.');
+    return Promise.reject(new Error('cardápio não carregado'));
+  }
+  const itens = (CARDAPIO[cat] || []).filter(i => i && i.nome).map(i => ({
+    id: i.id || 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    nome: i.nome,
+    preco: i.preco,
+    ...(i.precoG ? { precoG: i.precoG, tam: true } : {}),
+    ...(i.desc ? { desc: i.desc } : {}),
+    ...(i.pausado ? { pausado: true } : {})
+  }));
+  return db.ref('config/cardapio/' + chaveCat(cat)).set(itens)
+    .catch(e => { showToast('⚠️ NÃO salvou no servidor: ' + e.message); throw e; });
 }
 
 // ====== NAVEGAÇÃO ======
@@ -1834,7 +1863,7 @@ function adicionarMesa() {
   document.getElementById('total-mesas-display').textContent = totalMesas;
   renderMesas();
   renderMesaSelector();
-  salvarConfig();
+  salvarTotalMesas();
   showToast('✓ Mesa ' + totalMesas + ' adicionada!');
 }
 
@@ -1850,7 +1879,7 @@ function removerMesa() {
   document.getElementById('total-mesas-display').textContent = totalMesas;
   renderMesas();
   renderMesaSelector();
-  salvarConfig();
+  salvarTotalMesas();
   showToast('Mesa ' + num + ' removida.');
 }
 
@@ -3278,7 +3307,7 @@ function salvarEdicaoPedido() {
     // Atualizar totalMesas se necessário
     if (novaMesa > totalMesas) {
       totalMesas = novaMesa;
-      salvarConfig();
+      salvarTotalMesas();
     }
   }
 
@@ -3568,7 +3597,7 @@ function _removerCat(cat) {
     db.ref('config/categorias_extras').set(
       CATEGORIAS.filter(c => !CATEGORIAS_BASE.includes(c))
     );
-    db.ref('config/cardapio/' + cat.replace(/[.#$[\]]/g, '_')).remove();
+    db.ref('config/cardapio/' + chaveCat(cat)).remove();
   }
   editCatAtual = CATEGORIAS[0] || null;
   initEditCardapio();
@@ -3656,7 +3685,7 @@ function renderEditItems() {
 function togglePausar(cat, idx) {
   const item = CARDAPIO[cat][idx];
   item.pausado = !item.pausado;
-  salvarConfig();
+  salvarCategoria(cat).catch(() => { item.pausado = !item.pausado; renderEditItems(); renderCardapio(); });
   renderEditItems();
   renderCardapio();
   updateStatusBar();
@@ -3701,7 +3730,7 @@ function salvarEdicaoItem(idx) {
   renderEditItems();
   renderEditCatList();
   renderCardapio();
-  salvarConfig();
+  salvarCategoria(editCatAtual);
   showToast('✓ Item "' + novoNome + '" atualizado!');
 }
 
@@ -3713,7 +3742,7 @@ function confirmarRemoverItem(idx) {
     renderEditCatList();
     renderCardapio();
     renderCatTabs();
-    salvarConfig();
+    salvarCategoria(editCatAtual);
     showToast('Item removido!');
   });
 }
@@ -3731,6 +3760,7 @@ function adicionarItem() {
   const temTam = document.getElementById('new-item-tem-tam').checked;
 
   if (!nome) { showToast('⚠️ Informe o nome do produto!'); return; }
+  if (useFirebase && !cardapioPronto()) { showToast('⚠️ O cardápio ainda está carregando. Tente de novo em instantes.'); return; }
 
   let novoItem;
   const newId = 'custom_' + Date.now();
@@ -3764,8 +3794,8 @@ function adicionarItem() {
   renderEditCatList();
   renderCardapio();
   renderCatTabs();
-  salvarConfig();
-  showToast('✓ "' + nome + '" adicionado ao cardápio!');
+  showToast('Salvando "' + nome + '"...');
+  salvarCategoria(cat).then(() => showToast('✓ "' + nome + '" salvo no cardápio!')).catch(() => {});
 }
 </script>
 </body>
