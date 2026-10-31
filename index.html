@@ -1226,6 +1226,31 @@
   .pz-resumo b { color: white; }
   .pz-add { width: 100%; min-height: 54px; border: 0; border-radius: 12px; background: var(--green-dark); color: var(--cream); font: inherit; font-size: 17px; font-weight: 800; cursor: pointer; }
   .pz-add:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ===== SELETOR DE ITENS (caixa / edição) ===== */
+  .cob-btn-add { width: 100%; min-height: 50px; margin: 10px 0 0; border: 2px solid var(--gold); border-radius: 12px; background: #fff4d6; color: var(--wood-dark); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+  .pk-aviso { font-size: 13px; color: #6f5f4f; background: #fff8e1; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; }
+  #picker-busca { width: 100%; min-height: 50px; padding: 10px 14px; font-size: 16px !important; border: 2px solid var(--cream-dark); border-radius: 12px; background: white; margin: 0 0 10px; }
+  #picker-busca:focus { outline: none; border-color: var(--gold); }
+  .pk-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 8px; }
+  .pk-chips::-webkit-scrollbar { display: none; }
+  .pk-chips button { flex: 0 0 auto; min-height: 40px; padding: 0 14px; border: 1.5px solid var(--cream-dark); border-radius: 999px; background: white; font: inherit; font-size: 14px; font-weight: 700; color: var(--text-mid); cursor: pointer; white-space: nowrap; }
+  .pk-chips button.on { background: var(--wood-mid); border-color: var(--wood-mid); color: var(--cream); }
+  .pk-lista { border-radius: 12px; background: white; border: 1.5px solid var(--cream-dark); max-height: 46vh; overflow-y: auto; }
+  .pk-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px 8px 12px; border-bottom: 1px solid #f1e8d4; }
+  .pk-row:last-child { border-bottom: 0; }
+  .pk-nome { font-size: 16px; font-weight: 800; color: var(--wood-dark); overflow-wrap: anywhere; }
+  .pk-sub { font-size: 13px; color: #6f5f4f; }
+  .pk-add { min-width: 74px; min-height: 48px; border: 0; border-radius: 12px; background: var(--gold); color: white; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .pk-add b { background: var(--wood-dark); color: var(--cream); border-radius: 999px; min-width: 22px; padding: 0 6px; font-size: 13px; }
+  .pk-tam { display: inline-flex; margin-top: 4px; border: 1.5px solid var(--cream-dark); border-radius: 8px; overflow: hidden; }
+  .pk-tam button { min-height: 34px; padding: 0 10px; border: 0; background: white; font: inherit; font-size: 13px; font-weight: 700; color: var(--text-mid); cursor: pointer; }
+  .pk-tam button.on { background: var(--wood-mid); color: var(--cream); }
+  .pk-avulso { margin-top: 12px; background: #faf6ec; border-radius: 12px; padding: 4px 12px; }
+  .pk-avulso summary { min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 800; color: var(--wood-mid); cursor: pointer; }
+  .pk-avulso-form { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 4px 0 12px; }
+  .pk-avulso-form input { min-height: 46px; padding: 8px 12px; font-size: 16px !important; border: 2px solid var(--cream-dark); border-radius: 10px; background: white; margin: 0; width: 100%; }
+  .pk-avulso-form button { min-height: 46px; border: 0; border-radius: 10px; background: var(--wood-mid); color: var(--cream); font: inherit; font-weight: 800; cursor: pointer; }
 </style>
 </head>
 <body class="locked">
@@ -1628,6 +1653,7 @@
     <div style="padding:14px 20px;background:var(--cream)">
       <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px">Consumo</div>
       <div id="cob-itens"></div>
+      <button type="button" class="cob-btn-add" onclick="abrirPicker('cobranca', cobAddItem)">➕ Adicionar item do cardápio</button>
       <div class="cob-acoes-pedido">
         <button type="button" class="cob-btn-editar" onclick="abrirEditarPedido(cobKey)">✏️ Editar pedido</button>
         <button type="button" class="cob-btn-cancelar" onclick="cancelarPedidoCobranca()">🗑 Cancelar pedido</button>
@@ -1694,6 +1720,27 @@
 </div>
 
 <!-- MODAL EDITAR PEDIDO -->
+<div class="modal-overlay" id="modal-picker" style="z-index:450">
+  <div class="pizza-box" role="dialog" aria-modal="true" aria-label="Adicionar item">
+    <div class="pizza-head"><h3 id="picker-titulo">➕ Adicionar item</h3><button type="button" class="pizza-x" aria-label="Fechar" onclick="fecharPicker()">×</button></div>
+    <div class="pizza-body">
+      <div class="pk-aviso" id="picker-aviso"></div>
+      <input id="picker-busca" type="search" autocomplete="off" placeholder="Digite o item (ex.: coca, xis, café)" oninput="pickerBusca(this.value)">
+      <div class="pk-chips" id="picker-cats"></div>
+      <div id="picker-lista" class="pk-lista"></div>
+      <details class="pk-avulso">
+        <summary>✏️ Item avulso (digitar nome e valor)</summary>
+        <div class="pk-avulso-form">
+          <input id="picker-av-nome" type="text" autocomplete="off" maxlength="60" placeholder="Nome do item">
+          <input id="picker-av-preco" type="number" inputmode="decimal" min="0" step="0.5" placeholder="Valor (R$)">
+          <button type="button" onclick="pickerAvulso()">Adicionar</button>
+        </div>
+      </details>
+    </div>
+    <div class="pizza-foot"><div class="pz-resumo" id="picker-count">Nada adicionado ainda.</div><button type="button" class="pz-add" onclick="fecharPicker()">Concluir</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-pizza">
   <div class="pizza-box" role="dialog" aria-modal="true" aria-label="Montar pizza">
     <div class="pizza-head"><h3>🍕 Montar pizza</h3><button type="button" class="pizza-x" aria-label="Fechar" onclick="fecharPizza()">×</button></div>
@@ -1759,7 +1806,8 @@
       <option value="">— Sem garçom —</option>
     </select>
     <div style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Itens do Pedido</div>
-    <div id="editar-itens-lista" style="border:1.5px solid var(--cream-dark);border-radius:8px;background:white;margin-bottom:14px"></div>
+    <div id="editar-itens-lista" style="border:1.5px solid var(--cream-dark);border-radius:8px;background:white;margin-bottom:10px"></div>
+    <button type="button" class="cob-btn-add" style="margin:0 0 14px" onclick="abrirPicker('editar', editarAddItem)">➕ Adicionar item do cardápio</button>
     <div class="total-box" style="padding:10px 14px;margin-bottom:12px">
       <span class="label" style="font-size:12px">TOTAL ATUALIZADO</span>
       <span class="valor" id="editar-total-display" style="font-size:18px">R$ 0,00</span>
@@ -2271,8 +2319,12 @@ function normBusca(txt) {
   return String(txt || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
+// Apelidos: o garçom digita "coca" e o cardápio chama de "Refrigerante"
+function termoBusca(v) {
+  return normBusca(v).trim().replace(/\b(coca|cola|coca-cola|guarana|fanta|sprite|pepsi|refri|refris|soda)\b/g, 'refrigerante');
+}
 function atualizarBuscaCardapio(valor) {
-  buscaCardapio = normBusca(valor).trim();
+  buscaCardapio = termoBusca(valor);
   document.querySelectorAll('.cat-tab').forEach(x => x.classList.toggle('active', !buscaCardapio && x.textContent === catAtual));
   renderCardapio();
 }
@@ -3457,9 +3509,8 @@ function confirmarItemLojinha() {
   const valor = parseFloat(document.getElementById('lojinha-sel-valor').value);
   if (!nome) { showToast('⚠️ Digite o nome do produto!'); return; }
   if (!valor || valor <= 0) { showToast('⚠️ Digite o valor!'); return; }
-  lojinhaItensAdicionados.push({ nome, preco: valor, qtd: 1 });
-  renderLojinhaItensAdicionados();
-  calcularConta();
+  if (cobKey && pedidos[cobKey]) cobAddItem('🛍️ ' + nome, valor);   // grava no pedido (antes sumia ao fechar a tela)
+  else { lojinhaItensAdicionados.push({ nome, preco: valor, qtd: 1 }); renderLojinhaItensAdicionados(); calcularConta(); }
   fecharModalLojinha();
   showToast('✓ "' + nome + '" adicionado — R$ ' + valor.toFixed(2).replace('.',','));
 }
@@ -4664,6 +4715,90 @@ function pzAdicionar() {
   renderCardapio();
   showToast('✓ ' + pz.qtd + 'x ' + label);
   try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+}
+
+
+// ====== SELETOR DE ITENS DO CARDÁPIO (caixa / edição de pedido) ======
+// Itens adicionados aqui entram direto na conta (sem passar pela cozinha) e são gravados na hora.
+let picker = null;
+function abrirPicker(contexto, cb) {
+  picker = { cb, cat: '', busca: '', n: 0, adds: {} };
+  document.getElementById('picker-busca').value = '';
+  document.getElementById('picker-av-nome').value = '';
+  document.getElementById('picker-av-preco').value = '';
+  document.getElementById('picker-titulo').textContent = contexto === 'editar' ? '➕ Adicionar ao pedido' : '➕ Adicionar à conta';
+  document.getElementById('picker-aviso').textContent = contexto === 'editar'
+    ? 'O item entra no pedido quando você tocar em "Salvar Alterações".'
+    : 'Entra direto na conta e não vai para a cozinha.';
+  document.getElementById('picker-count').textContent = 'Nada adicionado ainda.';
+  document.getElementById('modal-picker').classList.add('open');
+  pickerRender();
+}
+function fecharPicker() { document.getElementById('modal-picker').classList.remove('open'); picker = null; }
+function pickerBusca(v) { picker.busca = termoBusca(v); pickerRender(); }
+function pickerCat(c) { picker.cat = c; pickerRender(); }
+function pickerTam(id, t) { tamanhoAtual[id] = t; pickerRender(); }
+function pickerRender() {
+  if (!picker) return;
+  document.getElementById('picker-cats').innerHTML =
+    ['', ...CATEGORIAS].map(c => `<button type="button" class="${picker.cat === c ? 'on' : ''}" onclick="pickerCat('${escHtml(c).replace(/'/g, "\\'")}')">${c || 'Todas'}</button>`).join('');
+  const q = picker.busca;
+  const cats = picker.cat ? [picker.cat] : CATEGORIAS;
+  const linhas = [];
+  cats.forEach(cat => (CARDAPIO[cat] || []).forEach(it => {
+    if (it.pausado) return;
+    if (q && !(normBusca(it.nome).includes(q) || normBusca(it.desc).includes(q) || normBusca(cat).includes(q))) return;
+    linhas.push({ cat, it });
+  }));
+  if (q) linhas.sort((a, b) => (normBusca(b.it.nome).includes(q) - normBusca(a.it.nome).includes(q)));
+  const el = document.getElementById('picker-lista');
+  if (!linhas.length) { el.innerHTML = '<div style="padding:16px;color:#6f5f4f;font-size:15px">Nenhum item com esse nome. Use "Item avulso" abaixo para digitar nome e valor.</div>'; return; }
+  el.innerHTML = linhas.slice(0, 80).map(({ cat, it }) => {
+    const t = it.tam ? (tamanhoAtual[it.id] || 'M') : '';
+    const preco = t === 'G' ? it.precoG : it.preco;
+    const n = picker.adds[it.id] || 0;
+    const tam = it.tam ? `<div class="pk-tam"><button type="button" class="${t === 'M' ? 'on' : ''}" onclick="pickerTam('${it.id}','M')">${tamRot(it, 'M')} ${brl(it.preco)}</button><button type="button" class="${t === 'G' ? 'on' : ''}" onclick="pickerTam('${it.id}','G')">${tamRot(it, 'G')} ${brl(it.precoG)}</button></div>` : '';
+    return `<div class="pk-row"><div><div class="pk-nome">${escHtml(it.nome)}</div><div class="pk-sub">${escHtml(q ? cat : (it.desc || ''))}${it.tam ? '' : ' · ' + brl(preco)}</div>${tam}</div>
+      <button type="button" class="pk-add" onclick="pickerAdd('${it.id}')" aria-label="Adicionar ${escHtml(it.nome)}">+${n ? `<b>${n}</b>` : ''}</button></div>`;
+  }).join('');
+}
+function pickerRegistrar(nome, preco) {
+  picker.cb(nome, preco);
+  picker.n++;
+  document.getElementById('picker-count').innerHTML = `✓ <b>${picker.n}</b> ${picker.n === 1 ? 'item adicionado' : 'itens adicionados'} · último: <b>${escHtml(nome)}</b>`;
+  try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+}
+function pickerAdd(id) {
+  const it = acharItem(id);
+  if (!it || !picker) return;
+  const t = it.tam ? (tamanhoAtual[id] || 'M') : '';
+  const preco = t === 'G' ? it.precoG : it.preco;
+  picker.adds[id] = (picker.adds[id] || 0) + 1;
+  pickerRegistrar(labelDe(it), preco);
+  pickerRender();
+}
+function pickerAvulso() {
+  const nome = document.getElementById('picker-av-nome').value.trim();
+  const preco = parseFloat(document.getElementById('picker-av-preco').value);
+  if (!nome) { showToast('⚠️ Digite o nome do item.'); return; }
+  if (isNaN(preco) || preco <= 0) { showToast('⚠️ Digite o valor do item.'); return; }
+  pickerRegistrar(nome, preco);
+  document.getElementById('picker-av-nome').value = '';
+  document.getElementById('picker-av-preco').value = '';
+}
+// item novo na CONTA (caixa): grava na hora no pedido, já como entregue
+function cobAddItem(nome, preco) {
+  const p = pedidos[cobKey];
+  if (!p) return;
+  const ex = (p.itens || []).find(i => i.nome === nome && Number(i.preco) === Number(preco) && i.entregue);
+  if (ex) ex.qtd++; else (p.itens = p.itens || []).push({ nome, qtd: 1, preco, entregue: true });
+  aposAlterarPedido(p);
+}
+// item novo no EDITOR de pedido: entra na lista e só grava em "Salvar Alterações"
+function editarAddItem(nome, preco) {
+  const ex = editarItens.find(i => i.nome === nome && Number(i.preco) === Number(preco));
+  if (ex) ex.qtd++; else editarItens.push({ nome, qtd: 1, preco });
+  renderEditarItens();
 }
 
 // ====== CRONÔMETRO ======
